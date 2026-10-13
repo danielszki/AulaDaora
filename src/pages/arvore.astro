@@ -1,0 +1,2029 @@
+---
+import Base from '../layouts/Base.astro';
+import { pessoas, semVinculo, type Pessoa } from '../data/familia';
+
+const soltos = semVinculo();
+
+function pessoaToJSON(p: Pessoa) {
+  return {
+    id: p.id,
+    nome: p.nome,
+    apelido: p.apelido,
+    nascimento: p.nascimento,
+    falecimento: p.falecimento,
+    geracao: p.geracao,
+    pais: p.pais,
+    conjuges: p.conjuges,
+    foto: p.foto || '',
+    bio: p.bio || '',
+    local: p.local || '',
+    profissao: p.profissao || '',
+    observacao: p.observacao || '',
+    agregado: p.agregado || false,
+    sexo: '',
+    exDe: [] as string[],
+  };
+}
+
+const seed: ReturnType<typeof pessoaToJSON>[] = pessoas.map(pessoaToJSON);
+const seedSoltos = soltos.map(pessoaToJSON);
+
+// Passa pro cliente os dados e o resolvedor de soltos (sem vínculo original).
+const dadosSeed = JSON.stringify(seed);
+const dadosSoltos = JSON.stringify(seedSoltos);
+const idsSoltes = soltos.map((p) => p.id);
+
+const fotosSite = [
+  ...new Set(pessoas.map((p) => p.foto).filter((f) => f && f.startsWith('/fotos/'))),
+];
+const planoPos = [
+  { top: '4%', left: '-5%', w: 300, rot: -6 },
+  { top: '36%', left: '-7%', w: 250, rot: 5 },
+  { top: '66%', left: '-5%', w: 300, rot: -4 },
+  { top: '6%', left: '70%', w: 270, rot: 4 },
+  { top: '44%', left: '74%', w: 290, rot: -5 },
+  { top: '74%', left: '67%', w: 250, rot: 6 },
+  { top: '16%', left: '36%', w: 210, rot: 3 },
+  { top: '52%', left: '31%', w: 240, rot: -3 },
+  { top: '84%', left: '42%', w: 250, rot: -5 },
+  { top: '0%', left: '46%', w: 190, rot: 2 },
+  { top: '78%', left: '-6%', w: 270, rot: -3 },
+  { top: '20%', left: '86%', w: 230, rot: -6 },
+];
+const fotosPlano: { src: string; top: string; left: string; w: number; rot: number }[] = [];
+for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
+  fotosPlano.push({ src: fotosSite[i], ...planoPos[i] });
+}
+---
+
+<Base
+  title="Árvore Genealógica"
+  description="A árvore completa da Família Kato, dos mais velhos aos mais novos — explore, edite e adicione familiares."
+>
+  <section class="section t-pagina">
+    <div class="t-container">
+      <span class="eyebrow">Árvore Genealógica</span>
+      <h1>A família inteira, de Yotaro e Toyo até hoje</h1>
+      <p class="lead">
+        A árvore abre mostrando <strong>toda a família</strong>, começando pelos
+        mais velhos: Yotaro e Toyo Kato, no topo. Arraste para mover, use a roda
+        do mouse (ou os botões <strong>+</strong> e <strong>−</strong>) para dar
+        zoom, e o botão <strong>⌖</strong> mostra a árvore toda de uma vez.
+        Clique em alguém para ver o perfil. Com a edição ligada, os cards mostram
+        botões claros para adicionar pai/mãe, filho(a), irmão(ã) ou cônjuge.
+      </p>
+
+      <div class="t-toolbar">
+        <label class="t-modo">
+          <input type="checkbox" id="t-modo" checked />
+          <span class="t-modo__faixa"><span class="t-modo__botao"></span></span>
+          <span class="t-modo__rotulo">Edição</span>
+        </label>
+
+        <div class="t-busca">
+          <input
+            type="search"
+            id="t-busca-input"
+            class="t-busca__input"
+            placeholder="Procurar por nome…"
+            autocomplete="off"
+          />
+          <div class="t-busca__resultados" id="t-busca-resultados" hidden></div>
+        </div>
+
+        <span class="t-aviso" id="t-aviso" role="status" hidden></span>
+
+        <div class="t-menu">
+          <button class="t-menu__botao" id="t-menu-btn" type="button" aria-label="Menu">☰</button>
+          <div class="t-menu__dropdown" id="t-menu-dropdown" hidden>
+            <button type="button" data-acao="familia">Árvore da família (foco numa pessoa)</button>
+            <button type="button" data-acao="inteira">Árvore inteira (toda a família, dos mais velhos aos mais novos)</button>
+            <button type="button" data-acao="encaixar">Encaixar na tela</button>
+            <button type="button" data-acao="focar">Focar na pessoa selecionada</button>
+            <button type="button" data-acao="restaurar">Restaurar dados originais</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="t-viewport" id="t-viewport">
+        <div class="t-plano" aria-hidden="true">
+          {fotosPlano.map(
+            (f) => (
+              <div
+                class="t-plano__foto"
+                style={`top:${f.top};left:${f.left};width:${f.w}px;transform:rotate(${f.rot}deg)`}
+              >
+                <img
+                  src={f.src}
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+            )
+          )}
+          <span class="t-plano__coracao" style="top:24%;right:7%">♥</span>
+          <span class="t-plano__coracao" style="top:46%;right:2%">♥</span>
+          <span class="t-plano__coracao" style="top:70%;right:9%">♥</span>
+        </div>
+        <div class="t-canvas" id="t-canvas">
+          <div class="t-linhas" id="t-linhas"></div>
+          <div class="t-nos" id="t-nos"></div>
+        </div>
+
+        <aside class="t-perfil" id="t-perfil" hidden>
+          <button class="t-perfil__fechar" id="t-perfil-fechar" type="button" aria-label="Fechar">✕</button>
+          <div class="t-perfil__conteudo" id="t-perfil-conteudo"></div>
+        </aside>
+
+        <div class="t-zoom">
+          <button id="t-zoom-reset" type="button" title="Mostrar a árvore toda" aria-label="Mostrar a árvore toda">⌖ Tudo</button>
+          <button id="t-zoom-in" type="button" title="Aproximar" aria-label="Aproximar">+</button>
+          <button id="t-zoom-out" type="button" title="Afastar" aria-label="Afastar">−</button>
+        </div>
+
+        <div class="t-dicas" id="t-dicas" role="note" aria-hidden="true">
+          <span class="t-dicas__icone" id="t-dicas-icone">⇢</span>
+          <span class="t-dicas__texto" id="t-dicas-texto">Arraste para mover a árvore</span>
+        </div>
+      </div>
+
+      <div class="t-soltos" id="t-soltos" hidden>
+        <strong>Pessoas que ainda não conseguimos ligar à árvore principal:</strong>
+        <span id="t-soltos-nomes"></span>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script define:vars={{ dadosSeed, dadosSoltos, idsSoltes }}>
+  // ---------------------------------------------------------------
+  // Estado
+  // ---------------------------------------------------------------
+  const CHAVE = 'kato-arvore-v1';
+  const CARD_W = 210;
+  const CARD_H = 256;
+  const CASAL_GAP = 46;
+  const GAP_X = 56;
+  const GAP_Y = 118;
+
+  let pessoas = [];
+  let egoId = 'daniel-suzuki';
+  let modo = 'inteira'; 
+
+  function carregar() {
+    try {
+      const guardado = localStorage.getItem(CHAVE);
+      if (guardado) {
+        const arr = JSON.parse(guardado);
+        if (Array.isArray(arr) && arr.length) return arr;
+      }
+    } catch {}
+    return JSON.parse(dadosSeed);
+  }
+
+  function persistir() {
+    try {
+      localStorage.setItem(CHAVE, JSON.stringify(pessoas));
+    } catch {}
+  }
+
+  function restaurar() {
+    try {
+      localStorage.removeItem(CHAVE);
+    } catch {}
+    pessoas = JSON.parse(dadosSeed);
+    derivarSexo();
+    selecionadoId = null;
+    esconderPerfil();
+    render();
+    toast('Dados restaurados para o original.');
+  }
+
+  let selecionadoId = null;
+  const mapa = new Map();
+  const estadoEdicao = { ativo: true };
+
+  // ---------------------------------------------------------------
+  // Gênero: deriva bordas do par conjuges (bipartição simples)
+  // ---------------------------------------------------------------
+  function derivarSexo() {
+    const sexo = new Map();
+    const conjPendentes = new Set(pessoas.filter((p) => p.conjuges.length).map((p) => p.id));
+
+    const marcaPar = (id, s) => {
+      if (sexo.has(id)) return;
+      sexo.set(id, s);
+      conjPendentes.add(id);
+    };
+
+    const raiz1 = pessoas.find((p) => p.id === 'yotaro-kato');
+    if (raiz1) marcaPar('yotaro-kato', 'M');
+    const tamanio = (id) => {
+      const p = mapa.get(id);
+      if (!p) return;
+      const s = sexo.get(id);
+      p.sexo = s || '';
+      p.conjuges.forEach((c) => {
+        const par = mapa.get(c);
+        if (par && s) {
+          if (!sexo.has(c)) {
+            sexo.set(c, s === 'M' ? 'F' : 'M');
+            tamanio(c);
+          } else if (sexo.get(c) !== (s === 'M' ? 'F' : 'M')) {
+            // família.me marca o primeiro como M; mantém o primeiro
+          }
+        }
+      });
+    };
+
+    // Varredura simples: para todo par, marca oposto; mantém o primeiro visitado.
+    pessoas.forEach(() => {});
+    // Passo 1: raiz
+    tamanio('yotaro-kato');
+    // Passo 2: qualquer par ainda sem gênero
+    for (const p of pessoas) {
+      if (p.conjuges.length && !sexo.has(p.id)) {
+        sexo.set(p.id, 'M');
+        tamanio(p.id);
+      }
+    }
+    // Gênero explícito para o núcleo da família (evita cores trocadas)
+    const sexoExplicito = {
+      'daniel-suzuki': 'M',
+      'tamae-suzuki': 'F',
+      'kiyoshi-suzuki': 'M',
+      'matsuko-suzuki': 'F',
+      'moacir': 'M',
+      'yotaro-kato': 'M',
+      'toyo-kato': 'F',
+    };
+    for (const p of pessoas) {
+      if (sexoExplicito[p.id]) p.sexo = sexoExplicito[p.id];
+      else if (!p.sexo) p.sexo = sexo.get(p.id) || '';
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Construção da árvore (igual à lógica do familia.ts)
+  // ---------------------------------------------------------------
+  function constroiUniao(membros) {
+    const filhos = [];
+    const vistos = new Set();
+    for (const m of membros) {
+      for (const f of pessoas.filter((pp) => pp.pais.includes(m.id))) {
+        if (vistos.has(f.id)) continue;
+        vistos.add(f.id);
+        const parceiro = f.conjuges
+          .map((c) => mapa.get(c))
+          .find((p) => p && p.id !== m.id);
+        filhos.push(constroiUniao([f, parceiro].filter(Boolean)));
+      }
+    }
+    filhos.sort((a, b) => dataDe(a.membros[0]) - dataDe(b.membros[0]));
+    return { membros, filhos };
+  }
+
+  function arvore() {
+    const y = mapa.get('yotaro-kato');
+    const t = mapa.get('toyo-kato');
+    return constroiUniao([y, t].filter(Boolean));
+  }
+
+  function dataDe(p) {
+    const m = (p.nascimento || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (!m) return Number.MAX_SAFE_INTEGER;
+    return Number(m[3]) * 10000 + Number(m[2]) * 100 + Number(m[1]);
+  }
+
+  function filhosDe(id) {
+    return pessoas.filter((p) => p.pais.includes(id));
+  }
+
+  // ---------------------------------------------------------------
+  // Layout (tidy: cada casal centrado sobre o próprio bloco de filhos)
+  // ---------------------------------------------------------------
+  function largura(u) {
+    const casal = u.membros.length * CARD_W + (u.membros.length - 1) * CASAL_GAP;
+    if (!u.filhos.length) return casal;
+    const filhosW =
+      u.filhos.reduce((acc, f) => acc + largura(f), 0) + (u.filhos.length - 1) * GAP_X;
+    return Math.max(casal, filhosW);
+  }
+
+  function render() {
+    pessoas = pessoas.filter(Boolean);
+    mapa.clear();
+    pessoas.forEach((p) => mapa.set(p.id, p));
+    const nosEl = document.getElementById('t-nos');
+    const svgEl = document.getElementById('t-linhas');
+    nosEl.innerHTML = '';
+    svgEl.innerHTML = '';
+    if (!pessoas.length) {
+      aviso('Nenhuma pessoa ainda. Use o menu de edição para começar.');
+      syncSoltos();
+      return;
+    }
+    if (modo === 'inteira') renderInteira();
+    else renderFamilia();
+    syncSoltos();
+  }
+
+  function renderInteira() {
+    const raiz = arvore();
+    if (raiz.membros.length) desenharNo(raiz, 0, 0);
+    aviso('Árvore inteira: <strong>toda a família, de Yotaro e Toyo (no topo) até os mais novos</strong>. Arraste para mover, faça zoom com os botões <strong>+</strong>/<strong>−</strong> (ou a roda do mouse) e use <strong>⌖</strong> para ver a árvore toda.');
+  }
+
+  function renderFamilia() {
+    const ego = mapa.get(egoId);
+    if (!ego) {
+      const candidato = pessoas.find((p) => (p.conjuges || []).length) || pessoas[0];
+      if (!candidato) return;
+      egoId = candidato.id;
+      renderFamilia();
+      return;
+    }
+    aviso(`Árvore de <strong>${esc(ego.nome)}</strong>: ancestrais e filhos. Clique em alguém e use o menu para mudar o centro.`);
+
+    // Gerações acima (até 2 níveis de anciãos, ou seja 3 gerações ao todo): ger[0] = mais antiga
+    const ger = [];
+    let linha = [ego];
+    for (let d = 0; d < 2; d++) {
+      const acima = [];
+      const vistos = new Set();
+      for (const p of linha) {
+        for (const pid of p.pais || []) {
+          const q = mapa.get(pid);
+          if (q && !vistos.has(q.id)) { vistos.add(q.id); acima.push(q); }
+        }
+      }
+      if (!acima.length) break;
+      linha = acima;
+      const casais = [];
+      for (const a of acima) {
+        const par = a.conjuges.map((c) => mapa.get(c)).find((q) => q && q.id !== a.id);
+        const membros = [a, par].filter(Boolean);
+        if (!casais.some((c) => c.some((m) => membros.includes(m)))) casais.push(membros);
+      }
+      ger.unshift(casais);
+    }
+
+    const egoCasal = [ego].concat((ego.conjuges || []).map((c) => mapa.get(c)).filter(Boolean));
+    const filhosUn = filhosDe(ego.id).sort((a, b) => dataDe(a) - dataDe(b)).map((f) => {
+      const par = f.conjuges.map((c) => mapa.get(c)).find((q) => q && q.id !== f.id);
+      return { membros: [f, par].filter(Boolean), filhos: [] };
+    });
+
+    // Montagem de baixo para cima: cada casal ancestral vira o nó-pai do nível abaixo
+    let unidade = { membros: egoCasal, filhos: filhosUn };
+    let linhaPessoas = egoCasal;
+    for (let i = ger.length - 1; i >= 0; i--) {
+      const casais = ger[i];
+      const abaixo = unidade;
+      const pessoasAbaixo = linhaPessoas;
+      unidade = {
+        membros: [],
+        filhos: casais.map((c) => ({
+          membros: c,
+          filhos: c.some((cm) => pessoasAbaixo.some((np) => (np.pais || []).includes(cm.id))) ? [abaixo] : [],
+        })),
+      };
+      linhaPessoas = casais.flat();
+    }
+
+    const raizes = unidade.membros.length ? [unidade] : unidade.filhos;
+    let ix = 0;
+    raizes.forEach((u) => {
+      desenharNo(u, ix + largura(u) / 2, 0);
+      ix += largura(u) + GAP_X;
+    });
+  }
+
+  function aviso(html) {
+    const el = document.getElementById('t-aviso');
+    el.innerHTML = html;
+    el.hidden = false;
+  }
+
+  function desenharNo(u, x, y) {
+    const nosEl = document.getElementById('t-nos');
+    const membros = u.membros;
+    const total = membros.length * CARD_W + (membros.length - 1) * CASAL_GAP;
+    let cx = x - total / 2;
+
+    membros.forEach((m, i) => {
+      const el = card(m);
+      el.style.left = cx + 'px';
+      el.style.top = y + 'px';
+      nosEl.appendChild(el);
+
+      if (i < membros.length - 1) {
+        const x1 = cx + CARD_W;
+        const x2 = x1 + CASAL_GAP;
+        const cy = y + CARD_H / 2;
+        line(x1, cy, x2, cy, 't-linha--casal');
+        const heart = document.createElement('div');
+        heart.className = 't-coracao' + (ehEx(m) ? ' t-coracao--ex' : '');
+        heart.style.left = (x1 + CASAL_GAP / 2 - 9) + 'px';
+        heart.style.top = (cy - 9) + 'px';
+        heart.textContent = ehEx(m) ? '♡' : '♥';
+        heart.title = 'Casal';
+        nosEl.appendChild(heart);
+      }
+      cx += CARD_W + CASAL_GAP;
+    });
+
+    if (u.filhos.length > 0) {
+      const paiY = y + CARD_H;
+      const busY = paiY + GAP_Y / 2;
+      const filhoY = paiY + GAP_Y;
+      const filhosW =
+        u.filhos.reduce((acc, f) => acc + largura(f), 0) + (u.filhos.length - 1) * GAP_X;
+      let fx = x - filhosW / 2;
+
+      line(x, paiY, x, busY, 't-linha');
+      const filhos = u.filhos;
+
+      // barra horizontal que une os filhos ao pai
+      if (filhos.length > 1) {
+        const primeiro = fx + largura(filhos[0]) / 2;
+        const ultimo = fx + filhosW - largura(filhos[filhos.length - 1]) / 2;
+        line(primeiro, busY, ultimo, busY, 't-linha');
+      }
+
+      filhos.forEach((f) => {
+        const fW = largura(f);
+        const fCenter = fx + fW / 2;
+        line(fCenter, busY, fCenter, filhoY, 't-linha');
+        desenharNo(f, fCenter, filhoY);
+        fx += fW + GAP_X;
+      });
+    }
+  }
+
+  function line(x1, y1, x2, y2, cls) {
+    const l = document.createElement('div');
+    const grossura = cls.indexOf('casal') >= 0 ? 3 : 4;
+    if (x1 === x2) {
+      l.style.width = grossura + 'px';
+      l.style.height = Math.abs(y2 - y1) + 'px';
+      l.style.left = (x1 - grossura / 2) + 'px';
+      l.style.top = Math.min(y1, y2) + 'px';
+    } else {
+      l.style.height = grossura + 'px';
+      l.style.width = Math.abs(x2 - x1) + 'px';
+      l.style.left = Math.min(x1, x2) + 'px';
+      l.style.top = (y1 - grossura / 2) + 'px';
+    }
+    l.className = 't-linha ' + cls;
+    document.getElementById('t-linhas').appendChild(l);
+  }
+
+  function ehEx(p) {
+    return (p.exDe || []).length > 0;
+  }
+
+  function card(p) {
+    const el = document.createElement('div');
+    el.className = 't-no';
+    el.dataset.id = p.id;
+    const foto = p.foto;
+    const anos = anosTexto(p);
+    const partes = parteNome(p);
+    const ego = p.id === egoId;
+    const sel = selecionadoId === p.id;
+    const silhueta = `<svg class="t-card__silhueta" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="20" r="12" fill="currentColor"/><path d="M8 60c3.4-15.8 13.2-23.5 24-23.5S52.6 44.2 56 60z" fill="currentColor"/></svg>`;
+    const capa = foto
+      ? `<img class="t-card__foto" src="${esc(foto)}" alt="${esc(p.nome)}" loading="lazy" />`
+      : silhueta;
+    el.innerHTML = `
+      <div class="t-card${sel ? ' t-card--sel' : ''}${ego ? ' t-card--ego' : ''}">
+        ${ego ? '<span class="t-me">eu</span>' : ''}
+        <button type="button" class="t-editar" data-acao="editar" title="Editar dados" aria-label="Editar dados">✎</button>
+        <div class="t-card__capa t-card__capa--${generoClasse(p)}">${capa}</div>
+        <div class="t-card__info">
+          <div class="t-card__primeiro">${esc(partes.primeiro || p.nome)}</div>
+          ${partes.ultimo ? `<div class="t-card__ultimo">${esc(partes.ultimo)}</div>` : ''}
+          ${anos ? `<div class="t-card__anos">${esc(anos)}</div>` : ''}
+        </div>
+        <div class="t-card__controles" data-edicao>
+          <button type="button" class="t-ctrl t-ctrl--pai" data-acao="pai" title="Adicionar pai ou mãe"><span class="t-ctrl__icone">＋</span><span class="t-ctrl__rotulo">Pai/mãe</span></button>
+          <button type="button" class="t-ctrl t-ctrl--filho" data-acao="filho" title="Adicionar filho(a)"><span class="t-ctrl__icone">＋</span><span class="t-ctrl__rotulo">Filho(a)</span></button>
+          <button type="button" class="t-ctrl t-ctrl--irmao" data-acao="irmao" title="Adicionar irmão(ã)"><span class="t-ctrl__icone">＋</span><span class="t-ctrl__rotulo">Irmão(ã)</span></button>
+          <button type="button" class="t-ctrl t-ctrl--conjuge" data-acao="conjuge" title="Adicionar cônjuge"><span class="t-ctrl__icone">♥</span><span class="t-ctrl__rotulo">Cônjuge</span></button>
+        </div>
+      </div>`;
+
+    el.addEventListener('click', (ev) => {
+      if (ev.target.closest('[data-acao]')) return;
+      selecionadoId = p.id;
+      pintarSelecao();
+      mostrarPerfil(p);
+    });
+
+    el.querySelectorAll('[data-acao]').forEach((btn) => {
+      btn.addEventListener('click', (ev) => {
+        if (!estadoEdicao.ativo) return;
+        ev.stopPropagation();
+        const acao = btn.dataset.acao;
+        if (acao === 'editar') abrirEditar(p.id);
+        else abrirNovo(acao, p.id);
+      });
+    });
+    return el;
+  }
+
+  function pintarSelecao() {
+    document.querySelectorAll('.t-no').forEach((n) => {
+      n.classList.toggle('t-no--sel', n.dataset.id === selecionadoId);
+    });
+    if (selecionadoId) document.getElementById('t-nos')?.querySelector('.t-card--sel')?.classList.remove('t-card--sel');
+    const nos = document.querySelectorAll('.t-card');
+    nos.forEach((c) => c.parentElement.classList.remove('t-no--sel'));
+  }
+
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  }
+
+  function parteNome(p) {
+    const partes = (p.nome || '').trim().split(/\s+/);
+    if (partes.length <= 1) return { primeiro: p.nome || '', ultimo: '' };
+    return { primeiro: partes.slice(0, -1).join(' '), ultimo: partes[partes.length - 1] };
+  }
+
+  function nomeIniciais(nome) {
+    return (nome || '').split(/\s+/).map((n) => n[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+  }
+
+  function anosTexto(p) {
+    const extrair = (s) => {
+      const m = (s || '').match(/\d{4}/);
+      return m ? m[0] : s || '';
+    };
+    const n = extrair(p.nascimento);
+    const f = extrair(p.falecimento);
+    if (n && f) return `${n} – ${f}`;
+    if (n) return `n. ${n}`;
+    if (f) return `f. ${f}`;
+    return '';
+  }
+
+  function generoClasse(p) {
+    if (p.sexo === 'F') return 'fem';
+    if (p.sexo === 'M') return 'masc';
+    return 'neu';
+  }
+
+  function seloGenero(p) {
+    return p.sexo === 'M' ? '♂' : p.sexo === 'F' ? '♀' : '';
+  }
+
+  // ---------------------------------------------------------------
+  // Pan / zoom / encaixe
+  // ---------------------------------------------------------------
+  const viewport = document.getElementById('t-viewport');
+  const canvas = document.getElementById('t-canvas');
+  let escala = 1;
+  let tx = 0;
+  let ty = 0;
+
+  function aplicar() {
+    canvas.style.transform = `translate(${tx}px, ${ty}px) scale(${escala})`;
+  }
+
+  function encaixar() {
+    const nos = document.querySelectorAll('.t-no');
+    if (!nos.length) return;
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    nos.forEach((el) => {
+      const L = parseFloat(el.style.left);
+      const T = parseFloat(el.style.top);
+      minX = Math.min(minX, L);
+      maxX = Math.max(maxX, L + CARD_W);
+      minY = Math.min(minY, T);
+      maxY = Math.max(maxY, T + CARD_H);
+    });
+    const pad = 56;
+    const perfilAberto = perfil && !perfil.hidden;
+    const sobre = perfilAberto ? 340 : 0;
+    const w = maxX - minX + pad * 2;
+    const h = maxY - minY + pad * 2;
+    const rect = viewport.getBoundingClientRect();
+    escala = Math.min((rect.width - sobre) / w, rect.height / h, 1);
+    tx = (rect.width + sobre) / 2 - ((minX + maxX) / 2) * escala;
+    ty = rect.height / 2 - ((minY + maxY) / 2) * escala;
+    aplicar();
+  }
+
+  function focar() {
+    if (!selecionadoId) { encaixar(); return; }
+    const no = document.querySelector(`.t-no[data-id="${selecionadoId}"]`);
+    if (!no) { encaixar(); return; }
+    const rect = viewport.getBoundingClientRect();
+    const perfilAberto = perfil && !perfil.hidden;
+    const sobre = perfilAberto ? 340 : 0;
+    const L = parseFloat(no.style.left) + CARD_W / 2;
+    const T = parseFloat(no.style.top) + CARD_H / 2;
+    escala = Math.max(escala, 1);
+    tx = (rect.width + sobre) / 2 - L * escala;
+    ty = rect.height / 2 - T * escala;
+    aplicar();
+  }
+
+  function zoom(fator, cx, cy) {
+    const nova = Math.max(0.15, Math.min(3, escala * fator));
+    const ratio = nova / escala;
+    tx = cx - (cx - tx) * ratio;
+    ty = cy - (cy - ty) * ratio;
+    escala = nova;
+    aplicar();
+  }
+
+  let arrastando = false;
+  let arrasto = null;
+
+  viewport.addEventListener('mousedown', (e) => {
+    if (e.target.closest('.t-card') || e.target.closest('button') || e.target.closest('.t-perfil')) return;
+    arrastando = true;
+    arrasto = { x: e.clientX - tx, y: e.clientY - ty };
+    viewport.style.cursor = 'grabbing';
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!arrastando) return;
+    tx = e.clientX - arrasto.x;
+    ty = e.clientY - arrasto.y;
+    aplicar();
+  });
+  window.addEventListener('mouseup', () => {
+    arrastando = false;
+    viewport.style.cursor = 'grab';
+  });
+  viewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const rect = viewport.getBoundingClientRect();
+    zoom(e.deltaY < 0 ? 1.12 : 0.9, e.clientX - rect.left, e.clientY - rect.top);
+  }, { passive: false });
+
+  document.getElementById('t-zoom-in').addEventListener('click', () => {
+    const rect = viewport.getBoundingClientRect();
+    zoom(1.2, rect.width / 2, rect.height / 2);
+  });
+  document.getElementById('t-zoom-out').addEventListener('click', () => {
+    const rect = viewport.getBoundingClientRect();
+    zoom(0.8, rect.width / 2, rect.height / 2);
+  });
+  document.getElementById('t-zoom-reset').addEventListener('click', encaixar);
+
+  window.addEventListener('resize', () => {
+    if (!selecionadoId) encaixar();
+    else focar();
+  });
+
+  // ---------------------------------------------------------------
+  // Modo edição (ligado/desligado)
+  // ---------------------------------------------------------------
+  const modoBtn = document.getElementById('t-modo');
+  modoBtn.addEventListener('change', () => {
+    estadoEdicao.ativo = modoBtn.checked;
+    document.body.classList.toggle('t-sem-edicao', !estadoEdicao.ativo);
+  });
+
+  // ---------------------------------------------------------------
+  // Busca
+  // ---------------------------------------------------------------
+  const buscaInput = document.getElementById('t-busca-input');
+  const buscaResultados = document.getElementById('t-busca-resultados');
+  buscaInput.addEventListener('input', () => {
+    const termo = buscaInput.value.trim().toLowerCase();
+    if (!termo) { buscaResultados.hidden = true; buscaResultados.innerHTML = ''; return; }
+    const achados = pessoas
+      .filter((p) => p.nome.toLowerCase().includes(termo))
+      .slice(0, 8);
+    buscaResultados.hidden = achados.length === 0;
+    if (!achados.length) { buscaResultados.innerHTML = '<em class="t-busca__vazio">Ninguém encontrado.</em>'; return; }
+    buscaResultados.innerHTML = achados
+      .map((p) => `<button type="button" data-id="${p.id}">${esc(p.nome)}</button>`)
+      .join('');
+    buscaResultados.querySelectorAll('button').forEach((b) => {
+      b.addEventListener('click', () => {
+        selecionadoId = b.dataset.id;
+        const p = mapa.get(selecionadoId);
+        if (p) mostrarPerfil(p);
+        encaixar();
+        requestAnimationFrame(focar);
+        buscaInput.value = '';
+        buscaResultados.hidden = true;
+        buscaResultados.innerHTML = '';
+      });
+    });
+  });
+
+  // ---------------------------------------------------------------
+  // Menu
+  // ---------------------------------------------------------------
+  const menuBtn = document.getElementById('t-menu-btn');
+  const menuDrp = document.getElementById('t-menu-dropdown');
+  menuBtn.addEventListener('click', () => { menuDrp.hidden = !menuDrp.hidden; });
+  menuDrp.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-acao]');
+    if (!btn) return;
+    menuDrp.hidden = true;
+    const acao = btn.dataset.acao;
+    if (acao === 'familia') {
+      if (selecionadoId && mapa.get(selecionadoId)) egoId = selecionadoId;
+      modo = 'familia';
+      render();
+      requestAnimationFrame(encaixar);
+    } else if (acao === 'inteira') {
+      modo = 'inteira';
+      render();
+      requestAnimationFrame(encaixar);
+    } else if (acao === 'encaixar') { encaixar(); }
+    else if (acao === 'focar') { focar(); }
+    else if (acao === 'restaurar') { restaurar(); }
+  });
+
+  // ---------------------------------------------------------------
+  // Painel de perfil
+  // ---------------------------------------------------------------
+  const perfil = document.getElementById('t-perfil');
+  const perfilConteudo = document.getElementById('t-perfil-conteudo');
+  const perfilFechar = document.getElementById('t-perfil-fechar');
+
+  function esconderPerfil() {
+    perfil.hidden = true;
+  }
+  perfilFechar.addEventListener('click', () => { esconderPerfil(); selecionadoId = null; pintarSelecao(); });
+
+  function listaNomes(ids) {
+    return ids.map((id) => mapa.get(id)).filter(Boolean).map((p) => p.nome).join(', ');
+  }
+
+  function mostrarPerfil(p) {
+    const filhos = filhosDe(p.id).map((f) => f.nome);
+    const gen = p.sexo === 'M' ? 'Masculino' : p.sexo === 'F' ? 'Feminino' : 'Não informado';
+    perfilConteudo.innerHTML = `
+      <div class="t-perfil__topo">
+        <span class="t-perfil__avatar t-perfil__avatar--${generoClasse(p)}">
+          ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome)}" />` : nomeIniciais(p.nome)}
+        </span>
+        <span class="t-perfil__tag">${esc(p.nome.toUpperCase())}</span>
+      </div>
+      <div class="t-perfil__caixa">
+        <span class="t-perfil__foto t-perfil__foto--${generoClasse(p)}">
+          ${p.foto ? `<img src="${esc(p.foto)}" alt="${esc(p.nome)}" />` : `<span>${seloGenero(p) || nomeIniciais(p.nome)}</span>`}
+        </span>
+        <div class="t-perfil__caixa-texto">
+          <h3>${esc(p.nome)}${p.apelido ? ` <small>“${esc(p.apelido)}”</small>` : ''}</h3>
+          <p class="t-perfil__memorias">${esc(anosTexto(p) || 'Datas a confirmar')} · ${esc(gen)}</p>
+        </div>
+      </div>
+      ${p.pais.length ? `<p class="t-perfil__linha"><strong>Pais:</strong> ${esc(listaNomes(p.pais))}</p>` : ''}
+      ${p.conjuges.length ? `<p class="t-perfil__linha"><strong>Cônjuge:</strong> ${esc(listaNomes(p.conjuges))}${(p.exDe || []).length ? ' <em>(ex)</em>' : ''}</p>` : ''}
+      ${filhos.length ? `<p class="t-perfil__linha"><strong>Filhos:</strong> ${esc(filhos.join(', '))}</p>` : ''}
+      ${p.local ? `<p class="t-perfil__linha"><strong>Local:</strong> ${esc(p.local)}</p>` : ''}
+      ${p.profissao ? `<p class="t-perfil__linha"><strong>Profissão:</strong> ${esc(p.profissao)}</p>` : ''}
+      ${p.bio ? `<p class="t-perfil__bio">${esc(p.bio)}</p>` : ''}
+      ${p.observacao ? `<p class="t-perfil__obs">${esc(p.observacao)}</p>` : ''}
+      <p class="t-perfil__centro"><button type="button" data-perfil="centro">Colocar no centro da árvore</button></p>
+      <div class="t-perfil__acoes" data-edicao>
+        <button type="button" data-perfil="editar">Editar perfil</button>
+        <a href="/pessoa/${p.id}">Ver página completa →</a>
+      </div>`;
+    perfil.hidden = false;
+    perfilConteudo.querySelectorAll('[data-perfil]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const acao = b.dataset.perfil;
+        if (acao === 'centro') {
+          egoId = p.id;
+          modo = 'familia';
+          render();
+          requestAnimationFrame(encaixar);
+          return;
+        }
+        if (!estadoEdicao.ativo) return;
+        if (acao === 'editar') abrirEditar(p.id);
+      });
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Modal genérico
+  // ---------------------------------------------------------------
+  function modal(html) {
+    fecharModal();
+    const overlay = document.createElement('div');
+    overlay.className = 't-modal';
+    overlay.innerHTML = `<div class="t-modal__caixa">${html}</div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) fecharModal(); });
+    return overlay;
+  }
+  function fecharModal() {
+    const m = document.querySelector('.t-modal');
+    if (m) m.remove();
+  }
+
+  // ---------------------------------------------------------------
+  // Adicionar parente/cônjuge
+  // ---------------------------------------------------------------
+  const TIPOS = {
+    pai: 'Pai ou mãe',
+    filho: 'Filho(a)',
+    irmao: 'Irmão(ã)',
+    conjuge: 'Cônjuge (esposa/esposo)',
+  };
+
+  function abrirNovo(tipo, idAlvo) {
+    const alvo = mapa.get(idAlvo);
+    if (!alvo) return;
+    const rotulo = TIPOS[tipo] || 'Novo parente';
+    let sexoInicial = '';
+    let exHtml = '';
+    if (tipo === 'conjuge') {
+      sexoInicial = alvo.sexo === 'M' ? 'F' : alvo.sexo === 'F' ? 'M' : '';
+      exHtml = `
+        <label class="t-modal__ex">
+          <input type="checkbox" id="t-novo-ex" />
+          <span>Marcar como ex-cônjuge</span>
+        </label>`;
+    }
+    const overlay = modal(`
+      <h2>Adicionar ${rotulo.toLowerCase()}</h2>
+      <p class="t-modal__hint">Relacionado a <strong>${esc(alvo.nome)}</strong></p>
+      <label class="t-modal__campo">
+        Nome completo
+        <input type="text" id="t-novo-nome" placeholder="Ex.: Caroline Silva" autocomplete="off" />
+      </label>
+      <div class="t-modal__gender">
+        <span class="t-modal__gender-titulo">Gênero</span>
+        <div class="t-modal__gender-picker" id="t-novo-gender">
+          <button type="button" class="t-gen t-gen--m${sexoInicial === 'M' ? ' ativo' : ''}" data-gen="M">♂ Masculino</button>
+          <button type="button" class="t-gen t-gen--f${sexoInicial === 'F' ? ' ativo' : ''}" data-gen="F">♀ Feminino</button>
+          <button type="button" class="t-gen${!sexoInicial ? ' ativo' : ''}" data-gen="">Indefinido</button>
+        </div>
+      </div>
+      ${exHtml}
+      <div class="t-modal__acoes">
+        <button type="button" class="t-modal__cancelar" id="t-novo-cancelar">Cancelar</button>
+        <button type="button" class="t-modal__salvar" id="t-novo-salvar">Salvar</button>
+      </div>`);
+    escolherGeneroSem = sexoInicial;
+    const nomeInput = overlay.querySelector('#t-novo-nome');
+    const genBtns = overlay.querySelectorAll('#t-novo-gender .t-gen');
+    genBtns.forEach((b) => b.addEventListener('click', () => {
+      genBtns.forEach((x) => x.classList.remove('ativo'));
+      b.classList.add('ativo');
+      escolherGeneroSem = b.dataset.gen;
+    }));
+    overlay.querySelector('#t-novo-cancelar').addEventListener('click', fecharModal);
+    overlay.querySelector('#t-novo-salvar').addEventListener('click', () => {
+      const nome = nomeInput.value.trim();
+      if (!nome) { nomeInput.focus(); return; }
+      const ex = !!overlay.querySelector('#t-novo-ex')?.checked;
+      salvarNovo(tipo, alvo, nome, escolherGeneroSem, ex);
+    });
+    nomeInput.focus();
+  }
+
+  let escolherGeneroSem = '';
+
+  function criarId(nome) {
+    const base = nome
+      .toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9-]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .slice(0, 40) || 'pessoa';
+    const suf = Date.now().toString(36);
+    return `${base}-${suf}`;
+  }
+
+  function salvarNovo(tipo, alvo, nome, sexo, ex) {
+    const id = criarId(nome);
+    const nova = {
+      id,
+      nome,
+      nascimento: '', falecimento: '', geracao: alvo.geracao + (tipo === 'filho' ? 1 : 0),
+      pais: [], conjuges: [], foto: '', bio: '', local: '', profissao: '', observacao: '',
+      agregado: false, sexo, exDe: [],
+    };
+
+    if (tipo === 'conjuge') {
+      nova.conjuges = [alvo.id];
+      if (ex) nova.exDe.push(alvo.id);
+      alvo.conjuges = alvo.conjuges.filter((c) => c !== nova.id);
+      alvo.conjuges.push(nova.id);
+    } else if (tipo === 'filho') {
+      nova.geracao = alvo.geracao + 1;
+      nova.pais = [alvo.id].concat(alvo.conjuges);
+      if (alvo.conjuges[0]) {
+        const par = mapa.get(alvo.conjuges[0]);
+        if (par) {
+          par.pais = par.pais || [];
+        }
+      }
+      alvo.pais = alvo.pais || [];
+    } else if (tipo === 'irmao') {
+      nova.geracao = alvo.geracao;
+      nova.pais = alvo.pais.slice();
+    } else if (tipo === 'pai') {
+      nova.geracao = Math.max(0, alvo.geracao - 1);
+      const paisOrig = alvo.pais.slice();
+      if (paisOrig.length === 1) {
+        const outro = mapa.get(paisOrig[0]);
+        if (outro && !outro.conjuges.length) {
+          outro.conjuges = [nova.id];
+          nova.conjuges = [outro.id];
+        }
+      }
+      nova.pais = [];
+      alvo.pais = paisOrig.concat(nova.id);
+    }
+
+    pessoas.push(nova);
+    persistir();
+    render();
+    selecionadoId = nova.id;
+    pintarSelecao();
+    mostrarPerfil(nova);
+    fecharModal();
+    locaNovo();
+    toast(rotuloTipo(tipo) + ' adicionada à árvore.');
+  }
+
+  function rotuloTipo(tipo) {
+    return ({ pai: 'Pessoa', filho: 'Filho(a)', irmao: 'Irmão(ã)', conjuge: 'Cônjuge' })[tipo] || 'Pessoa';
+  }
+
+  function locaNovo() {
+    const no = document.querySelector('.t-no:last-of-type');
+    if (no && selecionadoId) {
+      requestAnimationFrame(() => {
+        const alvo = document.querySelector(`.t-no[data-id="${selecionadoId}"]`);
+        const rect = viewport.getBoundingClientRect();
+        if (alvo) {
+          const L = parseFloat(alvo.style.left) + CARD_W / 2;
+          const T = parseFloat(alvo.style.top) + CARD_H / 2;
+          escala = Math.max(escala, 0.9);
+          tx = rect.width / 2 - L * escala;
+          ty = rect.height / 2 - T * escala;
+          aplicar();
+        }
+      });
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Editar perfil
+  // ---------------------------------------------------------------
+  function abrirEditar(id) {
+    const p = mapa.get(id);
+    if (!p) return;
+    const parts = (p.nascimento || '').match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const nacD = parts ? parts[1] : '';
+    const nacM = parts ? parts[2] : '';
+    const nacA = parts ? parts[3] : '';
+    const overlay = modal(`
+      <h2>Editar ${esc(p.nome)}</h2>
+      <label class="t-modal__campo">
+        Nome completo
+        <input type="text" id="t-edit-nome" value="${esc(p.nome)}" />
+      </label>
+      <div class="t-modal__linha">
+        <label class="t-modal__campo">Nascimento (dd/mm/aaaa)
+          <input type="text" id="t-edit-nacd" value="${esc(nacD)}" placeholder="dd" />
+        </label>
+        <label class="t-modal__campo">
+          <input type="text" id="t-edit-nacm" value="${esc(nacM)}" placeholder="mm" />
+        </label>
+        <label class="t-modal__campo">
+          <input type="text" id="t-edit-naca" value="${esc(nacA)}" placeholder="aaaa" />
+        </label>
+      </div>
+      <label class="t-modal__campo">
+        Falecimento (texto livre)
+        <input type="text" id="t-edit-fale" value="${esc(p.falecimento || '')}" placeholder="Deixe vazio se vivo" />
+      </label>
+      <div class="t-modal__gender">
+        <span class="t-modal__gender-titulo">Gênero</span>
+        <div class="t-modal__gender-picker" id="t-edit-gender">
+          <button type="button" class="t-gen t-gen--m${p.sexo === 'M' ? ' ativo' : ''}" data-gen="M">♂ Masculino</button>
+          <button type="button" class="t-gen t-gen--f${p.sexo === 'F' ? ' ativo' : ''}" data-gen="F">♀ Feminino</button>
+          <button type="button" class="t-gen${!p.sexo ? ' ativo' : ''}" data-gen="">Indefinido</button>
+        </div>
+      </div>
+      <label class="t-modal__campo">
+        Bio / profissão / local
+        <textarea id="t-edit-bio" rows="3">${esc(p.bio || '')}</textarea>
+      </label>
+      <div class="t-modal__acoes">
+        <button type="button" class="t-modal__cancelar" id="t-edit-cancelar">Cancelar</button>
+        <button type="button" class="t-modal__salvar" id="t-edit-salvar">Salvar</button>
+      </div>`);
+    let gen = p.sexo;
+    overlay.querySelectorAll('#t-edit-gender .t-gen').forEach((b) => b.addEventListener('click', () => {
+      overlay.querySelectorAll('#t-edit-gender .t-gen').forEach((x) => x.classList.remove('ativo'));
+      b.classList.add('ativo');
+      gen = b.dataset.gen;
+    }));
+    overlay.querySelector('#t-edit-cancelar').addEventListener('click', fecharModal);
+    overlay.querySelector('#t-edit-salvar').addEventListener('click', () => {
+      const nome = overlay.querySelector('#t-edit-nome').value.trim();
+      if (!nome) return;
+      const d = overlay.querySelector('#t-edit-nacd').value.trim();
+      const m = overlay.querySelector('#t-edit-nacm').value.trim();
+      const a = overlay.querySelector('#t-edit-naca').value.trim();
+      const natal = d && m && a ? `${d}/${m}/${a}` : (p.nascimento || '');
+      p.nome = nome;
+      if (d && m && a) p.nascimento = natal;
+      p.falecimento = overlay.querySelector('#t-edit-fale').value.trim();
+      p.sexo = gen;
+      p.bio = overlay.querySelector('#t-edit-bio').value.trim();
+      persistir();
+      render();
+      pintarSelecao();
+      mostrarPerfil(p);
+      fecharModal();
+      toast('Perfil salvo.');
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Toast
+  // ---------------------------------------------------------------
+  function toast(msg) {
+    const t = document.createElement('div');
+    t.className = 't-toast';
+    t.textContent = msg;
+    document.body.appendChild(t);
+    const limpar = () => t.remove();
+    setTimeout(limpar, 4000);
+  }
+
+  // ---------------------------------------------------------------
+  // Soltos + inicialização
+  // ---------------------------------------------------------------
+  function syncSoltos() {
+    const hojeArvore = new Set();
+    const percorre = (u) => { u.membros.forEach((p) => hojeArvore.add(p.id)); u.filhos.forEach(percorre); };
+    percorre(arvore());
+    const ainda = pessoas.filter((p) => idsSoltes.includes(p.id) && !hojeArvore.has(p.id));
+    const bloco = document.getElementById('t-soltos');
+    const nomes = document.getElementById('t-soltos-nomes');
+    if (ainda.length && estadoEdicao.ativo) {
+      bloco.hidden = false;
+      nomes.innerHTML = ainda.map((p) => esc(p.nome)).join(' · ');
+    } else {
+      bloco.hidden = true;
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') fecharModal();
+  });
+
+  // Boot
+  pessoas = carregar();
+  derivarSexo();
+  viewport.style.cursor = 'grab';
+  const foco = new URLSearchParams(window.location.search).get('focar');
+  if (foco && pessoas.some((p) => p.id === foco)) {
+    egoId = foco;
+    modo = 'familia';
+  }
+  render();
+  if (modo === 'familia' && mapa.get(egoId)) {
+    selecionadoId = egoId;
+    pintarSelecao();
+    mostrarPerfil(mapa.get(egoId));
+  }
+  encaixar();
+  if (modo === 'inteira') {
+    const topo = document.querySelector('.t-no[data-id="yotaro-kato"], .t-no[data-id="toyo-kato"]');
+    if (topo) {
+      const rect = viewport.getBoundingClientRect();
+      const L = parseFloat(topo.style.left);
+      const T = parseFloat(topo.style.top);
+      const cx = L + CARD_W + CASAL_GAP / 2;
+      escala = Math.max(escala, Math.min(1, 0.62));
+      tx = rect.width / 2 - cx * escala;
+      ty = 22 - T * escala;
+      aplicar();
+    }
+  }
+
+  // ---------------------------------------------------------------
+  // Dicas animadas: como ver, mexer e mudar a árvore
+  // ---------------------------------------------------------------
+  const dicaEl = document.getElementById('t-dicas');
+  const dicaIcone = document.getElementById('t-dicas-icone');
+  const dicaTexto = document.getElementById('t-dicas-texto');
+  const DICAS = [
+    { i: '⇢', t: 'Arraste o mapa para se mover pela árvore' },
+    { i: '＋', t: 'Use + e − para aproximar e afastar (ou a roda do mouse)' },
+    { i: '⌖', t: 'Para ver a árvore toda de uma vez, toque em “⌖ Tudo”' },
+    { i: '✎', t: 'Passe o mouse num card e toque no ✎ para editar os dados' },
+    { i: '♥', t: 'Com a edição ligada: ♥ adiciona cônjuge e ＋ pai/mãe, filho(a) ou irmão(ã)' },
+    { i: '✋', t: 'Clique num card para abrir o perfil da pessoa' },
+  ];
+  let dicaK = 0;
+  function dicaProxima() {
+    const d = DICAS[dicaK % DICAS.length];
+    dicaIcone.textContent = d.i;
+    dicaTexto.textContent = d.t;
+    dicaEl.classList.remove('t-dicas--ativa');
+    void dicaEl.offsetWidth;
+    dicaEl.classList.add('t-dicas--ativa');
+    dicaK++;
+  }
+  setTimeout(dicaProxima, 800);
+  setInterval(dicaProxima, 4600);
+</script>
+
+<style is:global>
+  .t-pagina {
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+  }
+
+  .t-container {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+  }
+
+  .t-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin: 1.5rem 0 1rem;
+  }
+
+  .t-aviso {
+    flex: 1 1 100%;
+    order: 5;
+    font-size: 0.95rem;
+    color: #6f6557;
+    background: #f7f0e3;
+    border: 1px dashed #d9cbaa;
+    border-radius: 999px;
+    padding: 0.4rem 1rem;
+    line-height: 1.5;
+  }
+
+  /* ---- Interruptor de edição ---- */
+  .t-modo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+  }
+  .t-modo input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .t-modo__faixa {
+    width: 46px;
+    height: 24px;
+    border-radius: 999px;
+    background: var(--montanha);
+    position: relative;
+    transition: background 0.2s;
+  }
+  .t-modo__botao {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+    transition: transform 0.2s;
+  }
+  .t-modo input:checked + .t-modo__faixa {
+    background: var(--vinho);
+  }
+  .t-modo input:checked + .t-modo__faixa .t-modo__botao {
+    transform: translateX(22px);
+  }
+  .t-modo__rotulo {
+    font-size: 0.9rem;
+    color: var(--texto);
+  }
+
+  /* ---- Busca ---- */
+  .t-busca {
+    position: relative;
+    flex: 0 1 320px;
+  }
+  .t-busca__input {
+    width: 100%;
+    font-family: inherit;
+    font-size: 0.95rem;
+    padding: 0.55rem 0.9rem;
+    border-radius: 999px;
+    border: 1.5px solid var(--montanha);
+    background: #fff;
+    color: var(--texto);
+  }
+  .t-busca__input:focus {
+    outline: none;
+    border-color: var(--vinho);
+  }
+  .t-busca__resultados {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    background: #fff;
+    border: 1px solid var(--montanha);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 0.35rem;
+  }
+  .t-busca__resultados button {
+    font-family: inherit;
+    text-align: left;
+    font-size: 0.9rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 8px;
+    border: 0;
+    background: #fff;
+    color: var(--vinho);
+    cursor: pointer;
+  }
+  .t-busca__resultados button:hover {
+    background: var(--rosa);
+  }
+  .t-busca__vazio {
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    padding: 0.3rem 0.5rem;
+    font-style: italic;
+  }
+
+  /* ---- Menu ---- */
+  .t-menu {
+    position: relative;
+    margin-left: auto;
+  }
+  .t-menu__botao {
+    font-family: inherit;
+    font-size: 1.2rem;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    border: 1.5px solid var(--montanha);
+    background: #fff;
+    color: var(--vinho);
+    cursor: pointer;
+  }
+  .t-menu__botao:hover {
+    background: var(--rosa);
+    border-color: var(--vinho);
+  }
+  .t-menu__dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    z-index: 30;
+    min-width: 230px;
+    background: #fff;
+    border: 1px solid var(--montanha);
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    padding: 0.35rem;
+    display: flex;
+    flex-direction: column;
+  }
+  .t-menu__dropdown button {
+    font-family: inherit;
+    text-align: left;
+    font-size: 0.9rem;
+    padding: 0.5rem 0.7rem;
+    border: 0;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--texto);
+    cursor: pointer;
+  }
+  .t-menu__dropdown button:hover {
+    background: var(--montanha-claro);
+    color: var(--vinho);
+  }
+  .t-menu__dropdown[hidden],
+  .t-busca__resultados[hidden],
+  .t-aviso[hidden] {
+    display: none;
+  }
+
+  /* ---- Viewport da árvore ---- */
+  .t-viewport {
+    position: relative;
+    width: 100%;
+    height: 76vh;
+    min-height: 560px;
+    border: 1px solid #e9e2d6;
+    border-radius: calc(var(--radius) + 4px);
+    overflow: hidden;
+    background: #fbfaf5;
+  }
+
+  /* ---- plano de fundo (fotos em P&B) ---- */
+  .t-plano {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .t-plano__foto {
+    position: absolute;
+    aspect-ratio: 4 / 3;
+    padding: 8px 8px 30px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(59, 52, 54, 0.16);
+    filter: grayscale(1) contrast(1.03) brightness(1.05);
+    opacity: 0.15;
+    animation: planoPulso 9s ease-in-out infinite;
+  }
+  .t-plano__foto:nth-child(odd) { animation-delay: -3s; }
+  .t-plano__foto:nth-child(3n) { animation-delay: -6s; }
+  .t-plano__foto img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 4px;
+  }
+  .t-plano__coracao {
+    position: absolute;
+    color: #c98a8a;
+    font-size: 36px;
+    line-height: 1;
+    opacity: 0.2;
+    filter: grayscale(0.5);
+    animation: coracaoFlutua 5.5s ease-in-out infinite;
+  }
+  .t-plano__coracao:nth-child(2n) { animation-delay: -2.4s; }
+  .t-plano__coracao:nth-child(3n) { animation-delay: -3.8s; }
+  @keyframes planoPulso {
+    0%, 100% { opacity: 0.12; }
+    50% { opacity: 0.2; }
+  }
+  @keyframes coracaoFlutua {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+
+  .t-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    transform-origin: 0 0;
+  }
+
+  .t-linhas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+    overflow: visible;
+    pointer-events: none;
+  }
+  .t-linha {
+    position: absolute;
+    background: #8a7d6b;
+    border-radius: 2px;
+  }
+  .t-linha--casal {
+    background: repeating-linear-gradient(90deg, #b3a794 0 8px, transparent 8px 14px);
+  }
+
+  .t-nos {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .t-no {
+    position: absolute;
+  }
+  .t-no--sel .t-card {
+    border-color: #d9a45b;
+    box-shadow: 0 0 0 3px rgba(217, 164, 91, 0.35), var(--shadow);
+  }
+
+  .t-card {
+    position: relative;
+    width: 210px;
+    height: 256px;
+    background: #fff;
+    border: 1px solid #e4e1dc;
+    border-radius: 14px;
+    box-shadow: 0 1px 3px rgba(59, 52, 54, 0.1);
+    text-align: center;
+    cursor: pointer;
+    overflow: visible;
+    transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+  }
+  .t-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(59, 52, 54, 0.16);
+  }
+  .t-card--ego {
+    border: 3px solid #7cb97c;
+    box-shadow: 0 2px 8px rgba(124, 185, 124, 0.35);
+  }
+  .t-card--ego:hover {
+    box-shadow: 0 6px 18px rgba(124, 185, 124, 0.45);
+  }
+
+  .t-card__capa {
+    position: relative;
+    height: 166px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-bottom: 1px solid #f0ede8;
+    border-radius: 13px 13px 0 0;
+    background: #e8e5e1;
+  }
+  .t-card__capa--fem { background: #f6d8d1; }
+  .t-card__capa--masc { background: #d3e2f0; }
+  .t-card__capa--neu { background: #e8e5e1; }
+  .t-card__silhueta {
+    width: 116px;
+    height: 116px;
+    color: rgba(255, 255, 255, 0.92);
+    filter: drop-shadow(0 1px 1px rgba(59, 52, 54, 0.12));
+  }
+  .t-card__foto {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .t-card__info {
+    height: 88px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding: 0.4rem 0.5rem;
+    line-height: 1.18;
+  }
+  .t-card__primeiro {
+    font-size: 1.04rem;
+    font-weight: 700;
+    color: #3b3436;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .t-card__ultimo {
+    font-size: 0.9rem;
+    color: #8c837c;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .t-card__anos {
+    font-size: 0.86rem;
+    color: #a99f97;
+  }
+
+  .t-coracao {
+    position: absolute;
+    color: #b3a794;
+    font-size: 18px;
+    z-index: 2;
+    pointer-events: none;
+  }
+  .t-coracao--ex {
+    color: #ddd8d3;
+  }
+
+  /* ---- Selo “eu” ---- */
+  .t-me {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5;
+    background: #7cb97c;
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    padding: 3px 12px;
+    border-radius: 999px;
+    box-shadow: 0 1px 4px rgba(59, 52, 54, 0.2);
+  }
+
+  /* ---- Editar (cantinho do card) ---- */
+  .t-editar {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 6;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1.5px solid #e4e1dc;
+    background: rgba(255, 255, 255, 0.96);
+    color: #a99f97;
+    font-size: 0.95rem;
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(59, 52, 54, 0.15);
+  }
+  .t-card:hover .t-editar,
+  .t-no--sel .t-editar {
+    display: flex;
+  }
+  .t-editar:hover {
+    background: #f2efe9;
+    color: #7cb97c;
+  }
+
+  /* ---- Controles por card (só na edição) ---- */
+  .t-card__controles {
+    display: none;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid #efe9e0;
+    border-radius: 0 0 13px 13px;
+    overflow: hidden;
+    background: rgba(255, 255, 255, 0.98);
+  }
+  .t-card:hover .t-card__controles,
+  .t-no--sel .t-card__controles {
+    display: grid;
+  }
+  .t-ctrl {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 6px 0 7px;
+    border: 0;
+    border-right: 1px solid #efe9e0;
+    background: transparent;
+    color: #4d6b44;
+    font-family: inherit;
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .t-ctrl:last-child { border-right: 0; }
+  .t-ctrl__icone {
+    font-size: 0.98rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .t-ctrl:hover {
+    background: #7cb97c;
+    color: #fff;
+  }
+
+  .t-sem-edicao [data-edicao],
+  .t-sem-edicao .t-perfil__acoes {
+    display: none !important;
+  }
+
+  /* ---- Perfil ---- */
+  .t-perfil {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    z-index: 20;
+    width: 320px;
+    max-height: calc(100% - 28px);
+    overflow: auto;
+    background: rgba(255, 255, 255, 0.98);
+    border: 1px solid #e4e1dc;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(59, 52, 54, 0.16);
+    padding: 0;
+  }
+  .t-perfil__fechar {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    z-index: 2;
+    border: 0;
+    background: transparent;
+    font-size: 1rem;
+    color: #a99f97;
+    cursor: pointer;
+  }
+  .t-perfil__fechar:hover { color: #7cb97c; }
+  .t-perfil__topo {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 0.9rem;
+    padding-right: 2.4rem;
+  }
+  .t-perfil__avatar {
+    width: 40px;
+    height: 40px;
+    flex: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    overflow: hidden;
+    background: #e8e5e1;
+  }
+  .t-perfil__avatar--fem { background: #d99a8e; }
+  .t-perfil__avatar--masc { background: #8fb4d8; }
+  .t-perfil__avatar--neu { background: #bfb9b2; }
+  .t-perfil__avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .t-perfil__tag {
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    color: #8c837c;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .t-perfil__caixa {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin: 0 0.9rem 0.6rem;
+    padding: 0.65rem;
+    background: #faf6ef;
+    border: 1px solid #efe7d8;
+    border-radius: 12px;
+  }
+  .t-perfil__foto {
+    width: 64px;
+    height: 64px;
+    flex: none;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #fff;
+    overflow: hidden;
+    background: #e8e5e1;
+  }
+  .t-perfil__foto--fem { background: #f6d8d1; color: #8c6b62; }
+  .t-perfil__foto--masc { background: #d3e2f0; color: #5b7891; }
+  .t-perfil__foto--neu { background: #e8e5e1; color: #8c837c; }
+  .t-perfil__foto img { width: 100%; height: 100%; object-fit: cover; }
+  .t-perfil__caixa-texto { min-width: 0; }
+  .t-perfil__caixa-texto h3 {
+    font-size: 1rem;
+    margin: 0 0 0.2rem;
+    color: #3b3436;
+    line-height: 1.25;
+  }
+  .t-perfil__caixa-texto h3 small { font-size: 0.72rem; color: #7cb97c; font-weight: 600; }
+  .t-perfil__memorias {
+    font-size: 0.78rem;
+    color: #8c837c;
+    margin: 0;
+  }
+  .t-perfil__linha {
+    font-size: 0.84rem;
+    color: #3b3436;
+    margin: 0.3rem 0.9rem;
+    line-height: 1.4;
+  }
+  .t-perfil__bio,
+  .t-perfil__obs {
+    font-size: 0.82rem;
+    color: #8c837c;
+    margin: 0.5rem 0.9rem;
+    line-height: 1.45;
+  }
+  .t-perfil__centro {
+    margin: 0.5rem 0.9rem 0;
+  }
+  .t-perfil__centro button {
+    font-family: inherit;
+    font-size: 0.78rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 999px;
+    border: 1px dashed #d9cbaa;
+    background: #f7f0e3;
+    color: #6f6557;
+    cursor: pointer;
+  }
+  .t-perfil__centro button:hover { border-color: #7cb97c; color: #5f8a5f; }
+  .t-perfil__acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0.8rem 0.9rem;
+    border-top: 1px solid #eee9e2;
+    padding-top: 0.7rem;
+  }
+  .t-perfil__acoes button {
+    font-family: inherit;
+    font-size: 0.85rem;
+    padding: 0.45rem 0.7rem;
+    border-radius: 10px;
+    border: 1px solid #e4e1dc;
+    background: #fff;
+    color: #3b3436;
+    cursor: pointer;
+  }
+  .t-perfil__acoes button:hover { background: #f2efe9; border-color: #cfc8c2; }
+  .t-perfil__acoes a { font-size: 0.85rem; color: #7cb97c; text-decoration: none; }
+  .t-perfil__acoes a:hover { text-decoration: underline; }
+
+  /* ---- Zoom ---- */
+  .t-zoom {
+    position: absolute;
+    right: 14px;
+    bottom: 18px;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .t-zoom button {
+    font-family: inherit;
+    font-size: 1.35rem;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 1px solid #e4e1dc;
+    background: #fff;
+    color: #5f574f;
+    cursor: pointer;
+    box-shadow: 0 1px 4px rgba(59, 52, 54, 0.16);
+    line-height: 1;
+  }
+  .t-zoom button:hover {
+    background: #f2efe9;
+    border-color: #cfc8c2;
+    color: #7cb97c;
+  }
+  #t-zoom-reset {
+    width: auto;
+    padding: 0 18px;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  #t-zoom-reset:hover {
+    background: #7cb97c;
+    color: #fff;
+  }
+
+  /* ---- dicas animadas de como usar ---- */
+  .t-dicas {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%);
+    z-index: 21;
+    max-width: 52%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.97);
+    border: 1px solid #e4e1dc;
+    border-radius: 999px;
+    box-shadow: 0 3px 14px rgba(59, 52, 54, 0.2);
+    padding: 8px 20px 8px 8px;
+    font-size: 0.95rem;
+    color: #5f574f;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  .t-dicas--ativa {
+    opacity: 1;
+  }
+  .t-dicas__icone {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #7cb97c;
+    color: #fff;
+    font-size: 1.15rem;
+    animation: iconeFlutua 2.4s ease-in-out infinite;
+  }
+  .t-dicas__texto {
+    line-height: 1.35;
+  }
+  @keyframes iconeFlutua {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-4px); }
+  }
+
+  /* ---- Modais ---- */
+  .t-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(59, 52, 54, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .t-modal__caixa {
+    width: 400px;
+    max-width: 100%;
+    max-height: 92vh;
+    overflow: auto;
+    background: #fff;
+    border-radius: var(--radius);
+    box-shadow: 0 18px 50px rgba(59, 52, 54, 0.3);
+    padding: 1.4rem;
+  }
+  .t-modal__caixa h2 {
+    margin: 0 0 0.4rem;
+    font-size: 1.35rem;
+  }
+  .t-modal__hint {
+    font-size: 0.95rem;
+    color: var(--texto-suave);
+    margin: 0 0 0.9rem;
+  }
+  .t-modal__campo {
+    display: block;
+    font-size: 0.92rem;
+    color: var(--texto-suave);
+    margin-bottom: 0.85rem;
+  }
+  .t-modal__campo input,
+  .t-modal__campo textarea {
+    width: 100%;
+    font-family: inherit;
+    font-size: 1.05rem;
+    padding: 0.6rem 0.75rem;
+    margin-top: 0.25rem;
+    border: 1.5px solid var(--montanha);
+    border-radius: 10px;
+    color: var(--texto);
+  }
+  .t-modal__campo input:focus,
+  .t-modal__campo textarea:focus {
+    outline: none;
+    border-color: var(--vinho);
+  }
+  .t-modal__linha {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .t-modal__linha .t-modal__campo {
+    flex: 1;
+  }
+  .t-modal__gender {
+    margin-bottom: 0.75rem;
+  }
+  .t-modal__gender-titulo {
+    display: block;
+    font-size: 0.92rem;
+    color: var(--texto-suave);
+    margin-bottom: 0.35rem;
+  }
+  .t-modal__gender-picker {
+    display: flex;
+    gap: 0.4rem;
+  }
+  .t-gen {
+    flex: 1;
+    font-family: inherit;
+    font-size: 0.92rem;
+    padding: 0.55rem 0.4rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--montanha);
+    background: #fff;
+    color: var(--texto);
+    cursor: pointer;
+  }
+  .t-gen--m.ativo {
+    border-color: var(--oliva);
+    background: var(--oliva);
+    color: var(--vinho-escuro);
+  }
+  .t-gen--f.ativo {
+    border-color: var(--rosa);
+    background: var(--rosa);
+    color: var(--vinho-escuro);
+  }
+  .t-gen.ativo:not(.t-gen--m):not(.t-gen--f) {
+    border-color: var(--montanha);
+    background: var(--montanha-claro);
+  }
+  .t-modal__ex {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.95rem;
+    color: var(--texto);
+    margin-bottom: 0.8rem;
+    cursor: pointer;
+  }
+  .t-modal__acoes {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+  .t-modal__acoes button {
+    font-family: inherit;
+    font-size: 1rem;
+    padding: 0.65rem 1.2rem;
+    border-radius: 10px;
+    cursor: pointer;
+    border: 1.5px solid var(--montanha);
+    background: #fff;
+    color: var(--texto);
+  }
+  .t-modal__salvar {
+    background: var(--vinho) !important;
+    border-color: var(--vinho) !important;
+    color: #fff !important;
+  }
+  .t-modal__salvar:hover {
+    background: var(--vinho-escuro) !important;
+  }
+
+  /* ---- Toast ---- */
+  .t-toast {
+    position: fixed;
+    bottom: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 120;
+    background: var(--texto);
+    color: #fff;
+    font-size: 0.95rem;
+    padding: 0.8rem 1.3rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+
+  /* ---- Soltos ---- */
+  .t-soltos {
+    margin-top: 1.2rem;
+    font-size: 0.95rem;
+    color: var(--texto-suave);
+    background: var(--montanha-claro);
+    border: 1px dashed var(--montanha);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+  }
+
+  @media (max-width: 720px) {
+    .t-menu {
+      margin-left: 0;
+    }
+    .t-busca {
+      flex: 1 1 100%;
+    }
+    .t-perfil {
+      width: calc(100% - 28px);
+    }
+  }
+</style>

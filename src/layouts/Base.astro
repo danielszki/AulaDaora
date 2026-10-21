@@ -1,0 +1,42 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title,
+  description = 'Árvore genealógica, linhas do tempo e histórias da Família Kato.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#b05d7a" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={`${title} · Família Kato`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="pt_BR" />
+    <title>{title} · Família Kato</title>
+    <script>
+      document.documentElement.classList.add('js');
+    </script>
+  </head>
+  <body>
+    <Header />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

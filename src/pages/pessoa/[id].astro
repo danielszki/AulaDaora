@@ -1,0 +1,236 @@
+---
+import Base from '../../layouts/Base.astro';
+import {
+  pessoas,
+  filhosDe,
+  nomeDe,
+  anosDe,
+  geracaoLabel,
+  esposoDaFamilia,
+} from '../../data/familia';
+
+export function getStaticPaths() {
+  return pessoas.map((pessoa) => ({ params: { id: pessoa.id }, props: { pessoa } }));
+}
+
+const { pessoa } = Astro.props;
+const filhos = filhosDe(pessoa.id);
+const pais = pessoa.pais.map((id) => ({ id, nome: nomeDe(id) }));
+const conjuges = pessoa.conjuges.map((id) => ({ id, nome: nomeDe(id) }));
+const conjugeFamilia = esposoDaFamilia(pessoa);
+const iniciais = pessoa.nome
+  .split(' ')
+  .map((n) => n[0])
+  .slice(0, 2)
+  .join('');
+---
+
+<Base title={pessoa.nome} description={`Página de ${pessoa.nome} na árvore da Família Kato.`}>
+  <section class="section">
+    <div class="container">
+      <p class="pessoa__volta">
+        <a href={`/arvore?focar=${pessoa.id}`}>← Ver na árvore</a>
+        <a href="/historias">Histórias da família</a>
+      </p>
+
+      <div class="pessoa">
+        {
+          pessoa.foto ? (
+            <img class="pessoa__foto" src={pessoa.foto} alt={pessoa.nome} />
+          ) : (
+            <div class="pessoa__foto" aria-hidden="true">{iniciais}</div>
+          )
+        }
+        <div class="pessoa__info">
+          <span class="eyebrow">{geracaoLabel(pessoa.geracao)}</span>
+          <h1>{pessoa.nome}</h1>
+          {
+            conjugeFamilia ? (
+              <p class="pessoa__vinculo pessoa__vinculo--agregado">
+                Casou-se com{' '}
+                <a href={`/pessoa/${conjugeFamilia.id}`}>{conjugeFamilia.nome}</a>
+              </p>
+            ) : (
+              <p class="pessoa__vinculo pessoa__vinculo--familia">Família Kato</p>
+            )
+          }
+          {pessoa.apelido && <p class="pessoa__apelido">"{pessoa.apelido}"</p>}
+          <p class="pessoa__anos">{anosDe(pessoa) || 'Datas a confirmar'}</p>
+          {pessoa.profissao && <p class="pessoa__meta">{pessoa.profissao}</p>}
+          {pessoa.local && <p class="pessoa__meta">{pessoa.local}</p>}
+          {pessoa.bio && <p class="lead">{pessoa.bio}</p>}
+          {pessoa.observacao && <p class="pessoa__obs">{pessoa.observacao}</p>}
+        </div>
+      </div>
+
+      <div class="grid grid--3" style="margin-top: 2.5rem">
+        <div class="card">
+          <h3>De onde veio</h3>
+          {
+            pais.length ? (
+              <ul class="lista">
+                {pais.map((p) => (
+                  <li>
+                    <a href={`/pessoa/${p.id}`}>{p.nome}</a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="empty">Sem pais registrados ainda.</p>
+            )
+          }
+        </div>
+
+        <div class="card">
+          <h3>Quem dividiu a vida</h3>
+          {
+            conjuges.length ? (
+              <ul class="lista">
+                {conjuges.map((c) => (
+                  <li>
+                    <a href={`/pessoa/${c.id}`}>{c.nome}</a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="empty">Sem cônjuge registrado ainda.</p>
+            )
+          }
+        </div>
+
+        <div class="card">
+          <h3>Deixou para cá</h3>
+          {
+            filhos.length ? (
+              <ul class="lista">
+                {filhos.map((filho) => (
+                  <li>
+                    <a href={`/pessoa/${filho.id}`}>{filho.nome}</a>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p class="empty">Nenhum filho registrado ainda.</p>
+            )
+          }
+        </div>
+      </div>
+
+      <section class="secao-secundaria">
+        <h2>Contribua com esta história</h2>
+        <p class="lead">
+          Faltou uma data, uma foto ou um detalhe? Escreve para a gente que a
+          gente inclui aqui.
+        </p>
+        <a class="btn" href="/admin">Enviar uma correção</a>
+      </section>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .pessoa__volta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin: 0 0 1.2rem;
+  }
+
+  .pessoa__volta a {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .pessoa {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 1.5rem;
+  }
+
+  .pessoa__foto {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--rosa);
+    color: var(--vinho-escuro);
+    display: grid;
+    place-items: center;
+    font-size: 2.6rem;
+    font-weight: 700;
+    border: 5px solid var(--fundo);
+    box-shadow: var(--shadow);
+    object-fit: cover;
+  }
+
+  .pessoa__apelido {
+    color: var(--vinho);
+    font-style: italic;
+    margin-bottom: 0.3rem;
+  }
+
+  .pessoa__vinculo {
+    display: inline-block;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    margin-bottom: 0.5rem;
+  }
+
+  .pessoa__vinculo--familia {
+    background: var(--rosa);
+    color: var(--vinho-escuro);
+  }
+
+  .pessoa__vinculo--agregado {
+    background: transparent;
+    color: var(--texto-suave);
+    border: 1px dashed var(--montanha);
+  }
+
+  .pessoa__vinculo--agregado a {
+    color: var(--vinho);
+  }
+
+  .pessoa__anos {
+    font-size: 1rem;
+    color: var(--texto-suave);
+    margin-bottom: 0.4rem;
+  }
+
+  .pessoa__meta {
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+    margin-bottom: 0.2rem;
+  }
+
+  .pessoa__obs {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+    font-style: italic;
+  }
+
+  .lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 0.95rem;
+  }
+
+  .lista li {
+    padding: 0.3rem 0;
+    border-bottom: 1px dashed var(--montanha);
+  }
+
+  .lista li:last-child {
+    border-bottom: none;
+  }
+
+  .secao-secundaria {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--montanha);
+  }
+</style>

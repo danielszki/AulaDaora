@@ -1,0 +1,50 @@
+---
+import Base from '../layouts/Base.astro';
+import StoryBlock from '../components/StoryBlock.astro';
+import { historias } from '../data/familia';
+---
+
+<Base title="Histórias e Memórias" description="Relatos e memórias contados pela Família Kato.">
+  <section class="section">
+    <div class="container">
+      <span class="eyebrow">Histórias e Memórias</span>
+      <h1>As histórias que a gente conta</h1>
+      <p class="lead">
+        Relatos de quem viveu, lembranças passadas de boca em boca e
+        curiosidades que merecem ficar por escrito.
+      </p>
+
+      <div class="grid grid--2" style="margin-top: 2rem">
+        {historias.map((historia) => <StoryBlock historia={historia} />)}
+      </div>
+
+      <p class="empty" style="margin-top: 2rem">
+        Quer contar uma história sua? <a href="/admin">Escreva para a gente</a>.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const id = window.location.hash.slice(1);
+  const alvo = id ? document.getElementById(id) : null;
+  if (alvo) {
+    setTimeout(() => alvo.classList.add('historia--destacada'), 60);
+  }
+</script>
+
+<style>
+  .historia--destacada {
+    animation: brilho 2.4s ease;
+  }
+
+  @keyframes brilho {
+    0%,
+    55% {
+      box-shadow: 0 0 0 3px var(--vinho);
+    }
+    100% {
+      box-shadow: var(--shadow);
+    }
+  }
+</style>

@@ -1,0 +1,164 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Área dos Administradores" description="Painel de edição da Família Kato.">
+  <section class="section">
+    <div class="container" style="max-width: 720px">
+      <span class="eyebrow">Administração</span>
+      <h1>Painel de edição</h1>
+      <p class="lead">
+        Aqui a Zoza e os familiares autorizados cadastram pessoas, sobem fotos
+        e escrevem histórias. Ainda é um rascunho: o login e a gravação de
+        dados entram na próxima etapa, junto com o CMS.
+      </p>
+
+      <div class="aviso">
+        <strong>Rascunho em construção.</strong> Os formulários abaixo ainda
+        não salvam nada — eles mostram como vai ficar.
+      </div>
+
+      <form class="form">
+        <h2>Cadastrar pessoa</h2>
+        <label>
+          Nome completo
+          <input type="text" name="nome" placeholder="Ex.: Haruto Kato" />
+        </label>
+        <div class="form__linha">
+          <label>
+            Nascimento
+            <input type="text" name="nascimento" placeholder="AAAA ou DD/MM/AAAA" />
+          </label>
+          <label>
+            Falecimento
+            <input type="text" name="falecimento" placeholder="Deixe vazio se vivo" />
+          </label>
+        </div>
+        <div class="form__linha">
+          <label>
+            Geração
+            <input type="number" name="geracao" min="1" placeholder="1" />
+          </label>
+          <label>
+            Foto
+            <input type="file" name="foto" accept="image/*" />
+          </label>
+        </div>
+        <label>
+          Observações
+          <textarea name="observacao" rows="3" placeholder="Detalhes, apelidos, histórias rápidas"></textarea>
+        </label>
+        <button class="btn" type="submit">Publicar</button>
+      </form>
+
+      <form class="form">
+        <h2>Adicionar histórico da família</h2>
+        <div class="form__linha">
+          <label>
+            Ano
+            <input type="text" name="ano" placeholder="1988" />
+          </label>
+          <label>
+            Título
+            <input type="text" name="titulo" placeholder="Nasce Renata" />
+          </label>
+        </div>
+        <label>
+          Descrição
+          <textarea name="descricao" rows="3" placeholder="Conta o que aconteceu"></textarea>
+        </label>
+        <button class="btn" type="submit">Publicar</button>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const aviso = document.createElement('p');
+  aviso.className = 'form__aviso';
+  aviso.textContent = 'Ainda não salvamos dados por aqui — mande sua sugestão para a Zoza no grupo da família.';
+  document.querySelectorAll('form').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      if (!form.querySelector('.form__aviso')) form.appendChild(aviso.cloneNode(true));
+    });
+  });
+</script>
+
+<style>
+  .form__aviso {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--vinho-escuro);
+    background: var(--rosa);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+  }
+</style>
+
+<style>
+  .aviso {
+    background: var(--rosa);
+    color: var(--vinho-escuro);
+    border-radius: var(--radius);
+    padding: 1rem 1.2rem;
+    font-size: 0.9rem;
+    margin: 1.5rem 0 2rem;
+  }
+
+  .form {
+    background: var(--montanha-claro);
+    border: 1px solid var(--montanha);
+    border-radius: var(--radius);
+    padding: 1.6rem;
+    margin-bottom: 1.6rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .form h2 {
+    font-size: 1.15rem;
+    margin: 0;
+  }
+
+  .form label {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+  }
+
+  .form input,
+  .form textarea {
+    font-family: inherit;
+    font-size: 0.95rem;
+    color: var(--texto);
+    padding: 0.7rem 0.9rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--montanha);
+    background: #fff;
+    width: 100%;
+  }
+
+  .form input:focus,
+  .form textarea:focus {
+    outline: none;
+    border-color: var(--vinho);
+  }
+
+  .form__linha {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .form .btn {
+    justify-self: start;
+  }
+
+  @media (max-width: 560px) {
+    .form__linha {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

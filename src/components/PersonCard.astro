@@ -1,0 +1,121 @@
+---
+import type { Pessoa } from '../data/familia';
+import { anosDe, esposoDaFamilia, geracaoLabel } from '../data/familia';
+
+interface Props {
+  pessoa: Pessoa;
+}
+
+const { pessoa } = Astro.props;
+const iniciais = pessoa.nome
+  .split(' ')
+  .map((n) => n[0])
+  .slice(0, 2)
+  .join('');
+const anos = anosDe(pessoa);
+const conjugeFamilia = esposoDaFamilia(pessoa);
+---
+
+<article class="pessoa-card">
+  <a class="pessoa-card__link" href={`/pessoa/${pessoa.id}`}>
+    {
+      pessoa.foto ? (
+        <img class="pessoa-card__foto" src={pessoa.foto} alt={pessoa.nome} loading="lazy" />
+      ) : (
+        <div class="pessoa-card__foto" aria-hidden="true">{iniciais}</div>
+      )
+    }
+    <h3 class="pessoa-card__nome">{pessoa.nome}</h3>
+    <p class="pessoa-card__anos">{anos || 'Datas a confirmar'}</p>
+    <div class="pessoa-card__tags">
+      {
+        conjugeFamilia ? (
+          <span class="pill pill--agregado">
+            casou-se com
+            <a href={`/pessoa/${conjugeFamilia.id}`}>{conjugeFamilia.nome}</a>
+          </span>
+        ) : (
+          <span class="pill pill--familia">{geracaoLabel(pessoa.geracao)}</span>
+        )
+      }
+    </div>
+  </a>
+</article>
+
+<style>
+  .pessoa-card {
+    background: var(--montanha-claro);
+    border: 1px solid var(--montanha);
+    border-radius: var(--radius);
+    padding: 1.2rem 1rem;
+    text-align: center;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .pessoa-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow);
+  }
+
+  .pessoa-card__link {
+    display: block;
+    color: inherit;
+  }
+
+  .pessoa-card__link:hover {
+    text-decoration: none;
+  }
+
+  .pessoa-card__foto {
+    width: 84px;
+    height: 84px;
+    margin: 0 auto 0.8rem;
+    border-radius: 50%;
+    background: var(--rosa);
+    color: var(--vinho-escuro);
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    font-size: 1.3rem;
+    border: 3px solid var(--fundo);
+    object-fit: cover;
+  }
+
+  .pessoa-card__nome {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+    color: var(--vinho);
+  }
+
+  .pessoa-card__anos {
+    margin: 0 0 0.6rem;
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+  }
+
+  .pessoa-card__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    justify-content: center;
+    font-size: 0.75rem;
+  }
+
+  .pill--familia {
+    background: var(--rosa);
+    color: var(--vinho-escuro);
+    font-size: inherit;
+  }
+
+  .pill--agregado {
+    background: transparent;
+    color: var(--texto-suave);
+    border: 1px dashed var(--montanha);
+    font-size: inherit;
+  }
+
+  .pill a {
+    color: var(--vinho);
+    text-decoration: underline;
+  }
+</style>

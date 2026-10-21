@@ -1,0 +1,82 @@
+---
+import PersonCard from './PersonCard.astro';
+import type { Uniao } from '../data/familia';
+
+interface Props {
+  uniao: Uniao;
+  raiz?: boolean;
+}
+
+const { uniao, raiz = false } = Astro.props;
+const nomes = uniao.membros.map((m) => m.nome.toLowerCase()).join(' ');
+---
+
+<div class={`uniao${raiz ? ' uniao--raiz' : ''}`} data-nome={nomes}>
+  <div class="uniao__casal">
+    {uniao.membros.map((m) => <PersonCard pessoa={m} />)}
+  </div>
+
+  {
+    uniao.filhos.length > 0 && (
+      <div class="uniao__filhos">
+        {uniao.filhos.map((f) => <Astro.self uniao={f} />)}
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .uniao {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .uniao__casal {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    position: relative;
+  }
+
+  .uniao__casal::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: 2px;
+    height: 1.4rem;
+    background: var(--verde-oliva);
+  }
+
+  .uniao__filhos {
+    display: flex;
+    gap: 1.6rem;
+    align-items: flex-start;
+    position: relative;
+    padding-top: 1.4rem;
+  }
+
+  /* trilho horizontal que liga os galhos */
+  .uniao__filhos::before {
+    content: '';
+    position: absolute;
+    top: 1.4rem;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--verde-oliva);
+  }
+
+  /* desce do trilho até cada neto */
+  .uniao__filhos > .uniao::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 2px;
+    height: 1.4rem;
+    background: var(--verde-oliva);
+  }
+</style>

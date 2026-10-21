@@ -1,0 +1,40 @@
+---
+import type { Historia } from '../data/familia';
+
+interface Props {
+  historia: Historia;
+}
+
+const { historia } = Astro.props;
+---
+
+<article class="card historia" id={historia.id}>
+  <h3>{historia.titulo}</h3>
+  <p>{historia.texto}</p>
+  <p class="historia__meta">
+    <span class="pill">{historia.autor}</span>
+    <span class="pill">{historia.publicado}</span>
+  </p>
+</article>
+
+<style>
+  .historia {
+    scroll-margin-top: 90px;
+  }
+
+  .historia h3 {
+    color: var(--vinho);
+    font-size: 1.05rem;
+  }
+
+  .historia p {
+    font-size: 0.95rem;
+  }
+
+  .historia__meta {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 0;
+  }
+</style>

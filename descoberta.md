@@ -1,12 +1,12 @@
 # 🌳 Site da Árvore Genealógica — Família Kato
 
-> Briefing do projeto — perguntas de escopo respondidas para orientar a construção do site.
+> Briefing do projeto e panorama dos dados reais já cadastrados no site.
 
 ---
 
 ## 1. Pra quem é?
 
-Para a família Kato: parentes de todas as gerações (avós, pais, primos, sobrinhos) que querem ver de onde vieram e como todos se conectam.
+Para os **descendentes de Yotaro e Toyo Kato**: parentes de todas as gerações (avós, pais, primos, sobrinhos) que querem ver de onde vieram e como todos se conectam.
 
 ## 2. Qual o objetivo?
 
@@ -16,60 +16,78 @@ Registrar e apresentar a árvore genealógica da família de forma visual, prese
 
 É a história real da família Kato — nomes, datas, fotos e histórias que só a família tem; não é um produto genérico de genealogia.
 
-*Por que importa: sem concorrente.*
-
 ## 4. O que o visitante deve fazer?
 
-Navegar pela árvore, encontrar seus parentes e, se possível, sugerir correções ou complementar informações que faltam.
-
-*Por que importa: interação fácil para idosos e pessoas com dificuldade com tecnologia.*
+Navegar pela árvore, encontrar seus parentes e contribuir com correções e complementos.
 
 ## 5. Qual o conteúdo essencial?
 
-Nomes completos, datas de nascimento (e falecimento quando houver), fotos das pessoas, e as ligações entre gerações (pais/filhos/cônjuges).
+Nomes completos, datas de nascimento e falecimento, fotos, e as ligações entre gerações (pais/filhos/cônjuges).
 
 ## 6. Tem referências?
 
-Gosto de um design simples, tipo linha do tempo.
+Design simples, estilo linha do tempo.
 
 ## 7. Qual o prazo?
 
-Sem prazo para entrega, mas é importante que possa haver atualização constante, pois sempre aparecem informações novas.
+Sem data fixa — projeto de atualização contínua.
 
 ## 8. Tem restrições?
 
-Sem restrições. O site será para celular e computador, e será público.
+Sem restrições. Responsivo (celular e computador), público.
 
 ## 9. Como vai ser atualizado?
 
-A ideia é que a Zoza seja a administradora, mas outras pessoas possam ter acesso às ferramentas de administração também, para fazer upload de fotos e textos.
+A Zoza é a administradora principal, com ajuda de outros familiares autorizados.
 
 ## 10. Sucesso é o quê?
 
-Toda a família conseguir se ver na árvore, entender o parentesco entre todos e sentir que a história foi bem preservada.
+Toda a família conseguir se ver na árvore, entender o parentesco e sentir que a história foi preservada.
 
 ---
 
-## Resumo rápido do escopo
+## Origem dos dados
 
-| Item | Definição |
+Os dados do site vêm de duas fontes enviadas pela própria família em 2026:
+
+1. **Conversa do WhatsApp** — grupo *"Descendentes da Família Yotaro e Toyo Kato"* (criado em 31/05/2026 por Carlos Akira Kato).
+2. **Planilha** `Árvore Genealógica da Família de Yotaro e Toyo Kato.xlsx` (8 abas, uma por ramo).
+
+Os dados estão em `src/data/familia.ts`. As fotos estão em `public/fotos/` e foram associadas pelas legendas escritas pela própria família.
+
+## Panorama
+
+| Item | Total |
 |---|---|
-| Plataforma | Web responsivo (celular + computador) |
-| Acesso | Público |
-| Prazo | Sem data fixa — projeto de atualização contínua |
-| Administração | Multiusuário (Zoza + outros familiares autorizados) |
-| Estilo visual | Simples, formato de linha do tempo |
-| Conteúdo por pessoa | Nome completo, nascimento, falecimento (se houver), foto, ligações familiares |
+| Pessoas cadastradas | **122** |
+| Gerações | **6** (Antepassados + 1ª a 5ª) |
+| Marcos na linha do tempo | 14 |
+| Histórias e memórias | 6 |
+| Fotos | 55 |
 
----
+## Os sete ramos (filhos de Yotaro e Toyo)
 
-## Membros da família (dados para a árvore)
+| Ramo | Filho(a) de Yotaro e Toyo | Cônjuge | Nasc. |
+|---|---|---|---|
+| 1 | Yoshiharu Kato | Miyoko Kato | 07/02/1939 |
+| 2 | Yoshinobu Kato | Tomiko Suzuki | — |
+| 3 | Tamae Suzuki (Kato) | Kiyoshi Suzuki | — |
+| 4 | Yoshitaka Kato | — | — |
+| 5 | Ayako Saito (Kato) | (Saito) | 05/04/1949 |
+| 6 | Kioko Suzuki (Kato) | Takeshi Suzuki | — |
+| 7 | Kiyoe Kadita (Kato) | Isao Kadita | 27/09/1934 |
 
-Preencher uma linha por pessoa — esses dados alimentam o site.
+> A família confirmou no grupo: **7 filhos** — 4 mulheres e 3 homens (Yoshiharu, Yoshinobu e Yoshitaka; Tamae, Ayako, Kioko e Kiyoe). A planilha acrescenta que o casal teve ainda **mais dois filhos cujos nomes não foram registrados**.
 
-| Nome completo | Nascimento | Falecimento | Geração | Pai | Mãe | Observações |
-|---|---|---|---|---|---|---|
-| Haruto Kato *(exemplo)* | 1935 | 2010 | 1ª geração | — | — | Patriarca da família |
-| | | | | | | |
-| | | | | | | |
-| | | | | | | |
+## Destaques
+
+- **Yotaro Kato** (1894–1976) e **Toyo Kato** (1897–1985) — os patriarcas.
+- **Kiyoe Kadita** — a caçula das irmãs e única filha viva; fez **92 anos** em 27/09/2026.
+- **Tamae Suzuki** ("tia gorda", 1ª filha) — criou os irmãos e os filhos sozinha, sempre alegre.
+- **Carlos Akira Kato** ("Akira") — criou o grupo e montou a planilha da árvore.
+
+## Pendências / a confirmar
+
+- **Antepassados** (Yoiti e Koto Kato; Masuji e Rika Fujita) — parentesco a confirmar.
+- Datas ausentes (nascimento/falecimento) de várias pessoas.
+- Fotos: identificação visual depende da família (o agente não enxerga imagens).

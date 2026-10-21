@@ -1,0 +1,73 @@
+---
+import Base from '../layouts/Base.astro';
+import PersonCard from '../components/PersonCard.astro';
+import TimelineEvent from '../components/TimelineEvent.astro';
+import StoryBlock from '../components/StoryBlock.astro';
+import HeroArt from '../components/HeroArt.astro';
+import { eventos, historias, pessoas, pessoaPorId } from '../data/familia';
+
+const ultimas = historias.slice(0, 2);
+const previewEventos = eventos.slice(0, 4);
+const destaques = ['yotaro-kato', 'toyo-kato', 'kiyoe-kadita', 'carlos-akira-kato']
+  .map((id) => pessoaPorId(id))
+  .filter((p): p is NonNullable<typeof p> => p !== undefined);
+const geracoesTotais = new Set(pessoas.map((p) => p.geracao)).size;
+---
+
+<Base title="Início" description="Bem-vindo à casa da família Kato: a nossa árvore, a nossa linha do tempo e as histórias que a gente conta.">
+  <section class="hero">
+    <div class="hero__art"><HeroArt /></div>
+    <div class="container">
+      <div class="hero__inner">
+        <span class="eyebrow">Família Kato</span>
+        <h1>Vem cá, deixa eu te mostrar de onde a gente veio.</h1>
+        <p class="lead">
+          Tudo começou com Yotaro e Toyo Kato. Hoje somos {pessoas.length}{' '}
+          pessoas registradas ao longo de {geracoesTotais} gerações — nomes,
+          datas, fotos e as histórias que a gente foi juntando.
+        </p>
+        <div class="hero__actions">
+          <a class="btn" href="/arvore">Ver a árvore da família</a>
+          <a class="btn btn--ghost" href="/linha-do-tempo">Conhecer a linha do tempo</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="container">
+      <span class="eyebrow">Comece por aqui</span>
+      <h2>A árvore genealógica</h2>
+      <p class="lead">
+        Toque em qualquer nome para ver a página da pessoa, com datas, foto e
+        quem é parente de quem.
+      </p>
+      <div class="grid grid--3" style="margin-top: 1.6rem">
+        {destaques.map((pessoa) => <PersonCard pessoa={pessoa} />)}
+      </div>
+      <p style="margin-top: 1.6rem"><a class="btn" href="/arvore">Ver a árvore completa</a></p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <span class="eyebrow">Linha do tempo</span>
+      <h2>Os marcos da nossa história</h2>
+      <div style="margin-top: 1.6rem; max-width: 760px">
+        {previewEventos.map((evento) => <TimelineEvent evento={evento} compacto />)}
+      </div>
+      <a class="btn btn--ghost" href="/linha-do-tempo">Ver a linha do tempo inteira</a>
+    </div>
+  </section>
+
+  <section class="section section--alt">
+    <div class="container">
+      <span class="eyebrow">Últimas atualizações</span>
+      <h2>O que foi adicionado recentemente</h2>
+      <div class="grid grid--2" style="margin-top: 1.6rem">
+        {ultimas.map((historia) => <StoryBlock historia={historia} />)}
+      </div>
+      <p><a href="/historias">Ver todas as histórias →</a></p>
+    </div>
+  </section>
+</Base>

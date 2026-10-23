@@ -369,7 +369,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
         if (vistos.has(p.id)) return;
         vistos.add(p.id);
         const detalhe = [];
-        if (p.nascimento) detalhe.push('n. ' + p.nascimento);
+        if (p.nascimento) detalhe.push(p.nascimento);
         if (p.falecimento) detalhe.push('f. ' + p.falecimento);
         if ((p.conjuges || []).length) {
           const nomes = p.conjuges.map((c) => (mapa.get(c) || {}).nome).filter(Boolean);
@@ -660,7 +660,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
     const n = extrair(p.nascimento);
     const f = extrair(p.falecimento);
     if (n && f) return `${n} – ${f}`;
-    if (n) return `n. ${n}`;
+    if (n) return `${n}`;
     if (f) return `f. ${f}`;
     return '';
   }

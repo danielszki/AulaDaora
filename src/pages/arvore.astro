@@ -1090,6 +1090,19 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
         Nome completo
         <input type="text" id="t-edit-nome" value="${esc(p.nome)}" />
       </label>
+      <label class="t-modal__campo">
+        Foto
+        <div class="t-modal__foto">
+          <div class="t-modal__foto-preview" id="t-edit-foto-preview">
+            ${p.foto ? `<img src="${esc(p.foto)}" alt="" />` : '<span class="t-modal__foto-vazio">Sem foto</span>'}
+          </div>
+          <div class="t-modal__foto-acoes">
+            <input type="file" id="t-edit-foto" accept="image/*" />
+            <button type="button" class="t-modal__foto-remover" id="t-edit-foto-remover">Remover foto</button>
+          </div>
+          <p class="t-modal__hint" style="margin-top:0.4rem">A foto fica guardada neste dispositivo (não vai para o site automaticamente).</p>
+        </div>
+      </label>
       <div class="t-modal__linha">
         <label class="t-modal__campo">Nascimento (dd/mm/aaaa)
           <input type="text" id="t-edit-nacd" value="${esc(nacD)}" placeholder="dd" />
@@ -1122,11 +1135,60 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
         <button type="button" class="t-modal__salvar" id="t-edit-salvar">Salvar</button>
       </div>`);
     let gen = p.sexo;
+    let fotoAtual = p.foto || '';
     overlay.querySelectorAll('#t-edit-gender .t-gen').forEach((b) => b.addEventListener('click', () => {
       overlay.querySelectorAll('#t-edit-gender .t-gen').forEach((x) => x.classList.remove('ativo'));
       b.classList.add('ativo');
       gen = b.dataset.gen;
     }));
+
+    const inputFoto = overlay.querySelector('#t-edit-foto');
+    const previewFoto = overlay.querySelector('#t-edit-foto-preview');
+    const removerFoto = overlay.querySelector('#t-edit-foto-remover');
+    function atualizarPreviewFoto(src) {
+      if (src) previewFoto.innerHTML = `<img src="${esc(src)}" alt="" />`;
+      else previewFoto.innerHTML = '<span class="t-modal__foto-vazio">Sem foto</span>';
+    }
+    if (inputFoto) {
+      inputFoto.addEventListener('change', () => {
+        const arq = inputFoto.files && inputFoto.files[0];
+        if (!arq) return;
+        if (!arq.type.startsWith('image/')) { toast('Arquivo não é imagem.'); return; }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          const img = new Image();
+          img.onload = () => {
+            const MAX = 512;
+            let w = img.width, h = img.height;
+            if (w > MAX || h > MAX) {
+              if (w >= h) { h = Math.round(h * MAX / w); w = MAX; }
+              else { w = Math.round(w * MAX / h); h = MAX; }
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = w; canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            try {
+              const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
+              fotoAtual = dataUrl;
+              atualizarPreviewFoto(dataUrl);
+            } catch {
+              toast('Não foi possível processar a imagem.');
+            }
+          };
+          img.src = ev.target.result;
+        };
+        reader.readAsDataURL(arq);
+      });
+    }
+    if (removerFoto) {
+      removerFoto.addEventListener('click', () => {
+        fotoAtual = '';
+        if (inputFoto) inputFoto.value = '';
+        atualizarPreviewFoto('');
+      });
+    }
+
     overlay.querySelector('#t-edit-cancelar').addEventListener('click', fecharModal);
     overlay.querySelector('#t-edit-salvar').addEventListener('click', () => {
       const nome = overlay.querySelector('#t-edit-nome').value.trim();
@@ -1140,6 +1202,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       p.falecimento = overlay.querySelector('#t-edit-fale').value.trim();
       p.sexo = gen;
       p.bio = overlay.querySelector('#t-edit-bio').value.trim();
+      p.foto = fotoAtual;
       persistir();
       render();
       pintarSelecao();
@@ -2110,8 +2173,58 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
   .t-modal__linha .t-modal__campo {
     flex: 1;
   }
-  .t-modal__gender {
-    margin-bottom: 0.75rem;
+  .t-modal__foto {
+    display: flex;
+    gap: 0.8rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .t-modal__foto-preview {
+    width: 88px;
+    height: 88px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--creme);
+    border: 1px solid var(--borda);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .t-modal__foto-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .t-modal__foto-vazio {
+    color: var(--texto-suave);
+    font-size: 0.8rem;
+    text-align: center;
+    padding: 0.4rem;
+  }
+  .t-modal__foto-acoes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+    min-width: 180px;
+  }
+  .t-modal__foto-acoes input[type='file'] {
+    font-size: 0.9rem;
+  }
+  .t-modal__foto-remover {
+    align-self: flex-start;
+    border: 1px solid var(--borda);
+    background: var(--papel);
+    color: var(--carvao);
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .t-modal__foto-remover:hover {
+    background: var(--creme);
   }
   .t-modal__gender-titulo {
     display: block;

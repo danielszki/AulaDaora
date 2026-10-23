@@ -173,11 +173,11 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
   // Estado
   // ---------------------------------------------------------------
   const CHAVE = 'kato-arvore-v1';
-  const CARD_W = 210;
-  const CARD_H = 256;
-  const CASAL_GAP = 46;
-  const GAP_X = 56;
-  const GAP_Y = 118;
+  const CARD_W = 250;
+  const CARD_H = 300;
+  const CASAL_GAP = 32;
+  const GAP_X = 36;
+  const GAP_Y = 96;
 
   let pessoas = [];
   let egoId = 'daniel-suzuki';
@@ -1206,7 +1206,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       const L = parseFloat(topo.style.left);
       const T = parseFloat(topo.style.top);
       const cx = L + CARD_W + CASAL_GAP / 2;
-      escala = Math.max(escala, Math.min(1, 0.62));
+      escala = Math.max(escala, Math.min(1, 0.78));
       tx = rect.width / 2 - cx * escala;
       ty = 22 - T * escala;
       aplicar();
@@ -1546,8 +1546,8 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
 
   .t-card {
     position: relative;
-    width: 210px;
-    height: 256px;
+    width: 250px;
+    height: 300px;
     background: #fff;
     border: 1px solid #e4e1dc;
     border-radius: 14px;
@@ -1564,7 +1564,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
 
   .t-card__capa {
     position: relative;
-    height: 166px;
+    height: 198px;
     display: flex;
     align-items: center;
     justify-content: center;

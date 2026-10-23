@@ -109,7 +109,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       <div class="t-legenda" id="t-legenda">
         <span><i class="t-leg t-leg--linha" aria-hidden="true"></i> Pais ↔ filhos</span>
         <span><i class="t-leg t-leg--casal" aria-hidden="true"></i> Casal</span>
-        <span><i class="t-leg t-leg--eu" aria-hidden="true"></i> Verde: a pessoa selecionada (e você)</span>
+        <span><i class="t-leg t-leg--eu" aria-hidden="true"></i> Verde: a pessoa selecionada</span>
         <span><i class="t-leg t-leg--coracao" aria-hidden="true"></i> ♥ sai do casal</span>
       </div>
 
@@ -126,6 +126,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
                   alt=""
                   loading="lazy"
                   decoding="async"
+                  draggable="false"
                 />
               </div>
             )
@@ -575,15 +576,13 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
     const foto = p.foto;
     const anos = anosTexto(p);
     const partes = parteNome(p);
-    const ego = p.id === egoId;
     const sel = selecionadoId === p.id;
     const silhueta = `<svg class="t-card__silhueta" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="20" r="12" fill="currentColor"/><path d="M8 60c3.4-15.8 13.2-23.5 24-23.5S52.6 44.2 56 60z" fill="currentColor"/></svg>`;
     const capa = foto
       ? `<img class="t-card__foto" src="${esc(foto)}" alt="${esc(p.nome)}" loading="lazy" />`
       : silhueta;
     el.innerHTML = `
-      <div class="t-card${sel ? ' t-card--sel' : ''}${ego ? ' t-card--ego' : ''}">
-        ${ego ? '<span class="t-me">eu</span>' : ''}
+      <div class="t-card${sel ? ' t-card--sel' : ''}">
         <button type="button" class="t-editar" data-acao="editar" title="Editar dados" aria-label="Editar dados">✎</button>
         <div class="t-card__capa t-card__capa--${generoClasse(p)}">${capa}</div>
         <div class="t-card__info">
@@ -1439,6 +1438,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
   /* ---- plano de fundo (fotos em P&B) ---- */
   .t-plano {
     position: absolute;
+    pointer-events: none;
     inset: 0;
     z-index: 0;
     overflow: hidden;
@@ -1463,6 +1463,9 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
     height: 100%;
     object-fit: cover;
     border-radius: 4px;
+    -webkit-user-drag: none;
+    user-select: none;
+    pointer-events: none;
   }
   .t-plano__coracao {
     position: absolute;
@@ -1541,13 +1544,6 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
     transform: translateY(-3px);
     box-shadow: 0 6px 16px rgba(59, 52, 54, 0.16);
   }
-  .t-card--ego {
-    border: 3px solid #7cb97c;
-    box-shadow: 0 2px 8px rgba(124, 185, 124, 0.35);
-  }
-  .t-card--ego:hover {
-    box-shadow: 0 6px 18px rgba(124, 185, 124, 0.45);
-  }
 
   .t-card__capa {
     position: relative;
@@ -1613,23 +1609,6 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
   }
   .t-coracao--ex {
     color: #ddd8d3;
-  }
-
-  /* ---- Selo “eu” ---- */
-  .t-me {
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 5;
-    background: #7cb97c;
-    color: #fff;
-    font-size: 0.68rem;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    padding: 3px 12px;
-    border-radius: 999px;
-    box-shadow: 0 1px 4px rgba(59, 52, 54, 0.2);
   }
 
   /* ---- Editar (cantinho do card) ---- */

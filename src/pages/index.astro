@@ -108,6 +108,30 @@ const fotoHero = '/fotos/IMG-20260927-WA0014.jpg';
     </div>
   </section>
 
+  <section class="section section--alt" aria-labelledby="album">
+    <div class="container">
+      <span class="eyebrow">Álbum familiar</span>
+      <h2 id="album">Fotos que já fazem parte do acervo</h2>
+      <ul class="album-strip" style="margin-top: 1.6rem">
+        {
+          fotosAlbum.map((f, i) => (
+            <li>
+              <button
+                type="button"
+                class="album-strip__btn"
+                data-index={i}
+                aria-label={`Ampliar foto ${i + 1} de ${fotosAlbum.length}: ${f.alt}`}
+              >
+                <img src={f.src} alt={f.alt} loading="lazy" decoding="async" />
+              </button>
+            </li>
+          ))
+        }
+      </ul>
+      <p style="margin-top: 1.4rem"><a class="btn" href="/galeria">Abrir o álbum completo</a></p>
+    </div>
+  </section>
+
   <section class="section" aria-labelledby="geracoes">
     <div class="container">
       <span class="eyebrow">Por geração</span>
@@ -156,30 +180,6 @@ const fotoHero = '/fotos/IMG-20260927-WA0014.jpg';
         {previewEventos.map((evento) => <TimelineEvent evento={evento} compacto />)}
       </div>
       <a class="btn btn--ghost" href="/linha-do-tempo">Ver a linha do tempo inteira</a>
-    </div>
-  </section>
-
-  <section class="section section--alt" aria-labelledby="album">
-    <div class="container">
-      <span class="eyebrow">Álbum familiar</span>
-      <h2 id="album">Fotos que já fazem parte do acervo</h2>
-      <ul class="album-strip" style="margin-top: 1.6rem">
-        {
-          fotosAlbum.map((f, i) => (
-            <li>
-              <button
-                type="button"
-                class="album-strip__btn"
-                data-index={i}
-                aria-label={`Ampliar foto ${i + 1} de ${fotosAlbum.length}: ${f.alt}`}
-              >
-                <img src={f.src} alt={f.alt} loading="lazy" decoding="async" />
-              </button>
-            </li>
-          ))
-        }
-      </ul>
-      <p style="margin-top: 1.4rem"><a class="btn" href="/galeria">Abrir o álbum completo</a></p>
     </div>
   </section>
 

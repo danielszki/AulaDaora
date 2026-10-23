@@ -119,6 +119,9 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
             (f) => (
               <div
                 class="t-plano__foto"
+                draggable="false"
+                onselectstart="return false;"
+                ondragstart="return false;"
                 style={`top:${f.top};left:${f.left};width:${f.w}px;transform:rotate(${f.rot}deg)`}
               >
                 <img
@@ -1438,11 +1441,14 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
   /* ---- plano de fundo (fotos em P&B) ---- */
   .t-plano {
     position: absolute;
-    pointer-events: none;
     inset: 0;
     z-index: 0;
     overflow: hidden;
     pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
   }
   .t-plano__foto {
     position: absolute;
@@ -1454,6 +1460,13 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
     filter: grayscale(1) contrast(1.03) brightness(1.05);
     opacity: 0.15;
     animation: planoPulso 9s ease-in-out infinite;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-touch-callout: none;
   }
   .t-plano__foto:nth-child(odd) { animation-delay: -3s; }
   .t-plano__foto:nth-child(3n) { animation-delay: -6s; }
@@ -1464,8 +1477,12 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
     object-fit: cover;
     border-radius: 4px;
     -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     pointer-events: none;
+    -webkit-touch-callout: none;
   }
   .t-plano__coracao {
     position: absolute;

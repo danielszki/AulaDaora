@@ -1,164 +1,392 @@
 ---
 import Base from '../layouts/Base.astro';
+import { pessoas } from '../data/familia';
+
+function geracaoTxt(g: number): string {
+  if (g === 0) return 'Antepassados';
+  const ordinais = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª', '7ª', '8ª'];
+  return `${ordinais[g - 1] ?? `${g}ª`} geração`;
+}
+
+// Mesma forma de registro usada pela árvore (kato-arvore-v1)
+function pessoaRegistro(p: (typeof pessoas)[number]) {
+  return {
+    id: p.id,
+    nome: p.nome,
+    apelido: p.apelido || '',
+    nascimento: p.nascimento || '',
+    falecimento: p.falecimento || '',
+    geracao: p.geracao,
+    pais: p.pais,
+    conjuges: p.conjuges,
+    foto: p.foto || '',
+    bio: p.bio || '',
+    local: p.local || '',
+    profissao: p.profissao || '',
+    observacao: p.observacao || '',
+    agregado: p.agregado || false,
+    sexo: '',
+    exDe: [],
+  };
+}
+
+const seed = pessoas.map(pessoaRegistro);
+const geracoesTotais = new Set(pessoas.map((p) => p.geracao)).size;
+const comFoto = pessoas.filter((p) => p.foto).length;
+const geracaoMaxima = Math.max(...pessoas.map((p) => p.geracao));
+const ordenadas = [...pessoas].sort((a, b) => a.geracao - b.geracao || a.nome.localeCompare(b.nome, 'pt-BR'));
 ---
 
-<Base title="Área dos Administradores" description="Painel de edição da Família Kato.">
+<Base title="Área da família" description="Ferramentas reais para administrar o arquivo da Família Kato.">
   <section class="section">
-    <div class="container" style="max-width: 720px">
-      <span class="eyebrow">Administração</span>
-      <h1>Painel de edição</h1>
+    <div class="container admin">
+      <span class="eyebrow">Área da família</span>
+      <h1>Administrar o arquivo</h1>
       <p class="lead">
-        Aqui a Zoza e os familiares autorizados cadastram pessoas, sobem fotos
-        e escrevem histórias. Ainda é um rascunho: o login e a gravação de
-        dados entram na próxima etapa, junto com o CMS.
+        Cadastramento de pessoas, correções e cópias de segurança. Tudo aqui
+        grava de verdade — mas <strong>no navegador deste dispositivo</strong>
+        (consulte as limitações mais abaixo antes de confiar no acervo).
       </p>
 
-      <div class="aviso">
-        <strong>Rascunho em construção.</strong> Os formulários abaixo ainda
-        não salvam nada — eles mostram como vai ficar.
+      <div class="admin__numeros" aria-label="Números atuais do arquivo">
+        <span class="pill pill--familia">{seed.length} pessoas registradas</span>
+        <span class="pill pill--familia">{geracoesTotais} gerações</span>
+        <span class="pill">{comFoto} com foto</span>
       </div>
 
-      <form class="form">
-        <h2>Cadastrar pessoa</h2>
-        <label>
-          Nome completo
-          <input type="text" name="nome" placeholder="Ex.: Haruto Kato" />
-        </label>
-        <div class="form__linha">
+      <div class="admin__grade">
+        {/* ---- Cadastrar pessoa (grava no mesmo storage da árvore) ---- */}
+        <form class="form" id="f-nova">
+          <h2>Cadastrar pessoa nova</h2>
           <label>
-            Nascimento
-            <input type="text" name="nascimento" placeholder="AAAA ou DD/MM/AAAA" />
+            Nome completo <strong aria-hidden="true">*</strong>
+            <input name="nome" required placeholder="Ex.: Haruto Kato" autocomplete="off" />
+          </label>
+          <div class="form__linha">
+            <label>Nascimento <span class="dica">DD/MM/AAAA ou vazio</span>
+              <input name="nascimento" placeholder="24/10/1894" />
+            </label>
+            <label>Falecimento <span class="dica">vazio se viva</span>
+              <input name="falecimento" placeholder="" />
+            </label>
+          </div>
+          <label>
+            Filho(a) de (opcional)
+            <select name="pai">
+              <option value="">— sem vínculo por enquanto —</option>
+              {ordenadas.map((p) => <option value={p.id}>{p.nome} ({geracaoTxt(p.geracao)})</option>)}
+            </select>
           </label>
           <label>
-            Falecimento
-            <input type="text" name="falecimento" placeholder="Deixe vazio se vivo" />
+            Observações
+            <textarea name="observacao" rows="3" placeholder="Apelidos, profissão, histórias rápidas, o que pedir depois..."></textarea>
           </label>
-        </div>
-        <div class="form__linha">
-          <label>
-            Geração
-            <input type="number" name="geracao" min="1" placeholder="1" />
-          </label>
-          <label>
-            Foto
-            <input type="file" name="foto" accept="image/*" />
-          </label>
-        </div>
-        <label>
-          Observações
-          <textarea name="observacao" rows="3" placeholder="Detalhes, apelidos, histórias rápidas"></textarea>
-        </label>
-        <button class="btn" type="submit">Publicar</button>
-      </form>
+          <button class="btn" type="submit">Cadastrar e salvar</button>
+          <p class="form__feedback" id="f-nova-feedback" role="status"></p>
+          <p class="dica dica--rodape">
+            Foto entra depois (o administrador adiciona no arquivo do site).
+            Vínculos extra (cônjuge, irmãos) podem ser adicionados na árvore.
+          </p>
+        </form>
 
-      <form class="form">
-        <h2>Adicionar histórico da família</h2>
-        <div class="form__linha">
-          <label>
-            Ano
-            <input type="text" name="ano" placeholder="1988" />
+        {/* ---- Lista + busca ---- */}
+        <section class="form form--lista" aria-label="Pessoas registradas">
+          <h2>Pessoas registradas</h2>
+          <input type="search" id="busca" placeholder="Procurar por nome…" autocomplete="off" />
+          <ul id="lista-pessoas" class="admin__lista">
+            {ordenadas.map((p) => (
+              <li data-nome={p.nome.toLowerCase()}>
+                <span class="admin__nome">
+                  <a href={`/pessoa/${p.id}`}>{p.nome}</a>
+                  <small>{geracaoTxt(p.geracao)}{p.foto ? '' : ' · sem foto'}</small>
+                </span>
+                <a class="btn btn--ghost admin__ver" href={`/arvore?focar=${p.id}`}>Abrir na árvore</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      {/* ---- Backup: exportar, importar, restaurar ---- */}
+      <section class="form form--backup" aria-label="Cópias de segurança">
+        <h2>Cópias de segurança</h2>
+        <p class="dica">
+          O arquivo das alterações fica no navegador deste dispositivo. Antes de
+          mudar de computador ou limpar o histórico, <strong>exporte</strong> um JSON
+          e depois <strong>importe</strong> no outro dispositivo.
+        </p>
+        <div class="form__linha form__linha--3">
+          <button class="btn" id="b-exportar" type="button">Exportar arquivo (JSON)</button>
+          <label class="btn btn--ghost btn--arquivo">
+            Importar arquivo…
+            <input type="file" id="b-importar" accept=".json,application/json" />
           </label>
-          <label>
-            Título
-            <input type="text" name="titulo" placeholder="Nasce Renata" />
-          </label>
+          <button class="btn btn--ghost" id="b-restaurar" type="button">Restaurar o original</button>
         </div>
-        <label>
-          Descrição
-          <textarea name="descricao" rows="3" placeholder="Conta o que aconteceu"></textarea>
-        </label>
-        <button class="btn" type="submit">Publicar</button>
-      </form>
+        <p class="form__feedback" id="b-feedback" role="status"></p>
+      </section>
+
+      {/* ---- Limitações honestas ---- */}
+      <section class="aviso" aria-label="Limitações atuais">
+        <h2>O que ainda não fazemos aqui</h2>
+        <ul>
+          <li><strong>O salvamento é por dispositivo.</strong> Para compartilhar as alterações entre a família, o arquivo editado precisa ser gravado em um banco de dados na internet — etapa planejada, exige configurar esse serviço e alguém autorizado.</li>
+          <li>Histórias, eventos da linha do tempo e álbuns continuam sendo editados direto no arquivo do projeto (por quem cuida do site).</li>
+          <li>Envio de fotos precisa de um serviço de armazenamento; sem ele, fotos entram pelo route do administrador do site.</li>
+        </ul>
+        <p style="margin: 0">Restaurar o original <em>apaga</em> mudanças locais — usamos confirmação e o export antes é sempre recomendado.</p>
+      </section>
     </div>
   </section>
 </Base>
 
-<script>
-  const aviso = document.createElement('p');
-  aviso.className = 'form__aviso';
-  aviso.textContent = 'Ainda não salvamos dados por aqui — mande sua sugestão para a Zoza no grupo da família.';
-  document.querySelectorAll('form').forEach((form) => {
-    form.addEventListener('submit', (event) => {
-      event.preventDefault();
-      if (!form.querySelector('.form__aviso')) form.appendChild(aviso.cloneNode(true));
+<script define:vars={{ seed, geracaoMaxima }}>
+  const CHAVE = 'kato-arvore-v1';
+  const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function estado() {
+    try {
+      const g = JSON.parse(localStorage.getItem(CHAVE) || 'null');
+      if (Array.isArray(g) && g.length) return g;
+    } catch {}
+    return seed.map((p) => ({ ...p, pais: p.pais.slice(), conjuges: p.conjuges.slice(), exDe: [] }));
+  }
+  function gravar(arr) {
+    localStorage.setItem(CHAVE, JSON.stringify(arr));
+  }
+  function feedback(el, msg, ok) {
+    el.textContent = msg;
+    el.classList.toggle('form__feedback--erro', !ok);
+  }
+
+  const byId = (arr) => new Map(arr.map((p) => [p.id, p]));
+
+  /* ---- Cadastrar pessoa nova ---- */
+  const fNova = document.getElementById('f-nova');
+  fNova.addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const fb = document.getElementById('f-nova-feedback');
+    const dados = Object.fromEntries(new FormData(fNova).entries());
+    const nome = (dados.nome || '').trim();
+    if (!nome) return feedback(fb, 'Escreva o nome completo.', false);
+    let arr = estado();
+    if (arr.some((p) => p.nome.toLowerCase() === nome.toLowerCase()) && !confirm('Já existe alguém com esse nome. Cadastrar mesmo assim?')) return;
+    const arrEstado = byId(arr);
+    const pai = dados.pai ? arrEstado.get(dados.pai) : null;
+    let id = 'p-' + nome.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    if (arr.some((p) => p.id === id)) id += '-' + Math.random().toString(36).slice(2, 6);
+    const nova = {
+      id, nome,
+      apelido: '', nascimento: (dados.nascimento || '').trim(), falecimento: (dados.falecimento || '').trim(),
+      geracao: pai ? (pai.geracao || 0) + 1 : geracaoMaxima,
+      pais: pai ? [pai.id] : [],
+      conjuges: [], foto: '', bio: '',
+      local: '', profissao: '',
+      observacao: (dados.observacao || '').trim(), agregado: !pai, sexo: '', exDe: [],
+    };
+    arr.push(nova);
+    gravar(arr);
+    fNova.reset();
+    feedback(fb, pai ? 'Cadastrada como filho(a) de ' + pai.nome + '! Abra a árvore para conferir.' : 'Cadastrada sem vínculo por enquanto. O vínculo pode ser criado na árvore (+ Pai/mãe).', true);
+  });
+
+  /* ---- Busca na lista ---- */
+  const busca = document.getElementById('busca');
+  busca.addEventListener('input', () => {
+    const t = busca.value.toLowerCase().trim();
+    document.querySelectorAll('#lista-pessoas li').forEach((li) => {
+      li.style.display = !t || li.dataset.nome.includes(t) ? '' : 'none';
     });
+  });
+
+  /* ---- Exportar ---- */
+  document.getElementById('b-exportar').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(estado(), null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'familia-kato-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    feedback(document.getElementById('b-feedback'), 'Arquivo exportado. Guarde-o junto das fotos.', true);
+  });
+
+  /* ---- Importar ---- */
+  const bFeedback = document.getElementById('b-feedback');
+  document.getElementById('b-importar').addEventListener('change', async (ev) => {
+    const file = ev.target.files && ev.target.files[0];
+    if (!file) return;
+    try {
+      const arr = JSON.parse(await file.text());
+      const ok = Array.isArray(arr) && arr.every((p) => p && typeof p.id === 'string' && typeof p.nome === 'string');
+      if (!ok) return feedback(bFeedback, 'Este arquivo não é um backup válido (esperado: lista de pessoas).', false);
+      if (!confirm(`Importar ${arr.length} pessoas? Isso substitui o arquivo atual deste dispositivo.`)) return;
+      gravar(arr.map((p) => ({ ...p })));
+      feedback(bFeedback, `Importado: ${arr.length} pessoas. Recarregue a página da árvore para ver.`, true);
+    } catch {
+      feedback(bFeedback, 'Não foi possível ler este arquivo.', false);
+    }
+    ev.target.value = '';
+  });
+
+  /* ---- Restaurar original ---- */
+  document.getElementById('b-restaurar').addEventListener('click', () => {
+    if (!confirm('Restaurar o original apaga TODAS as alterações feitas neste dispositivo. Exportar um backup antes? (OK para apagar)')) return;
+    localStorage.removeItem(CHAVE);
+    feedback(document.getElementById('b-feedback'), 'Restaurado. Recarregue a página da árvore.', true);
   });
 </script>
 
 <style>
-  .form__aviso {
-    margin: 0;
-    font-size: 0.85rem;
-    color: var(--vinho-escuro);
-    background: var(--rosa);
-    border-radius: 10px;
-    padding: 0.7rem 1rem;
+  .admin__numeros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.6rem;
   }
-</style>
-
-<style>
-  .aviso {
-    background: var(--rosa);
-    color: var(--vinho-escuro);
-    border-radius: var(--radius);
-    padding: 1rem 1.2rem;
-    font-size: 0.9rem;
-    margin: 1.5rem 0 2rem;
+  .admin__grade {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.6rem;
+    align-items: start;
   }
-
   .form {
     background: var(--montanha-claro);
-    border: 1px solid var(--montanha);
+    border: 1px solid var(--borda);
     border-radius: var(--radius);
     padding: 1.6rem;
     margin-bottom: 1.6rem;
     display: grid;
     gap: 1rem;
   }
-
   .form h2 {
     font-size: 1.15rem;
     margin: 0;
   }
-
   .form label {
     display: grid;
     gap: 0.35rem;
-    font-size: 0.85rem;
+    font-size: 0.88rem;
     color: var(--texto-suave);
   }
-
   .form input,
-  .form textarea {
+  .form textarea,
+  .form select {
     font-family: inherit;
-    font-size: 0.95rem;
+    font-size: 0.98rem;
     color: var(--texto);
     padding: 0.7rem 0.9rem;
     border-radius: 10px;
-    border: 1.5px solid var(--montanha);
+    border: 1.5px solid var(--borda);
     background: #fff;
     width: 100%;
   }
-
   .form input:focus,
-  .form textarea:focus {
+  .form textarea:focus,
+  .form select:focus {
     outline: none;
-    border-color: var(--vinho);
+    border-color: var(--verde);
   }
-
   .form__linha {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 1rem;
   }
-
+  .form__linha--3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: center;
+  }
   .form .btn {
     justify-self: start;
   }
-
+  .btn--arquivo {
+    justify-self: stretch;
+    text-align: center;
+    position: relative;
+    cursor: pointer;
+  }
+  .btn--arquivo input[type="file"] {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  .form__feedback {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--oliva-escuro, #496b54);
+    background: var(--verde-suave);
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    display: none;
+  }
+  .form__feedback:not(:empty) {
+    display: block;
+  }
+  .form__feedback--erro {
+    background: #f6e3dc;
+    color: #8a4a3a;
+  }
+  .dica {
+    font-size: 0.78rem;
+    color: var(--texto-suave);
+  }
+  .dica--rodape {
+    border-top: 1px dashed var(--borda);
+    padding-top: 0.8rem;
+    margin: 0;
+  }
+  .admin__lista {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 520px;
+    overflow: auto;
+    display: grid;
+    gap: 0.45rem;
+  }
+  .admin__lista li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    background: #fffefb;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 0.55rem 0.9rem;
+  }
+  .admin__lista small {
+    display: block;
+    color: var(--texto-suave);
+    font-weight: 400;
+  }
+  .admin__ver {
+    padding: 0.35rem 0.9rem;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+  .aviso {
+    background: #fdf6ec;
+    border: 1px solid #eadfc8;
+    color: #6f5a3a;
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    font-size: 0.92rem;
+    line-height: 1.65;
+  }
+  .aviso h2 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: inherit;
+  }
+  .aviso ul {
+    margin: 0 0 0.8rem;
+    padding-left: 1.2rem;
+  }
+  @media (max-width: 900px) {
+    .admin__grade { grid-template-columns: 1fr; }
+    .form__linha--3 { grid-template-columns: 1fr; }
+  }
   @media (max-width: 560px) {
-    .form__linha {
-      grid-template-columns: 1fr;
-    }
+    .form__linha { grid-template-columns: 1fr; }
   }
 </style>

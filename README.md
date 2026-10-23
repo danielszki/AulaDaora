@@ -34,17 +34,30 @@ public/fotos/      55 fotos da família (IMG-*.jpg)
 
 | Rota | Conteúdo |
 | --- | --- |
-| `/` | Hero, atalho para a árvore, prévia da linha do tempo, últimas atualizações |
-| `/arvore` | Árvore por gerações com busca por nome |
+| `/` | Apresentação, destaques, gerações, memórias, álbum e participação |
+| `/arvore` | Árvore inteira (padrão, Yotaro e Toyo no topo), lista completa e foco por pessoa |
 | `/pessoa/[id]` | Ficha da pessoa, pais, cônjuge e filhos |
 | `/linha-do-tempo` | Marcos cronológicos |
 | `/historias` | Relatos e memórias |
 | `/galeria` | Álbuns por época (fotos entram depois) |
 | `/sobre` | Propósito do site e quem mantém |
-| `/admin` | Painel de edição (rascunho, sem login/gravação ainda) |
+| `/admin` | Ferramentas reais: cadastrar pessoa, buscar, exportar/importar backup |
+
+## Administrar o conteúdo
+
+- **Cadastrar pessoa:** `/admin` → "Cadastrar pessoa nova". Escolha (opcional) "Filho(a) de" para já criar o vínculo; a pessoa aparece na árvore em seguida.
+- **Backup:** `/admin` → **Exportar** baixa um JSON; **Importar** restaura esse backup. Faça export **antes** de trocar de dispositivo ou limpar o navegador.
+- **Onde as alterações ficam:** no `localStorage` do navegador do dispositivo atual (chave `kato-arvore-v1`). É um armazenamento **por dispositivo**. Para compartilhar as alterações entre a família com sincronia e controle de acesso, o próximo passo é conectar um banco persistente (ex.: Vercel + Supabase/KV) com login e permissões — sem serviço/credencial definidos ainda pela família.
+- **Restaurar o original:** apaga alterações locais, sempre com confirmação. Export antes!
 
 ## Próximos passos
 
 1. Associar as fotos restantes às pessoas (pelas legendas do grupo).
-2. Login + CMS (Notion ou headless leve) para o painel de `/admin`.
-3. Deploy na Vercel.
+2. Banco persistente + login/papéis (admin, editor, colaborador) para as alterações valerem em todos os dispositivos.
+3. Envio de fotos pelo painel (exige serviço de armazenamento).
+
+## Deploy
+
+- O site é estático (Astro). Build: `npm run build` → `dist/`.
+- Vercel já conectado ao GitHub: **todo push no `main` faz deploy automático** (projeto `familiakato`). Config fixada em `vercel.json` (framework Astro, saída `dist/`).
+- Não há segredos nem variáveis de ambiente em produção hoje. Quando entrarmos a etapa de banco/login, serão usadas variáveis documentadas aqui (ex.: `DATABASE_URL`, `ADMIN_TOKEN`) — nomes apenas, sem valores.

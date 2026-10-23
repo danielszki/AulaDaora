@@ -2,57 +2,156 @@
 import Base from '../layouts/Base.astro';
 import PersonCard from '../components/PersonCard.astro';
 import TimelineEvent from '../components/TimelineEvent.astro';
-import StoryBlock from '../components/StoryBlock.astro';
 import HeroArt from '../components/HeroArt.astro';
-import { eventos, historias, pessoas, pessoaPorId } from '../data/familia';
+import { pessoas, eventos, historias, albuns, filhosDe, geracaoLabel, anosDe } from '../data/familia';
 
-const ultimas = historias.slice(0, 2);
+const ultimas = historias.slice(0, 3);
 const previewEventos = eventos.slice(0, 4);
-const destaques = ['yotaro-kato', 'toyo-kato', 'kiyoe-kadita', 'carlos-akira-kato']
-  .map((id) => pessoaPorId(id))
-  .filter((p): p is NonNullable<typeof p> => p !== undefined);
 const geracoesTotais = new Set(pessoas.map((p) => p.geracao)).size;
+
+// Destaques fixos: fundadores, filha viva mais velha, fundador do grupo
+const destaques = ['yotaro-kato', 'toyo-kato', 'kiyoe-kadita', 'carlos-akira-kato']
+  .map((id) => pessoas.find((p) => p.id === id))
+  .filter((p) => p !== undefined);
+
+// "Conheça alguém": candidatos com algo para mostrar (foto, bio ou profissão)
+const candidatos = pessoas
+  .filter((p) => p.foto || p.bio || p.profissao)
+  .map((p) => ({
+    id: p.id,
+    nome: p.nome,
+    foto: p.foto || '',
+    anos: anosDe(p),
+    geracao: geracaoLabel(p.geracao),
+  }));
+
+// Uma geração por botão, com representante real (pessoa da geração com mais filhos)
+const stripsGeracoes = [...new Set(pessoas.map((p) => p.geracao))]
+  .sort((a, b) => a - b)
+  .map((g) => {
+    const da = pessoas.filter((p) => p.geracao === g);
+    let rep = da[0];
+    let max = -1;
+    for (const p of da) {
+      const n = filhosDe(p.id).length;
+      if (n > max) {
+        max = n;
+        rep = p;
+      }
+    }
+    return { label: geracaoLabel(g), total: da.length, href: `/arvore?focar=${rep.id}` };
+  });
+
+// Álbum: 8 fotos reais espalhadas pelos álbuns
+const fotosAlbum: { src: string; alt: string }[] = [];
+for (const album of albuns) {
+  for (const f of album.fotos) {
+    if (fotosAlbum.length >= 8) break;
+    const src = `/fotos/${f}`;
+    if (!fotosAlbum.some((x) => x.src === src)) fotosAlbum.push({ src, alt: `Foto do álbum ${album.titulo}` });
+  }
+}
+
+const fotoHero = '/fotos/IMG-20260927-WA0014.jpg';
 ---
 
-<Base title="Início" description="Bem-vindo à casa da família Kato: a nossa árvore, a nossa linha do tempo e as histórias que a gente conta.">
-  <section class="hero">
+<Base
+  title="Início"
+  description="Bem-vindo à casa da família Kato: a nossa árvore, a nossa linha do tempo e as histórias que a gente conta."
+>
+  <section class="hero seigaiha">
     <div class="hero__art"><HeroArt /></div>
     <div class="container">
-      <div class="hero__inner">
-        <span class="eyebrow">Família Kato</span>
-        <h1>Vem cá, deixa eu te mostrar de onde a gente veio.</h1>
-        <p class="lead">
-          Tudo começou com Yotaro e Toyo Kato. Hoje somos {pessoas.length}{' '}
-          pessoas registradas ao longo de {geracoesTotais} gerações — nomes,
-          datas, fotos e as histórias que a gente foi juntando.
-        </p>
-        <div class="hero__actions">
-          <a class="btn" href="/arvore">Ver a árvore da família</a>
-          <a class="btn btn--ghost" href="/linha-do-tempo">Conhecer a linha do tempo</a>
+      <div class="hero__flex">
+        <div class="hero__inner">
+          <span class="eyebrow">Família Kato <span class="jp" lang="ja" aria-hidden="true">加藤</span></span>
+          <h1>Vem cá, deixa eu te mostrar de onde a gente veio.</h1>
+          <p class="lead">
+            Nossa família tem origem japonesa e a história dela tomou forma no
+            Brasil. Tudo começou com Yotaro e Toyo Kato — hoje somos{' '}
+            {pessoas.length} pessoas registradas ao longo de {geracoesTotais}{' '}
+            gerações, com nomes, datas, fotos e as histórias que a gente foi
+            juntando.
+          </p>
+          <ul class="hero__stats" aria-label="Números do arquivo familiar">
+            <li class="pill pill--familia">{pessoas.length} pessoas</li>
+            <li class="pill pill--familia">{geracoesTotais} gerações</li>
+            <li class="pill">{eventos.length} marcos no tempo</li>
+            <li class="pill">{historias.length} histórias</li>
+          </ul>
+          <div class="hero__actions">
+            <a class="btn" href="/arvore">Explorar a árvore</a>
+            <a class="btn btn--ghost" href="/historias">Conhecer nossas histórias</a>
+          </div>
         </div>
+        <figure class="hero__foto">
+          <img src={fotoHero} alt="Reunião da família no 92º aniversário de Kiyoe, em setembro de 2026" loading="eager" decoding="async" />
+          <figcaption>Tia Kiyoe comemorando 92 anos, com a família reunida.</figcaption>
+        </figure>
       </div>
     </div>
   </section>
 
-  <section class="section section--alt">
+  <section class="section section--alt" aria-labelledby="conheca">
     <div class="container">
       <span class="eyebrow">Comece por aqui</span>
-      <h2>A árvore genealógica</h2>
-      <p class="lead">
-        Toque em qualquer nome para ver a página da pessoa, com datas, foto e
-        quem é parente de quem.
-      </p>
-      <div class="grid grid--3" style="margin-top: 1.6rem">
+      <h2 id="conheca">Conheça alguém da nossa família</h2>
+      <p class="lead">Toque em qualquer nome para abrir a página da pessoa, com datas, foto e quem é parente de quem.</p>
+      <div class="grid grid--3" style="margin-top: 1.6rem" id="painel-destaques">
         {destaques.map((pessoa) => <PersonCard pessoa={pessoa} />)}
       </div>
-      <p style="margin-top: 1.6rem"><a class="btn" href="/arvore">Ver a árvore completa</a></p>
+      <div class="sortear" style="margin-top: 1.6rem">
+        <button class="btn btn--ghost" id="btn-sortear" type="button">Sortear alguém da família</button>
+        <p class="sortear__alvo" id="sortear-alvo" aria-live="polite"></p>
+      </div>
+      <p><a class="btn" href="/arvore">Ver a árvore completa</a></p>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" aria-labelledby="geracoes">
     <div class="container">
-      <span class="eyebrow">Linha do tempo</span>
-      <h2>Os marcos da nossa história</h2>
+      <span class="eyebrow">Por geração</span>
+      <h2 id="geracoes">Explore a família geração a geração</h2>
+      <p class="lead">Cada faixa abre a árvore já parando em alguém desse grupo — sem precisar navegar a árvore inteira do começo.</p>
+      <ul class="faixa-geracoes" style="margin-top: 1.6rem">
+        {
+          stripsGeracoes.map((fg) => (
+            <li>
+              <a class="gen" href={fg.href}>
+                <strong>{fg.label}</strong>
+                <span>{fg.total} pessoa{fg.total === 1 ? '' : 's'}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="memorias">
+    <div class="container">
+      <span class="eyebrow">Memórias em destaque</span>
+      <h2 id="memorias">O que a família conta</h2>
+      <div class="grid grid--3" style="margin-top: 1.6rem">
+        {
+          ultimas.map((h) => (
+            <article class="card historia-card">
+              <h3><a href={`/historias#${h.id}`}>{h.titulo}</a></h3>
+              <p class="historia-card__trecho">{h.texto.slice(0, 160).trim()}…</p>
+              <p class="historia-card__meta">{h.autor} · {h.publicado}</p>
+              <p><a href={`/historias#${h.id}`}>Ler história completa →</a></p>
+            </article>
+          ))
+        }
+      </div>
+      <p style="margin-top: 1.4rem"><a href="/historias">Todas as histórias →</a></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="tempo">
+    <div class="container">
+      <span class="eyebrow">Nossa história no tempo</span>
+      <h2 id="tempo">Os marcos da nossa história</h2>
       <div style="margin-top: 1.6rem; max-width: 760px">
         {previewEventos.map((evento) => <TimelineEvent evento={evento} compacto />)}
       </div>
@@ -60,14 +159,240 @@ const geracoesTotais = new Set(pessoas.map((p) => p.geracao)).size;
     </div>
   </section>
 
-  <section class="section section--alt">
+  <section class="section section--alt" aria-labelledby="album">
     <div class="container">
-      <span class="eyebrow">Últimas atualizações</span>
-      <h2>O que foi adicionado recentemente</h2>
-      <div class="grid grid--2" style="margin-top: 1.6rem">
-        {ultimas.map((historia) => <StoryBlock historia={historia} />)}
+      <span class="eyebrow">Álbum familiar</span>
+      <h2 id="album">Fotos que já fazem parte do acervo</h2>
+      <ul class="album-strip" style="margin-top: 1.6rem">
+        {
+          fotosAlbum.map((f) => (
+            <li>
+              <img src={f.src} alt={f.alt} loading="lazy" decoding="async" />
+            </li>
+          ))
+        }
+      </ul>
+      <p style="margin-top: 1.4rem"><a class="btn" href="/galeria">Abrir o álbum completo</a></p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="participe">
+    <div class="container">
+      <span class="eyebrow">Participe</span>
+      <h2 id="participe">Essa história é de todo mundo</h2>
+      <p class="lead">Achou um erro, tem uma foto esquecida numa gaveta ou lembra de uma história? Toda contribuição é bem-vinda.</p>
+      <div class="grid grid--3" style="margin-top: 1.6rem">
+        <div class="card">
+          <h3>Corrigir informações</h3>
+          <p>Nome errado, data errada, vínculo faltando? Fale com a família ou corrija na área de edição.</p>
+          <p><a class="btn btn--ghost" href="/sobre">Falar conosco</a></p>
+        </div>
+        <div class="card">
+          <h3>Enviar fotos e lembranças</h3>
+          <p>Fotos antigas, relatos de memória, gravações — manda pelo grupo da família ou escreve no sobre.</p>
+          <p><a class="btn btn--ghost" href="/historias">Ler o que já foi contado</a></p>
+        </div>
+        <div class="card">
+          <h3>Cadastrar um familiar</h3>
+          <p>Quem está faltando na árvore pode ser cadastrado direto na área da família, sem mexer em código.</p>
+          <p><a class="btn" href="/admin">Abrir a área da família</a></p>
+        </div>
       </div>
-      <p><a href="/historias">Ver todas as histórias →</a></p>
     </div>
   </section>
 </Base>
+
+<script define:vars={{ candidatos }}>
+  const btn = document.getElementById('btn-sortear');
+  const alvo = document.getElementById('sortear-alvo');
+  const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const p = candidatos[Math.floor(Math.random() * candidatos.length)];
+      if (!p) return;
+      const inicial = p.nome.split(' ').map((n) => n[0]).slice(0, 2).join('');
+      alvo.innerHTML = `
+        <a class="sortear__card" href="/pessoa/${esc(p.id)}">
+          ${p.foto ? `<img src="${esc(p.foto)}" alt="" loading="lazy" />` : `<span class="sortear__iniciais">${esc(inicial)}</span>`}
+          <strong>${esc(p.nome)}</strong>
+          <span>${esc(p.anos || 'Datas a confirmar')} · ${esc(p.geracao)}</span>
+        </a>`;
+      alvo.hidden = false;
+    });
+  }
+</script>
+
+<style>
+  .hero__flex {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(240px, 0.9fr);
+    gap: 2.5rem;
+    align-items: center;
+  }
+
+  .hero__stats {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.2rem 0 0;
+    padding: 0;
+  }
+
+  .hero__foto {
+    margin: 0;
+    background: var(--papel);
+    border: 1px solid var(--borda);
+    box-shadow: 0 14px 34px rgba(41, 50, 45, 0.14);
+    border-radius: 12px;
+    padding: 0.8rem 0.8rem 1rem;
+    transform: rotate(2.5deg);
+  }
+
+  .hero__foto img {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: 8px;
+  }
+
+  .hero__foto figcaption {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+    padding-top: 0.6rem;
+    text-align: center;
+    font-family: var(--fonte-titulo);
+  }
+
+  .sortear__alvo {
+    margin-top: 1rem;
+  }
+
+  .sortear__alvo[hidden] {
+    display: none;
+  }
+
+  .sortear__card {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.9rem;
+    background: var(--papel);
+    border: 1px solid var(--borda);
+    border-radius: 999px;
+    padding: 0.5rem 1.3rem 0.5rem 0.5rem;
+    box-shadow: var(--shadow);
+    color: var(--texto);
+  }
+
+  .sortear__card img,
+  .sortear__iniciais {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--verde-suave);
+    color: var(--verde);
+    font-weight: 700;
+  }
+
+  .sortear__card span:last-child {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+  }
+
+  .faixa-geracoes {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
+
+  .gen {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    border: 1px solid var(--borda);
+    background: var(--papel);
+    border-radius: 12px;
+    padding: 0.65rem 1rem;
+    color: var(--texto);
+    box-shadow: var(--shadow);
+  }
+
+  .gen:hover {
+    border-color: var(--verde);
+    text-decoration: none;
+  }
+
+  .gen strong {
+    font-family: var(--fonte-titulo);
+    color: var(--verde);
+  }
+
+  .gen span {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+  }
+
+  .historia-card__trecho {
+    color: var(--texto-suave);
+    font-size: 0.94rem;
+  }
+
+  .historia-card__meta {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    border-top: 1px dashed var(--borda);
+    padding-top: 0.6rem;
+  }
+
+  .album-strip {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 0.9rem;
+  }
+
+  .album-strip li {
+    background: var(--papel);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    padding: 0.5rem 0.5rem 0.5rem;
+    box-shadow: var(--shadow);
+  }
+
+  .album-strip img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: 6px;
+  }
+
+  .album-strip li:nth-child(odd) {
+    transform: rotate(-1.2deg);
+  }
+
+  .album-strip li:nth-child(even) {
+    transform: rotate(1.2deg);
+  }
+
+  @media (max-width: 860px) {
+    .hero__flex {
+      grid-template-columns: 1fr;
+    }
+
+    .hero__foto {
+      max-width: 420px;
+    }
+  }
+</style>

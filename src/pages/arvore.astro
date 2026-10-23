@@ -52,7 +52,7 @@ const planoPos = [
 ];
 const fotosPlano: { src: string; top: string; left: string; w: number; rot: number }[] = [];
 for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
-  fotosPlano.push({ src: fotosSite[i], ...planoPos[i] });
+  fotosPlano.push({ src: fotosSite[i] || '', ...planoPos[i] });
 }
 ---
 
@@ -98,11 +98,19 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
           <div class="t-menu__dropdown" id="t-menu-dropdown" hidden>
             <button type="button" data-acao="familia">Árvore da família (foco numa pessoa)</button>
             <button type="button" data-acao="inteira">Árvore inteira (toda a família, dos mais velhos aos mais novos)</button>
+            <button type="button" data-acao="lista">Lista completa (sem diagrama, boa para ler de cima a baixo)</button>
             <button type="button" data-acao="encaixar">Encaixar na tela</button>
             <button type="button" data-acao="focar">Focar na pessoa selecionada</button>
             <button type="button" data-acao="restaurar">Restaurar dados originais</button>
           </div>
         </div>
+      </div>
+
+      <div class="t-legenda" id="t-legenda">
+        <span><i class="t-leg t-leg--linha" aria-hidden="true"></i> Pais ↔ filhos</span>
+        <span><i class="t-leg t-leg--casal" aria-hidden="true"></i> Casal</span>
+        <span><i class="t-leg t-leg--eu" aria-hidden="true"></i> Verde: a pessoa selecionada (e você)</span>
+        <span><i class="t-leg t-leg--coracao" aria-hidden="true"></i> ♥ sai do casal</span>
       </div>
 
       <div class="t-viewport" id="t-viewport">
@@ -185,10 +193,16 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
   function persistir() {
     try {
       localStorage.setItem(CHAVE, JSON.stringify(pessoas));
-    } catch {}
+      toast('Alterações salvas neste dispositivo.');
+      return true;
+    } catch {
+      toast('Não foi possível salvar — suas alterações continuam na tela.');
+      return false;
+    }
   }
 
   function restaurar() {
+    if (!window.confirm('Restaurar os dados originais? As alterações feitas neste dispositivo serão removidas.')) return;
     try {
       localStorage.removeItem(CHAVE);
     } catch {}
@@ -325,14 +339,84 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       return;
     }
     if (modo === 'inteira') renderInteira();
+    else if (modo === 'lista') renderLista();
     else renderFamilia();
     syncSoltos();
+    const legenda = document.getElementById('t-legenda');
+    if (legenda) legenda.hidden = modo === 'lista';
   }
 
   function renderInteira() {
     const raiz = arvore();
     if (raiz.membros.length) desenharNo(raiz, 0, 0);
     aviso('Árvore inteira: <strong>toda a família, de Yotaro e Toyo (no topo) até os mais novos</strong>. Arraste para mover, faça zoom com os botões <strong>+</strong>/<strong>−</strong> (ou a roda do mouse) e use <strong>⌖</strong> para ver a árvore toda.');
+  }
+
+  // Lista hierárquica legível: uma alternativa completa ao diagrama
+  function renderLista() {
+    const nosEl = document.getElementById('t-nos');
+    const raiz = arvore();
+    const linhas = [];
+    let nivel = 0;
+    const vistos = new Set();
+    const percorre = (u) => {
+      nivel++;
+      u.membros.forEach((p, i) => {
+        if (vistos.has(p.id)) return;
+        vistos.add(p.id);
+        const detalhe = [];
+        if (p.nascimento) detalhe.push('n. ' + p.nascimento);
+        if (p.falecimento) detalhe.push('f. ' + p.falecimento);
+        if ((p.conjuges || []).length) {
+          const nomes = p.conjuges.map((c) => (mapa.get(c) || {}).nome).filter(Boolean);
+          if (nomes.length) detalhe.push('casado(a) com ' + nomes.join(', '));
+        }
+        linhas.push(
+          `<li><span class="t-lista__social">${'—'.repeat(Math.min(nivel, 8))}</span><a class="t-lista__nome" href="/pessoa/${esc(p.id)}">${esc(p.nome)}</a>` +
+          `<span class="t-lista__detalhe">${esc(detalhe.join(' · '))}</span>` +
+          `<button type="button" class="t-lista__ver" data-ver="${esc(p.id)}" title="Abrir na árvore">Ver na árvore ⌖</button></li>`
+        );
+      });
+      u.filhos.forEach(percorre);
+      nivel--;
+    };
+    percorre(raiz);
+    const soltos = pessoas
+      .filter((p) => !vistos.has(p.id) && p.geracao !== 0)
+      .map((p) => ({ p }));
+    const mais = pessoas.filter((p) => p.geracao === 0 && !vistos.has(p.id));
+    let html = '<div class="t-lista">';
+    html += '<h2 class="t-lista__titulo">Toda a família, de cima para baixo</h2>';
+    if (linhas.length) html += '<ul class="t-lista__ul">' + linhas.join('') + '</ul>';
+    if (mais.length) {
+      html += '<h3 class="t-lista__sub">Antepassados citados (vínculo a confirmar)</h3><ul class="t-lista__ul">';
+      html += mais.map((p) => `<li><span class="t-lista__social">—</span><a class="t-lista__nome" href="/pessoa/${esc(p.id)}">${esc(p.nome)}</a><span class="t-lista__detalhe">Antepassado citado na planilha da família</span></li>`).join('');
+      html += '</ul>';
+    }
+    if (soltos.length) {
+      html += '<h3 class="t-lista__sub">Sem vínculo identificado ainda</h3><ul class="t-lista__ul">';
+      html += soltos.map(({ p }) => `<li><span class="t-lista__social">—</span><a class="t-lista__nome" href="/pessoa/${esc(p.id)}">${esc(p.nome)}</a><span class="t-lista__detalhe">${esc(anosTexto(p))}</span></li>`).join('');
+      html += '</ul>';
+    }
+    html += '</div>';
+    nosEl.innerHTML = html;
+    nosEl.querySelectorAll('button[data-ver]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const id = b.dataset.ver;
+        const p = mapa.get(id);
+        if (!p) return;
+        selecionadoId = id;
+        egoId = id;
+        modo = 'familia';
+        render();
+        requestAnimationFrame(() => {
+          pintarSelecao();
+          mostrarPerfil(p);
+          focar();
+        });
+      });
+    });
+    aviso('Lista completa: <strong>toda a família em texto, da mais antiga à mais nova</strong>. Toque num nome para abrir a página da pessoa, ou em “Ver na árvore” para voltar ao diagrama já no lugar certo.');
   }
 
   function renderFamilia() {
@@ -522,6 +606,18 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       mostrarPerfil(p);
     });
 
+    el.tabIndex = 0;
+    el.setAttribute('role', 'button');
+    el.setAttribute('aria-label', `Abrir perfil de ${p.nome}`);
+    el.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter' || ev.key === ' ') {
+        ev.preventDefault();
+        selecionadoId = p.id;
+        pintarSelecao();
+        mostrarPerfil(p);
+      }
+    });
+
     el.querySelectorAll('[data-acao]').forEach((btn) => {
       btn.addEventListener('click', (ev) => {
         if (!estadoEdicao.ativo) return;
@@ -538,9 +634,6 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
     document.querySelectorAll('.t-no').forEach((n) => {
       n.classList.toggle('t-no--sel', n.dataset.id === selecionadoId);
     });
-    if (selecionadoId) document.getElementById('t-nos')?.querySelector('.t-card--sel')?.classList.remove('t-card--sel');
-    const nos = document.querySelectorAll('.t-card');
-    nos.forEach((c) => c.parentElement.classList.remove('t-no--sel'));
   }
 
   function esc(s) {
@@ -740,6 +833,9 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       modo = 'inteira';
       render();
       requestAnimationFrame(encaixar);
+    } else if (acao === 'lista') {
+      modo = 'lista';
+      render();
     } else if (acao === 'encaixar') { encaixar(); }
     else if (acao === 'focar') { focar(); }
     else if (acao === 'restaurar') { restaurar(); }
@@ -1853,6 +1949,110 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
   @keyframes iconeFlutua {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-4px); }
+  }
+
+  /* ---- Legenda dos símbolos ---- */
+  .t-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+    align-items: center;
+    margin: 0.9rem 0 0;
+    padding: 0.55rem 1rem;
+    background: var(--verde-suave, #e8efe7);
+    border: 1px solid #d3e0d1;
+    border-radius: 10px;
+    font-size: 0.85rem;
+    color: #3d5a45;
+  }
+  .t-legenda[hidden] { display: none; }
+  .t-leg {
+    display: inline-block;
+    width: 26px;
+    height: 0;
+    border-top: 3px solid #8a7d6b;
+    border-radius: 2px;
+    vertical-align: middle;
+    margin-right: 0.35rem;
+  }
+  .t-leg--casal { border-top-style: dashed; border-top-color: #b3a794; }
+  .t-leg--eu {
+    width: 18px; height: 18px;
+    border: 2.5px solid #7cb97c; border-radius: 50%; background: #d8efdc;
+  }
+  .t-leg--coracao { width: auto; height: auto; border: 0; color: #ad6652; }
+
+  /* ---- Cards: foco de teclado visível ---- */
+  .t-no:focus-visible {
+    outline: 3px solid #b99a61;
+    outline-offset: 3px;
+  }
+
+  /* ---- Lista completa (modo sem diagrama) ---- */
+  .t-lista {
+    max-width: 900px;
+    margin: 1.4rem auto 3rem;
+    background: var(--papel, #fffefb);
+    border: 1px solid var(--borda, #e6e2d7);
+    border-radius: 14px;
+    padding: 1.6rem 1.8rem;
+    box-shadow: 0 6px 24px rgba(41, 50, 45, 0.07);
+  }
+  .t-lista__titulo {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+  }
+  .t-lista__sub {
+    font-size: 1rem;
+    margin: 1.6rem 0 0.6rem;
+    color: #496b54;
+  }
+  .t-lista__ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .t-lista__ul li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.5rem 0.7rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #e6e2d7;
+  }
+  .t-lista__ul li:last-child { border-bottom: 0; }
+  .t-lista__social {
+    color: #b9b3a3;
+    letter-spacing: -1px;
+    flex: 0 0 auto;
+    user-select: none;
+  }
+  .t-lista__nome {
+    font-weight: 700;
+    color: #29322d;
+  }
+  .t-lista__nome:hover { color: #496b54; }
+  .t-lista__detalhe {
+    color: #5d6660;
+    font-size: 0.85rem;
+  }
+  .t-lista__ver {
+    margin-left: auto;
+    border: 1px solid #cfd9cd;
+    background: #e8efe7;
+    color: #3d5a45;
+    border-radius: 999px;
+    padding: 0.25rem 0.8rem;
+    font-size: 0.82rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .t-lista__ver:hover { background: #d8e6d6; }
+
+  /* ---- Movimento reduzido: para as animações decorativas ---- */
+  @media (prefers-reduced-motion: reduce) {
+    .t-plano__foto, .t-plano__coracao, .t-dicas__icone, .t-dicas { animation: none; transition: none; }
+    .t-dicas { opacity: 1; }
   }
 
   /* ---- Modais ---- */

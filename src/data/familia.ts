@@ -1284,7 +1284,7 @@ export function nomeDe(id: string): string {
 
 export function anosDe(p: Pessoa): string {
   if (p.nascimento && p.falecimento) return `${p.nascimento} – ${p.falecimento}`;
-  if (p.nascimento) return `n. ${p.nascimento}`;
+  if (p.nascimento) return p.nascimento;
   if (p.falecimento) return `f. ${p.falecimento}`;
   return '';
 }

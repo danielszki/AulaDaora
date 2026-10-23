@@ -364,7 +364,9 @@ const kzPayload = JSON.stringify({ pessoas: dados, historias }).replace(/</g, '\
     const heading = makeElement('div', 'kz-details__person');
     heading.append(personPortrait(person, 'medium'));
     const headingCopy = makeElement('div', 'kz-details__person-copy');
-    headingCopy.append(makeElement('h2', '', person.nome));
+    const detailHeading = makeElement('h2', '', person.nome);
+    detailHeading.id = 'kz-detail-title';
+    headingCopy.append(detailHeading);
     headingCopy.append(makeElement('p', 'kz-details__dates', dates(person)));
     headingCopy.append(makeElement('span', 'kz-details__generation', generation(person)));
     heading.append(headingCopy);
@@ -581,6 +583,12 @@ const kzPayload = JSON.stringify({ pessoas: dados, historias }).replace(/</g, '\
     document.body.style.overflow = '';
     relationAId = null;
     relationBId = null;
+    relAInput.value = '';
+    relBInput.value = '';
+    relAList.hidden = true;
+    relBList.hidden = true;
+    relAInput.setAttribute('aria-expanded', 'false');
+    relBInput.setAttribute('aria-expanded', 'false');
     $('kz-rel-resultado').textContent = 'O caminho encontrado aparecerá aqui.';
     if (previousFocus && typeof previousFocus.focus === 'function') previousFocus.focus();
   }
@@ -736,6 +744,7 @@ const kzPayload = JSON.stringify({ pessoas: dados, historias }).replace(/</g, '\
 </script>
 
 <style>
+  .kz-heading, .kz-explorer, .kz-modal { --verde: #496b54; }
   .kz-container { width: min(1480px, 100% - 2.5rem); margin-inline: auto; }
 
   .kz-heading { padding: 2.2rem 0 1.5rem; background: linear-gradient(112deg, #f7f5ef 0%, #f3f1e8 58%, #edf1e9 100%); border-bottom: 1px solid var(--borda); overflow: hidden; }

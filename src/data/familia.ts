@@ -1300,6 +1300,13 @@ export function filhosDe(id: string): Pessoa[] {
   return pessoas.filter((p) => p.pais.includes(id));
 }
 
+export function irmaosDe(id: string): Pessoa[] {
+  const p = pessoaPorId(id);
+  if (!p || !p.pais.length) return [];
+  const ids = new Set(p.pais);
+  return pessoas.filter((q) => q.id !== id && q.pais.some((pp) => ids.has(pp)));
+}
+
 export function geracaoLabel(g: number): string {
   if (g === 0) return 'Antepassados';
   const ordinais = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª', '7ª', '8ª', '9ª', '10ª'];

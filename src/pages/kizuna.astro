@@ -1,0 +1,668 @@
+---
+import Base from '../layouts/Base.astro';
+import { pessoas, historias, albuns, eventos, filhosDe, irmaosDe, anosDe, geracaoLabel, pessoaPorId } from '../data/familia';
+
+const dados = pessoas.map((p) => ({
+  id: p.id,
+  nome: p.nome,
+  nascimento: p.nascimento || '',
+  falecimento: p.falecimento || '',
+  geracao: p.geracao,
+  pais: p.pais,
+  conjuges: p.conjuges,
+  exDe: p.exDe || [],
+  foto: p.foto || '',
+  bio: p.bio || '',
+  local: p.local || '',
+  profissao: p.profissao || '',
+  observacao: p.observacao || '',
+}));
+
+const storiesByPerson = {};
+for (const h of historias) {
+  // heuristic: stories mention names; we just keep list and link by id not available, so skip linking
+}
+const fotosCount = {};
+for (const a of albuns) for (const f of a.fotos) {
+  // no person mapping in data; leave empty
+}
+---
+
+<Base title="Kizuna — Laços da Família Kato" description="Descubra sua família de pessoa em pessoa.">
+  <section class="kz-hero">
+    <div class="container">
+      <span class="eyebrow">Kizuna · laços</span>
+      <h1>Kizuna — Laços da Família Kato</h1>
+      <p class="kz-sub">“Cada pessoa tem uma história. Cada história nos conecta.”</p>
+      <p class="kz-intro">
+        Escolha um familiar e veja quem está ao seu redor. Toque em um cartão para seguir explorando.
+      </p>
+    </div>
+  </section>
+
+  <section class="kz-app">
+    <div class="container">
+      <div class="kz-toolbar">
+        <div class="kz-search">
+          <input type="search" id="kz-busca" placeholder="Pesquisar familiar…" autocomplete="off" aria-label="Pesquisar familiar" />
+          <ul id="kz-sugestoes" class="kz-sugestoes" hidden></ul>
+        </div>
+        <div class="kz-acoes">
+          <button type="button" id="kz-voltar" class="btn btn--ghost" disabled aria-label="Voltar ao familiar anterior">← Voltar</button>
+          <button type="button" id="kz-centrar" class="btn btn--ghost" aria-label="Centralizar pessoa atual">⌖ Centralizar</button>
+          <button type="button" id="kz-inicio" class="btn btn--ghost" aria-label="Voltar ao início da exploração">Início</button>
+          <button type="button" id="kz-relacao" class="btn btn--ghost" aria-label="Como somos parentes?">Como somos parentes?</button>
+          <a class="btn btn--ghost" href="/arvore" aria-label="Abrir árvore tradicional">Árvore tradicional</a>
+        </div>
+      </div>
+
+      <div class="kz-canvas" id="kz-canvas">
+        <svg class="kz-linhas" id="kz-linhas" aria-hidden="true"></svg>
+        <div class="kz-centro" id="kz-centro"></div>
+        <div class="kz-grupos" id="kz-grupos"></div>
+      </div>
+
+      <aside class="kz-painel" id="kz-painel" hidden>
+        <button type="button" class="kz-painel__fechar" id="kz-painel-fechar" aria-label="Fechar painel">×</button>
+        <div id="kz-painel-conteudo"></div>
+      </aside>
+    </div>
+  </section>
+
+  <div class="kz-relacao-modal" id="kz-relacao-modal" hidden>
+    <div class="kz-relacao-backdrop" data-close></div>
+    <div class="kz-relacao-caixa">
+      <h2>Como somos parentes?</h2>
+      <p class="kz-relacao-hint">Escolha duas pessoas. O sistema encontra o caminho entre elas usando apenas os vínculos registrados.</p>
+      <div class="kz-relacao-escolhas">
+        <div>
+          <label>Primeira pessoa
+            <input type="search" id="kz-rel-a" placeholder="Pesquisar…" />
+          </label>
+          <ul id="kz-rel-a-list" class="kz-sugestoes"></ul>
+        </div>
+        <div>
+          <label>Segunda pessoa
+            <input type="search" id="kz-rel-b" placeholder="Pesquisar…" />
+          </label>
+          <ul id="kz-rel-b-list" class="kz-sugestoes"></ul>
+        </div>
+      </div>
+      <div class="kz-relacao-resultado" id="kz-rel-resultado"></div>
+      <div class="kz-relacao-acoes">
+        <button type="button" class="btn btn--ghost" data-close>Fechar</button>
+        <button type="button" class="btn" id="kz-rel-calcular">Calcular caminho</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="application/json" id="kz-dados" set:html={JSON.stringify(dados)}></script>
+</Base>
+
+<script define:vars={{ dados, historias }}>
+  // Kizuna client
+  const dataEl = document.getElementById('kz-dados');
+  const PESSOAS = dataEl ? JSON.parse(dataEl.textContent || '[]') : (dados || []);
+  const byId = new Map(PESSOAS.map((p) => [p.id, p]));
+
+  const centroEl = document.getElementById('kz-centro');
+  const gruposEl = document.getElementById('kz-grupos');
+  const linhasSvg = document.getElementById('kz-linhas');
+  const painel = document.getElementById('kz-painel');
+  const painelCont = document.getElementById('kz-painel-conteudo');
+  const busca = document.getElementById('kz-busca');
+  const sugestoes = document.getElementById('kz-sugestoes');
+  const btnVoltar = document.getElementById('kz-voltar');
+  const btnCentrar = document.getElementById('kz-centrar');
+  const btnInicio = document.getElementById('kz-inicio');
+  const btnRelacao = document.getElementById('kz-relacao');
+  const modalRel = document.getElementById('kz-relacao-modal');
+
+  const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const LIMITE_GRUPO = 6;
+
+  let selecionado = null;
+  const historico = [];
+
+  function esc(s) { return String(s || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
+  function geracaoLabel(g) { const o=['1ª','2ª','3ª','4ª','5ª','6ª','7ª','8ª','9ª','10ª']; return g===0?'Antepassados':`${o[g-1]??g+'ª'} geração`; }
+  function anos(p) {
+    if (p.nascimento && p.falecimento) return `${p.nascimento} – ${p.falecimento}`;
+    if (p.nascimento) return p.nascimento;
+    if (p.falecimento) return `f. ${p.falecimento}`;
+    return 'Datas a confirmar';
+  }
+  function iniciais(nome) { return nome.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase(); }
+  function irmaos(id) {
+    const p = byId.get(id);
+    if (!p || !p.pais.length) return [];
+    const ids = new Set(p.pais);
+    return PESSOAS.filter((q) => q.id !== id && q.pais.some((pp) => ids.has(pp)));
+  }
+  function filhos(id) { return PESSOAS.filter((p) => p.pais.includes(id)).sort((a,b) => (a.nascimento||'').localeCompare(b.nascimento||'')); }
+  function pais(id) { const p = byId.get(id); return (p?.pais || []).map((x) => byId.get(x)).filter(Boolean); }
+  function conjuge(id) { const p = byId.get(id); return (p?.conjuges || []).map((x) => byId.get(x)).filter(Boolean); }
+  function exs(id) { const p = byId.get(id); return (p?.exDe || []).map((x) => byId.get(x)).filter(Boolean); }
+
+  function cardHTML(p, extra = '') {
+    const foto = p.foto ? `<img src="${esc(p.foto)}" alt="" loading="lazy" />` : `<span class="kz-avatar">${esc(iniciais(p.nome))}</span>`;
+    return `<button type="button" class="kz-card" data-id="${esc(p.id)}" aria-label="Selecionar ${esc(p.nome)}">
+      <div class="kz-card__foto">${foto}</div>
+      <div class="kz-card__info">
+        <strong class="kz-card__nome">${esc(p.nome)}</strong>
+        <span class="kz-card__anos">${esc(anos(p))}</span>
+        ${p.geracao ? `<span class="kz-card__gen">${esc('G' + p.geracao)}</span>` : ''}
+      </div>
+      ${extra}
+    </button>`;
+  }
+
+  function grupoHTML(titulo, lista, expandido) {
+    const visiveis = expandido ? lista : lista.slice(0, LIMITE_GRUPO);
+    const mais = lista.length > LIMITE_GRUPO && !expandido;
+    return `<section class="kz-grupo" data-grupo="${esc(titulo)}">
+      <header class="kz-grupo__head">
+        <h3>${esc(titulo)}</h3>
+        <span class="kz-grupo__count">${lista.length}</span>
+      </header>
+      ${lista.length ? `<div class="kz-grupo__cards">${visiveis.map((p) => cardHTML(p)).join('')}</div>` : `<p class="kz-grupo__vazio">Nenhum registro.</p>`}
+      ${mais ? `<button type="button" class="kz-grupo__mais" data-expandir>Ver todos (${lista.length})</button>` : ''}
+    </section>`;
+  }
+
+  function renderSelecionado(id) {
+    const p = byId.get(id);
+    if (!p) return;
+    selecionado = id;
+    // history
+    if (historico.length === 0 || historico[historico.length - 1] !== id) historico.push(id);
+    btnVoltar.disabled = historico.length <= 1;
+
+    const ps = pais(id);
+    const cs = conjuge(id);
+    const xs = exs(id);
+    const is = irmaos(id);
+    const fs = filhos(id);
+
+    const centro = `<div class="kz-centro__card">
+      <div class="kz-centro__foto">${p.foto ? `<img src="${esc(p.foto)}" alt="" />` : `<span class="kz-avatar kz-avatar--lg">${esc(iniciais(p.nome))}</span>`}</div>
+      <h2 class="kz-centro__nome">${esc(p.nome)}</h2>
+      <p class="kz-centro__anos">${esc(anos(p))}${p.geracao ? ' · ' + esc(geracaoLabel(p.geracao)) : ''}</p>
+      ${p.bio ? `<p class="kz-centro__bio">${esc(p.bio)}</p>` : ''}
+      <div class="kz-centro__acoes">
+        <a class="btn btn--ghost" href="/pessoa/${esc(p.id)}">Ver perfil completo</a>
+        <button type="button" class="btn btn--ghost" data-abrir-painel>Detalhes</button>
+      </div>
+    </div>`;
+    centroEl.innerHTML = centro;
+
+    let gruposHTML = '';
+    gruposHTML += grupoHTML('Pais', ps, false);
+    gruposHTML += grupoHTML('Cônjuge', cs.concat(xs), false);
+    gruposHTML += grupoHTML('Irmãos', is, false);
+    gruposHTML += grupoHTML('Filhos', fs, false);
+    gruposEl.innerHTML = gruposHTML;
+
+    // expand handlers
+    gruposEl.querySelectorAll('[data-expandir]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const sec = b.closest('.kz-grupo');
+        const titulo = sec.dataset.grupo;
+        const listas = { Pais: ps, 'Cônjuge': cs.concat(xs), 'Irmãos': is, 'Filhos': fs };
+        const lista = listas[titulo] || [];
+        sec.querySelector('.kz-grupo__cards').innerHTML = lista.map((p) => cardHTML(p)).join('');
+        b.remove();
+        ligarCards();
+        desenharLinhas();
+      });
+    });
+
+    ligarCards();
+    desenharLinhas();
+    atualizarURL(id);
+    abrirPainel(id);
+
+    // animate in (unless reduced motion)
+    if (!reduzido) {
+      centroEl.classList.remove('kz-in');
+      void centroEl.offsetWidth;
+      centroEl.classList.add('kz-in');
+      gruposEl.classList.remove('kz-in');
+      void gruposEl.offsetWidth;
+      gruposEl.classList.add('kz-in');
+    }
+  }
+
+  function ligarCards() {
+    gruposEl.querySelectorAll('.kz-card').forEach((btn) => {
+      btn.addEventListener('click', () => renderSelecionado(btn.dataset.id));
+    });
+    const ab = centroEl.querySelector('[data-abrir-painel]');
+    if (ab) ab.addEventListener('click', () => abrirPainel(selecionado));
+  }
+
+  function desenharLinhas() {
+    if (!linhasSvg) return;
+    const canvas = document.getElementById('kz-canvas');
+    const cRect = canvas.getBoundingClientRect();
+    const centroCard = centroEl.querySelector('.kz-centro__card');
+    if (!centroCard) return;
+    const cr = centroCard.getBoundingClientRect();
+    const cx = cr.left + cr.width / 2 - cRect.left;
+    const cy = cr.top + cr.height / 2 - cRect.top;
+    let svg = '';
+    gruposEl.querySelectorAll('.kz-grupo__cards .kz-card').forEach((card) => {
+      const r = card.getBoundingClientRect();
+      const x = r.left + r.width / 2 - cRect.left;
+      const y = r.top + r.height / 2 - cRect.top;
+      svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(73,107,84,0.35)" stroke-width="1.5" stroke-linecap="round" />`;
+    });
+    linhasSvg.setAttribute('width', cRect.width);
+    linhasSvg.setAttribute('height', cRect.height);
+    linhasSvg.setAttribute('viewBox', `0 0 ${cRect.width} ${cRect.height}`);
+    linhasSvg.innerHTML = svg;
+  }
+
+  function abrirPainel(id) {
+    const p = byId.get(id);
+    if (!p) return;
+    const ps = pais(id);
+    const cs = conjuge(id).concat(exs(id));
+    const is = irmaos(id);
+    const fs = filhos(id);
+    const hist = historias.filter((h) => h.texto.toLowerCase().includes(p.nome.toLowerCase().split(' ')[0].toLowerCase())).slice(0, 5);
+    painelCont.innerHTML = `
+      <h3 class="kz-painel__titulo">${esc(p.nome)}</h3>
+      <p class="kz-painel__anos">${esc(anos(p))}${p.geracao ? ' · ' + esc(geracaoLabel(p.geracao)) : ''}</p>
+      ${p.bio ? `<p class="kz-painel__bio">${esc(p.bio)}</p>` : ''}
+      ${p.local ? `<p class="kz-painel__linha"><strong>Local:</strong> ${esc(p.local)}</p>` : ''}
+      ${p.profissao ? `<p class="kz-painel__linha"><strong>Profissão:</strong> ${esc(p.profissao)}</p>` : ''}
+      <div class="kz-painel__sec">
+        <h4>Parentes</h4>
+        <ul class="kz-painel__lista">
+          ${ps.length ? `<li><strong>Pais:</strong> ${ps.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
+          ${cs.length ? `<li><strong>Cônjuge:</strong> ${cs.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
+          ${is.length ? `<li><strong>Irmãos:</strong> ${is.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
+          ${fs.length ? `<li><strong>Filhos:</strong> ${fs.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
+          ${!ps.length && !cs.length && !is.length && !fs.length ? '<li>Sem vínculos registrados.</li>' : ''}
+        </ul>
+      </div>
+      ${hist.length ? `<div class="kz-painel__sec"><h4>Histórias</h4><ul class="kz-painel__lista">${hist.map((h) => `<li><a href="/historias#${esc(h.id)}">${esc(h.titulo)}</a> <small>· ${esc(h.autor)}</small></li>`).join('')}</ul></div>` : ''}
+      <div class="kz-painel__sec">
+        <h4>Explorar</h4>
+        <div class="kz-painel__acoes">
+          <a class="btn btn--ghost" href="/pessoa/${esc(p.id)}">Perfil completo</a>
+          <a class="btn btn--ghost" href="/arvore?focar=${esc(p.id)}">Na árvore tradicional</a>
+        </div>
+      </div>`;
+    painel.hidden = false;
+    painelCont.querySelectorAll('[data-nav]').forEach((a) => {
+      a.addEventListener('click', (e) => { e.preventDefault(); renderSelecionado(a.dataset.nav); });
+    });
+  }
+
+  function fecharPainel() { painel.hidden = true; }
+
+  function atualizarURL(id) {
+    const u = new URL(window.location.href);
+    u.searchParams.set('pessoa', id);
+    window.history.replaceState({}, '', u.toString());
+  }
+
+  function voltar() {
+    if (historico.length <= 1) return;
+    historico.pop();
+    const prev = historico[historico.length - 1];
+    selecionado = prev;
+    btnVoltar.disabled = historico.length <= 1;
+    renderSelecionadoUI(prev);
+  }
+
+  function renderSelecionado(id, fromHistory = false) {
+    if (!byId.has(id)) return;
+    if (!fromHistory && selecionado && selecionado !== id) {
+      // already pushed in render? push happens inside
+    }
+    renderSelecionadoCore(id);
+  }
+  function renderSelecionadoCore(id) {
+    renderSelecionadoImpl(id);
+  }
+  // simplify: one function
+  function renderSelecionadoImpl(id) {
+    if (!byId.has(id)) return;
+    if (selecionado && selecionado !== id) historico.push(id);
+    else if (!selecionado) historico.push(id);
+    // dedupe consecutive
+    if (historico.length > 1 && historico[historico.length-1] === historico[historico.length-2]) historico.pop();
+    btnVoltar.disabled = historico.length <= 1;
+    renderSelecionadoUI(id);
+  }
+
+  // Replace the above convoluted history with a clean version by redefining render:
+  // We'll just use renderSelecionadoUI and manage history separately.
+
+  // ---- clean reimplementation ----
+  let _init = false;
+  function selecionar(id) {
+    if (!byId.has(id)) return;
+    if (selecionado && selecionado !== id) historico.push(id);
+    if (!selecionado) historico.push(id);
+    // dedupe
+    while (historico.length > 1 && historico[historico.length-1] === historico[historico.length-2]) historico.pop();
+    selecionado = id;
+    btnVoltar.disabled = historico.length <= 1;
+    renderSelecionadoUI(id);
+  }
+  function renderSelecionadoUI(id) {
+    const p = byId.get(id);
+    if (!p) return;
+    const ps = pais(id);
+    const cs = conjuge(id);
+    const xs = exs(id);
+    const is = irmaos(id);
+    const fs = filhos(id);
+
+    const centro = `<div class="kz-centro__card">
+      <div class="kz-centro__foto">${p.foto ? `<img src="${esc(p.foto)}" alt="" />` : `<span class="kz-avatar kz-avatar--lg">${esc(iniciais(p.nome))}</span>`}</div>
+      <h2 class="kz-centro__nome">${esc(p.nome)}</h2>
+      <p class="kz-centro__anos">${esc(anos(p))}${p.geracao ? ' · ' + esc(geracaoLabel(p.geracao)) : ''}</p>
+      ${p.bio ? `<p class="kz-centro__bio">${esc(p.bio)}</p>` : ''}
+      <div class="kz-centro__acoes">
+        <a class="btn btn--ghost" href="/pessoa/${esc(p.id)}">Ver perfil completo</a>
+        <button type="button" class="btn btn--ghost" data-abrir-painel>Detalhes</button>
+      </div>
+    </div>`;
+    centroEl.innerHTML = centro;
+
+    let gruposHTML = '';
+    gruposHTML += grupoHTML('Pais', ps, false);
+    gruposHTML += grupoHTML('Cônjuge', cs.concat(xs), false);
+    gruposHTML += grupoHTML('Irmãos', is, false);
+    gruposHTML += grupoHTML('Filhos', fs, false);
+    gruposEl.innerHTML = gruposHTML;
+
+    gruposEl.querySelectorAll('[data-expandir]').forEach((b) => {
+      b.addEventListener('click', () => {
+        const sec = b.closest('.kz-grupo');
+        const titulo = sec.dataset.grupo;
+        const listas = { 'Pais': ps, 'Cônjuge': cs.concat(xs), 'Irmãos': is, 'Filhos': fs };
+        const lista = listas[titulo] || [];
+        sec.querySelector('.kz-grupo__cards').innerHTML = lista.map((pp) => cardHTML(pp)).join('');
+        b.remove();
+        ligarCards();
+        desenharLinhas();
+      });
+    });
+
+    ligarCards();
+    desenharLinhas();
+    atualizarURL(id);
+    abrirPainel(id);
+
+    if (!reduzido) {
+      centroEl.classList.remove('kz-in');
+      void centroEl.offsetWidth;
+      centroEl.classList.add('kz-in');
+      gruposEl.classList.remove('kz-in');
+      void gruposEl.offsetWidth;
+      gruposEl.classList.add('kz-in');
+    }
+  }
+
+  function ligarCards() {
+    gruposEl.querySelectorAll('.kz-card').forEach((btn) => {
+      btn.addEventListener('click', () => selecionar(btn.dataset.id));
+    });
+    const ab = centroEl.querySelector('[data-abrir-painel]');
+    if (ab) ab.addEventListener('click', () => abrirPainel(selecionado));
+  }
+
+  function desenharLinhas() {
+    if (!linhasSvg) return;
+    const canvas = document.getElementById('kz-canvas');
+    const cRect = canvas.getBoundingClientRect();
+    const centroCard = centroEl.querySelector('.kz-centro__card');
+    if (!centroCard) return;
+    const cr = centroCard.getBoundingClientRect();
+    const cx = cr.left + cr.width / 2 - cRect.left;
+    const cy = cr.top + cr.height / 2 - cRect.top;
+    let svg = '';
+    gruposEl.querySelectorAll('.kz-grupo__cards .kz-card').forEach((card) => {
+      const r = card.getBoundingClientRect();
+      const x = r.left + r.width / 2 - cRect.left;
+      const y = r.top + r.height / 2 - cRect.top;
+      svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(73,107,84,0.3)" stroke-width="1.5" stroke-linecap="round" />`;
+    });
+    linhasSvg.setAttribute('width', cRect.width);
+    linhasSvg.setAttribute('height', cRect.height);
+    linhasSvg.setAttribute('viewBox', `0 0 ${cRect.width} ${cRect.height}`);
+    linhasSvg.innerHTML = svg;
+  }
+
+  function abrirPainel(id) {
+    const p = byId.get(id);
+    if (!p) return;
+    const ps = pais(id);
+    const cs = conjuge(id).concat(exs(id));
+    const is = irmaos(id);
+    const fs = filhos(id);
+    const hist = historias.filter((h) => h.texto.toLowerCase().includes(p.nome.toLowerCase().split(' ')[0].toLowerCase())).slice(0, 5);
+    painelCont.innerHTML = `
+      <h3 class="kz-painel__titulo">${esc(p.nome)}</h3>
+      <p class="kz-painel__anos">${esc(anos(p))}${p.geracao ? ' · ' + esc(geracaoLabel(p.geracao)) : ''}</p>
+      ${p.bio ? `<p class="kz-painel__bio">${esc(p.bio)}</p>` : ''}
+      ${p.local ? `<p class="kz-painel__linha"><strong>Local:</strong> ${esc(p.local)}</p>` : ''}
+      ${p.profissao ? `<p class="kz-painel__linha"><strong>Profissão:</strong> ${esc(p.profissao)}</p>` : ''}
+      <div class="kz-painel__sec">
+        <h4>Parentes</h4>
+        <ul class="kz-painel__lista">
+          ${ps.length ? `<li><strong>Pais:</strong> ${ps.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
+          ${cs.length ? `<li><strong>Cônjuge:</strong> ${cs.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
+          ${is.length ? `<li><strong>Irmãos:</strong> ${is.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
+          ${fs.length ? `<li><strong>Filhos:</strong> ${fs.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
+          ${!ps.length && !cs.length && !is.length && !fs.length ? '<li>Sem vínculos registrados.</li>' : ''}
+        </ul>
+      </div>
+      ${hist.length ? `<div class="kz-painel__sec"><h4>Histórias</h4><ul class="kz-painel__lista">${hist.map((h) => `<li><a href="/historias#${esc(h.id)}">${esc(h.titulo)}</a> <small>· ${esc(h.autor)}</small></li>`).join('')}</ul></div>` : ''}
+      <div class="kz-painel__sec">
+        <h4>Explorar</h4>
+        <div class="kz-painel__acoes">
+          <a class="btn btn--ghost" href="/pessoa/${esc(p.id)}">Perfil completo</a>
+          <a class="btn btn--ghost" href="/arvore?focar=${esc(p.id)}">Na árvore tradicional</a>
+        </div>
+      </div>`;
+    painel.hidden = false;
+    painelCont.querySelectorAll('[data-nav]').forEach((a) => {
+      a.addEventListener('click', (e) => { e.preventDefault(); selecionar(a.dataset.nav); });
+    });
+  }
+  function fecharPainel() { painel.hidden = true; }
+
+  // search
+  function filtrar(q) {
+    q = (q || '').toLowerCase().trim();
+    if (!q) return [];
+    return PESSOAS.filter((p) => p.nome.toLowerCase().includes(q)).slice(0, 8);
+  }
+  function renderSugestoes(el, q, onPick) {
+    const res = filtrar(q);
+    if (!res.length || !q) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    el.innerHTML = res.map((p) => `<li><button type="button" data-id="${esc(p.id)}">${esc(p.nome)} <small>${esc(p.nascimento || '')}</small></button></li>`).join('');
+    el.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { onPick(b.dataset.id); el.hidden = true; }));
+  }
+  busca.addEventListener('input', () => renderSugestoes(sugestoes, busca.value, (id) => { busca.value = byId.get(id).nome; selecionar(id); }));
+  document.addEventListener('click', (e) => { if (!busca.contains(e.target) && !sugestoes.contains(e.target)) sugestoes.hidden = true; });
+
+  btnVoltar.addEventListener('click', () => {
+    if (historico.length <= 1) return;
+    historico.pop();
+    const prev = historico[historico.length - 1];
+    selecionado = null;
+    historico.length = 0;
+    historico.push(prev);
+    selecionado = prev;
+    btnVoltar.disabled = historico.length <= 1;
+    renderSelecionadoUI(prev);
+  });
+  btnCentrar.addEventListener('click', () => { if (selecionado) { const c = centroEl.querySelector('.kz-centro__card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); } });
+  btnInicio.addEventListener('click', () => selecionar(PESSOAS[0]?.id || 'yotaro-kato'));
+  btnRelacao.addEventListener('click', () => { modalRel.hidden = false; document.body.style.overflow = 'hidden'; });
+
+  // relation modal
+  modalRel.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', () => { modalRel.hidden = true; document.body.style.overflow = ''; }));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modalRel.hidden) { modalRel.hidden = true; document.body.style.overflow = ''; } });
+  const relA = document.getElementById('kz-rel-a');
+  const relB = document.getElementById('kz-rel-b');
+  const relAList = document.getElementById('kz-rel-a-list');
+  const relBList = document.getElementById('kz-rel-b-list');
+  let relAId = null, relBId = null;
+  relA.addEventListener('input', () => renderSugestoes(relAList, relA.value, (id) => { relA.value = byId.get(id).nome; relAId = id; relAList.hidden = true; }));
+  relB.addEventListener('input', () => renderSugestoes(relBList, relB.value, (id) => { relB.value = byId.get(id).nome; relBId = id; relBList.hidden = true; }));
+
+  function bfsPath(start, end) {
+    if (start === end) return [start];
+    const visited = new Set([start]);
+    const parent = new Map();
+    const q = [start];
+    while (q.length) {
+      const cur = q.shift();
+      const p = byId.get(cur);
+      if (!p) continue;
+      const viz = [...p.pais, ...p.conjuges, ...(p.exDe || []), ...PESSOAS.filter((x) => x.pais.includes(cur)).map((x) => x.id)];
+      for (const v of viz) {
+        if (visited.has(v)) continue;
+        visited.add(v);
+        parent.set(v, cur);
+        if (v === end) {
+          const path = [end];
+          let c = end;
+          while (parent.has(c)) { c = parent.get(c); path.unshift(c); }
+          return path;
+        }
+        q.push(v);
+      }
+    }
+    return null;
+  }
+  function descreverVinculo(a, b) {
+    const pa = byId.get(a), pb = byId.get(b);
+    if (!pa || !pb) return 'relacionados';
+    if (pa.pais.includes(b)) return 'pai/mãe';
+    if (pb.pais.includes(a)) return 'filho(a)';
+    if (pa.conjuges.includes(b)) return 'cônjuge';
+    if (pa.exDe && pa.exDe.includes(b)) return 'ex-cônjuge';
+    if (irmaos(a).some((x) => x.id === b)) return 'irmão/irmã';
+    return 'parente';
+  }
+  document.getElementById('kz-rel-calcular').addEventListener('click', () => {
+    const res = document.getElementById('kz-rel-resultado');
+    if (!relAId || !relBId) { res.textContent = 'Escolha as duas pessoas.'; return; }
+    const path = bfsPath(relAId, relBId);
+    if (!path) { res.textContent = 'Não foi encontrado caminho entre essas duas pessoas pelos vínculos registrados.'; return; }
+    const steps = path.map((id, i) => {
+      const p = byId.get(id);
+      const rel = i > 0 ? descreverVinculo(path[i-1], id) : '';
+      return `${esc(p.nome)}${rel ? ' (' + esc(rel) + ')' : ''}`;
+    }).join(' → ');
+    res.innerHTML = `<p><strong>Caminho encontrado (${path.length} pessoa${path.length===1?'':'s'}):</strong></p><p class="kz-rel-caminho">${steps}</p>`;
+  });
+
+  // painel fechar
+  document.getElementById('kz-painel-fechar').addEventListener('click', fecharPainel);
+
+  // URL state
+  const foco = new URLSearchParams(window.location.search).get('pessoa');
+  const inicial = (foco && byId.has(foco)) ? foco : (byId.has('yotaro-kato') ? 'yotaro-kato' : (PESSOAS[0]?.id || 'yotaro-kato'));
+  // remove the convoluted duplicate functions above by just using selecionar
+  // (they reference renderSelecionadoUI which is defined below? no - defined above as renderSelecionadoUI). Use selecionar.
+  selecionar(inicial);
+
+  // window resize redraw lines
+  window.addEventListener('resize', () => { if (selecionado) desenharLinhas(); });
+</script>
+
+<style>
+  .kz-hero { padding: 2.5rem 0 1.5rem; }
+  .kz-hero h1 { font-size: 2.2rem; margin: 0.3rem 0 0.4rem; }
+  .kz-sub { font-style: italic; color: var(--texto-suave); margin: 0 0 0.6rem; }
+  .kz-intro { max-width: 620px; }
+
+  .kz-toolbar { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin-bottom: 1rem; }
+  .kz-search { position: relative; flex: 1 1 260px; min-width: 200px; }
+  .kz-search input { width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid var(--borda); border-radius: 10px; font-size: 1rem; }
+  .kz-acoes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .kz-sugestoes { position: absolute; top: 100%; left: 0; right: 0; background: var(--papel); border: 1px solid var(--borda); border-radius: 10px; list-style: none; padding: 0.3rem; margin: 0.3rem 0 0; max-height: 260px; overflow: auto; z-index: 50; box-shadow: var(--shadow); }
+  .kz-sugestoes li button { width: 100%; text-align: left; background: none; border: 0; padding: 0.5rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
+  .kz-sugestoes li button:hover { background: var(--creme); }
+  .kz-sugestoes small { color: var(--texto-suave); margin-left: 0.4rem; }
+
+  .kz-canvas { position: relative; min-height: 60vh; border: 1px solid var(--borda); border-radius: 16px; background: var(--creme); padding: 1.5rem; overflow: hidden; }
+  .kz-linhas { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+  .kz-centro { display: flex; justify-content: center; margin-bottom: 1.5rem; position: relative; z-index: 1; }
+  .kz-centro__card { background: var(--papel); border: 1px solid var(--borda); border-radius: 16px; padding: 1.2rem; text-align: center; box-shadow: var(--shadow); max-width: 320px; width: 100%; }
+  .kz-centro__foto { width: 96px; height: 96px; margin: 0 auto 0.7rem; border-radius: 50%; overflow: hidden; background: var(--creme); display: flex; align-items: center; justify-content: center; }
+  .kz-centro__foto img { width: 100%; height: 100%; object-fit: contain; }
+  .kz-centro__nome { margin: 0; font-size: 1.25rem; }
+  .kz-centro__anos { color: var(--texto-suave); font-size: 0.9rem; margin: 0.2rem 0 0.6rem; }
+  .kz-centro__bio { font-size: 0.92rem; margin: 0.6rem 0; }
+  .kz-centro__acoes { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.6rem; }
+  .kz-avatar { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: var(--verde); color: #fff; font-weight: 700; border-radius: 50%; }
+  .kz-avatar--lg { font-size: 2rem; }
+
+  .kz-grupos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; position: relative; z-index: 1; }
+  @media (max-width: 720px) { .kz-grupos { grid-template-columns: 1fr; } }
+
+  .kz-grupo { background: var(--papel); border: 1px solid var(--borda); border-radius: 12px; padding: 0.8rem; }
+  .kz-grupo__head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+  .kz-grupo__head h3 { margin: 0; font-size: 1rem; color: var(--verde); }
+  .kz-grupo__count { background: var(--creme); border-radius: 999px; padding: 0.1rem 0.6rem; font-size: 0.8rem; font-weight: 700; }
+  .kz-grupo__cards { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+  .kz-grupo__vazio { color: var(--texto-suave); font-size: 0.9rem; margin: 0; }
+  .kz-grupo__mais { margin-top: 0.6rem; border: 1px solid var(--borda); background: var(--creme); border-radius: 999px; padding: 0.4rem 0.9rem; cursor: pointer; font-size: 0.85rem; }
+
+  .kz-card { display: flex; align-items: center; gap: 0.6rem; background: var(--creme); border: 1px solid var(--borda); border-radius: 10px; padding: 0.5rem; cursor: pointer; text-align: left; transition: transform 0.15s, box-shadow 0.15s; }
+  .kz-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .kz-card__foto { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: var(--papel); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+  .kz-card__foto img { width: 100%; height: 100%; object-fit: contain; }
+  .kz-card__info { display: flex; flex-direction: column; min-width: 0; }
+  .kz-card__nome { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
+  .kz-card__anos { font-size: 0.78rem; color: var(--texto-suave); }
+  .kz-card__gen { font-size: 0.7rem; color: var(--verde); font-weight: 700; }
+
+  .kz-painel { position: fixed; top: 0; right: 0; bottom: 0; width: min(380px, 92vw); background: var(--papel); border-left: 1px solid var(--borda); box-shadow: -8px 0 32px rgba(0,0,0,0.18); padding: 1.2rem; overflow: auto; z-index: 60; }
+  .kz-painel[hidden] { display: none; }
+  .kz-painel__fechar { position: absolute; top: 0.6rem; right: 0.6rem; border: 0; background: var(--creme); width: 36px; height: 36px; border-radius: 999px; cursor: pointer; font-size: 1.3rem; }
+  .kz-painel__titulo { margin: 0 0 0.2rem; font-size: 1.2rem; }
+  .kz-painel__anos { color: var(--texto-suave); font-size: 0.9rem; margin: 0 0 0.8rem; }
+  .kz-painel__bio { font-size: 0.92rem; margin: 0 0 0.8rem; }
+  .kz-painel__linha { font-size: 0.9rem; margin: 0.3rem 0; }
+  .kz-painel__sec { margin-top: 1rem; }
+  .kz-painel__sec h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texto-suave); margin: 0 0 0.4rem; }
+  .kz-painel__lista { list-style: none; padding: 0; margin: 0; font-size: 0.92rem; line-height: 1.6; }
+  .kz-painel__lista a { color: var(--verde); text-decoration: none; }
+  .kz-painel__lista a:hover { text-decoration: underline; }
+  .kz-painel__acoes { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+
+  .kz-relacao-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+  .kz-relacao-modal[hidden] { display: none; }
+  .kz-relacao-backdrop { position: absolute; inset: 0; background: rgba(20,24,22,0.75); }
+  .kz-relacao-caixa { position: relative; z-index: 1; background: var(--papel); border-radius: 16px; padding: 1.4rem; width: min(92vw, 640px); max-height: 90vh; overflow: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.4); }
+  .kz-relacao-escolhas { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0.8rem 0; }
+  @media (max-width: 520px) { .kz-relacao-escolhas { grid-template-columns: 1fr; } }
+  .kz-relacao-escolhas label { display: block; font-size: 0.9rem; color: var(--texto-suave); }
+  .kz-relacao-escolhas input { width: 100%; margin-top: 0.3rem; padding: 0.5rem 0.7rem; border: 1.5px solid var(--borda); border-radius: 10px; font-size: 1rem; }
+  .kz-relacao-resultado { margin: 0.8rem 0; padding: 0.8rem; background: var(--creme); border-radius: 10px; font-size: 0.92rem; min-height: 2rem; }
+  .kz-rel-caminho { word-break: break-word; }
+  .kz-relacao-acoes { display: flex; gap: 0.5rem; justify-content: flex-end; }
+
+  .kz-in { animation: kzFade 0.35s ease; }
+  @keyframes kzFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .kz-in { animation: none; } }
+
+  @media (max-width: 720px) {
+    .kz-centro__card { max-width: 100%; }
+    .kz-painel { width: 100%; }
+  }
+</style>

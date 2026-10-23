@@ -99,6 +99,13 @@ for (const a of albuns) for (const f of a.fotos) {
   <script type="application/json" id="kz-dados" set:html={JSON.stringify(dados)}></script>
 </Base>
 
+<script>
+  import { fetchPessoas, isCloudEnabled, savePessoa, uploadPhoto } from '../scripts/data';
+  import { getSession, signIn, signUp, signOut, isAdmin } from '../scripts/supabase';
+  window.__katoCloud = { fetchPessoas, isCloudEnabled, savePessoa, uploadPhoto, getSession, signIn, signUp, signOut, isAdmin };
+  window.dispatchEvent(new Event('kato-cloud-ready'));
+</script>
+
 <script define:vars={{ dados, historias }}>
   // Kizuna client
   const dataEl = document.getElementById('kz-dados');
@@ -573,11 +580,23 @@ for (const a of albuns) for (const f of a.fotos) {
   document.getElementById('kz-painel-fechar').addEventListener('click', fecharPainel);
 
   // URL state
-  const foco = new URLSearchParams(window.location.search).get('pessoa');
-  const inicial = (foco && byId.has(foco)) ? foco : (byId.has('yotaro-kato') ? 'yotaro-kato' : (PESSOAS[0]?.id || 'yotaro-kato'));
-  // remove the convoluted duplicate functions above by just using selecionar
-  // (they reference renderSelecionadoUI which is defined below? no - defined above as renderSelecionadoUI). Use selecionar.
-  selecionar(inicial);
+  (async () => {
+    const cloud = window.__katoCloud;
+    if (cloud && cloud.isCloudEnabled()) {
+      try {
+        const remote = await cloud.fetchPessoas(PESSOAS.slice());
+        if (remote && remote.length) {
+          PESSOAS.length = 0;
+          PESSOAS.push(...remote);
+          byId.clear();
+          for (const p of PESSOAS) byId.set(p.id, p);
+        }
+      } catch (e) { console.warn('cloud fetch falhou:', e); }
+    }
+    const foco = new URLSearchParams(window.location.search).get('pessoa');
+    const inicial = (foco && byId.has(foco)) ? foco : (byId.has('yotaro-kato') ? 'yotaro-kato' : (PESSOAS[0]?.id || 'yotaro-kato'));
+    selecionar(inicial);
+  })().catch((e) => console.error('boot falhou:', e));
 
   // window resize redraw lines
   window.addEventListener('resize', () => { if (selecionado) desenharLinhas(); });

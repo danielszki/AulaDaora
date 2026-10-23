@@ -1,0 +1,104 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Entrar — Família Kato" description="Acesso da família.">
+  <section class="section">
+    <div class="container" style="max-width: 420px;">
+      <span class="eyebrow">Acesso da família</span>
+      <h1>Entrar</h1>
+      <p class="lead">Acesso restrito a familiares autorizados. Visitantes não precisam entrar.</p>
+
+      <div id="login-status" class="card" style="margin-top: 1rem;">
+        <p id="login-msg" style="margin: 0 0 0.8rem;">Verificando configuração…</p>
+        <form id="login-form" hidden>
+          <label class="campo">E-mail
+            <input type="email" id="login-email" autocomplete="email" required />
+          </label>
+          <label class="campo">Senha
+            <input type="password" id="login-senha" autocomplete="current-password" required />
+          </label>
+          <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-top:0.8rem;">
+            <button type="submit" class="btn" id="login-entrar">Entrar</button>
+            <button type="button" class="btn btn--ghost" id="login-cadastrar">Criar conta</button>
+          </div>
+        </form>
+        <div id="login-logado" hidden>
+          <p style="margin: 0 0 0.8rem;">Você está conectado como <strong id="login-email-atual"></strong>.</p>
+          <button type="button" class="btn btn--ghost" id="login-sair">Sair</button>
+          <a class="btn" href="/admin" style="margin-left:0.4rem;">Ir para a administração</a>
+        </div>
+        <p id="login-feedback" style="margin-top:0.8rem; color: var(--texto-suave);"></p>
+      </div>
+
+      <p style="margin-top: 1.4rem; font-size: 0.9rem; color: var(--texto-suave);">
+        Sem configuração de nuvem, o site funciona com armazenamento local do dispositivo.
+        Veja <code>supabase/schema.sql</code> e as variáveis <code>PUBLIC_SUPABASE_URL</code> / <code>PUBLIC_SUPABASE_ANON_KEY</code>.
+      </p>
+    </div>
+  </section>
+
+  <script>
+    import { isCloudEnabled, getSession, signIn, signUp, signOut } from '../scripts/supabase';
+    const status = document.getElementById('login-status');
+    const msg = document.getElementById('login-msg');
+    const form = document.getElementById('login-form');
+    const logado = document.getElementById('login-logado');
+    const fb = document.getElementById('login-feedback');
+    const emailAtual = document.getElementById('login-email-atual');
+
+    async function atualizar() {
+      if (!isCloudEnabled()) {
+        msg.textContent = 'Nuvem não configurada: usando armazenamento local do dispositivo.';
+        form.hidden = true;
+        logado.hidden = true;
+        return;
+      }
+      const s = await getSession();
+      if (s) {
+        msg.textContent = 'Conectado.';
+        form.hidden = true;
+        logado.hidden = false;
+        emailAtual.textContent = s.user?.email || '';
+      } else {
+        msg.textContent = 'Entre com sua conta de familiar autorizado.';
+        form.hidden = false;
+        logado.hidden = true;
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      fb.textContent = '';
+      const email = document.getElementById('login-email').value.trim();
+      const senha = document.getElementById('login-senha').value;
+      const r = await signIn(email, senha);
+      if (r.ok) { fb.textContent = 'Entrou com sucesso.'; await atualizar(); }
+      else fb.textContent = 'Erro: ' + r.error;
+    });
+
+    document.getElementById('login-cadastrar').addEventListener('click', async () => {
+      fb.textContent = '';
+      const email = document.getElementById('login-email').value.trim();
+      const senha = document.getElementById('login-senha').value;
+      if (!email || !senha) { fb.textContent = 'Preencha e-mail e senha.'; return; }
+      const r = await signUp(email, senha);
+      if (r.ok) fb.textContent = 'Conta criada. Verifique seu e-mail para confirmar (se necessário) e entre.';
+      else fb.textContent = 'Erro: ' + r.error;
+    });
+
+    document.getElementById('login-sair').addEventListener('click', async () => {
+      await signOut();
+      await atualizar();
+      fb.textContent = 'Saiu.';
+    });
+
+    atualizar();
+  </script>
+
+  <style>
+    .campo { display: block; font-size: 0.92rem; color: var(--texto-suave); margin-bottom: 0.85rem; }
+    .campo input { width: 100%; font-family: inherit; font-size: 1.05rem; padding: 0.6rem 0.75rem; margin-top: 0.25rem; border: 1.5px solid var(--montanha); border-radius: 10px; color: var(--texto); }
+    .campo input:focus { outline: none; border-color: var(--vinho); }
+  </style>
+</Base>

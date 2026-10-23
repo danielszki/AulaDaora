@@ -168,6 +168,13 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
   </section>
 </Base>
 
+<script>
+  import { fetchPessoas, isCloudEnabled, savePessoa, uploadPhoto } from '../scripts/data';
+  import { getSession, signIn, signUp, signOut, isAdmin } from '../scripts/supabase';
+  window.__katoCloud = { fetchPessoas, isCloudEnabled, savePessoa, uploadPhoto, getSession, signIn, signUp, signOut, isAdmin };
+  window.dispatchEvent(new Event('kato-cloud-ready'));
+</script>
+
 <script define:vars={{ dadosSeed, dadosSoltos, idsSoltes }}>
   // ---------------------------------------------------------------
   // Estado
@@ -1043,6 +1050,10 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
 
     pessoas.push(nova);
     persistir();
+    if (window.__katoCloud && window.__katoCloud.isCloudEnabled()) {
+      window.__katoCloud.savePessoa(nova);
+      window.__katoCloud.savePessoa(alvo);
+    }
     render();
     selecionadoId = nova.id;
     pintarSelecao();
@@ -1170,8 +1181,19 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
             ctx.drawImage(img, 0, 0, w, h);
             try {
               const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-              fotoAtual = dataUrl;
-              atualizarPreviewFoto(dataUrl);
+              // Se a nuvem estiver configurada, envia para o Storage e guarda a URL pública
+              if (window.__katoCloud && window.__katoCloud.isCloudEnabled()) {
+                  canvas.toBlob(async (blob) => {
+                    if (!blob) { fotoAtual = dataUrl; atualizarPreviewFoto(dataUrl); return; }
+                    const file = new File([blob], 'foto.jpg', { type: 'image/jpeg' });
+                    const r = await window.__katoCloud.uploadPhoto(file);
+                    if (r.ok && r.url) { fotoAtual = r.url; atualizarPreviewFoto(r.url); }
+                    else { fotoAtual = dataUrl; atualizarPreviewFoto(dataUrl); toast('Upload na nuvem falhou; salvo localmente.'); }
+                  }, 'image/jpeg', 0.82);
+                } else {
+                  fotoAtual = dataUrl;
+                  atualizarPreviewFoto(dataUrl);
+                }
             } catch {
               toast('Não foi possível processar a imagem.');
             }
@@ -1204,6 +1226,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       p.bio = overlay.querySelector('#t-edit-bio').value.trim();
       p.foto = fotoAtual;
       persistir();
+      if (window.__katoCloud && window.__katoCloud.isCloudEnabled()) window.__katoCloud.savePessoa(p);
       render();
       pintarSelecao();
       mostrarPerfil(p);
@@ -1276,8 +1299,23 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
     }
   }
 
-  // ---------------------------------------------------------------
-  // Dicas animadas: como ver, mexer e mudar a árvore
+  // Sincronização com a nuvem (se configurada): carrega dados remotos e re-renderiza
+  function sincronizarNuvem() {
+    const cloud = window.__katoCloud;
+    if (!cloud || !cloud.isCloudEnabled()) return;
+    cloud.fetchPessoas(JSON.parse(dadosSeed)).then((remote) => {
+      if (remote && remote.length) {
+        pessoas = remote;
+        try { localStorage.setItem(CHAVE, JSON.stringify(remote)); } catch {}
+        derivarSexo();
+        render();
+        pintarSelecao();
+        if (selecionadoId && mapa.get(selecionadoId)) mostrarPerfil(mapa.get(selecionadoId));
+      }
+    }).catch((e) => console.warn('sync nuvem falhou:', e));
+  }
+  if (window.__katoCloud) sincronizarNuvem();
+  else window.addEventListener('kato-cloud-ready', sincronizarNuvem, { once: true });
   // ---------------------------------------------------------------
   const dicaEl = document.getElementById('t-dicas');
   const dicaIcone = document.getElementById('t-dicas-icone');

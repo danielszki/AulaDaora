@@ -43,10 +43,9 @@ const ordenadas = [...pessoas].sort((a, b) => a.geracao - b.geracao || a.nome.lo
       <span class="eyebrow">Área da família</span>
       <h1>Administrar o arquivo</h1>
       <p class="lead">
-        Cadastramento de pessoas, correções e cópias de segurança. Tudo aqui
-        grava de verdade — mas <strong>no navegador deste dispositivo</strong>
-        (consulte as limitações mais abaixo antes de confiar no acervo).
+        Cadastramento de pessoas, correções e cópias de segurança.
       </p>
+      <p class="lead" id="admin-modo" style="font-size: 0.9rem;"></p>
 
       <div class="admin__numeros" aria-label="Números atuais do arquivo">
         <span class="pill pill--familia">{seed.length} pessoas registradas</span>
@@ -140,6 +139,13 @@ const ordenadas = [...pessoas].sort((a, b) => a.geracao - b.geracao || a.nome.lo
   </section>
 </Base>
 
+<script>
+  import { savePessoa, isCloudEnabled } from '../scripts/data';
+  import { getSession } from '../scripts/supabase';
+  window.__katoCloud = Object.assign(window.__katoCloud || {}, { savePessoa, isCloudEnabled, getSession });
+  window.dispatchEvent(new Event('kato-cloud-ready'));
+</script>
+
 <script define:vars={{ seed, geracaoMaxima }}>
   const CHAVE = 'kato-arvore-v1';
   const esc = (s) => String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -186,11 +192,26 @@ const ordenadas = [...pessoas].sort((a, b) => a.geracao - b.geracao || a.nome.lo
     };
     arr.push(nova);
     gravar(arr);
+    const _cloud = window.__katoCloud;
+    if (_cloud && _cloud.isCloudEnabled()) _cloud.savePessoa(nova);
     fNova.reset();
     feedback(fb, pai ? 'Cadastrada como filho(a) de ' + pai.nome + '! Abra a árvore para conferir.' : 'Cadastrada sem vínculo por enquanto. O vínculo pode ser criado na árvore (+ Pai/mãe).', true);
   });
 
-  /* ---- Busca na lista ---- */
+  /* ---- Status da nuvem ---- */
+  (function () {
+    const cloud = window.__katoCloud;
+    const el = document.getElementById('admin-modo');
+    if (!el) return;
+    if (!cloud || !cloud.isCloudEnabled()) {
+      el.textContent = 'Modo local: alterações ficam neste dispositivo.';
+      return;
+    }
+    cloud.getSession().then((s) => {
+      if (s) el.textContent = 'Conectado à nuvem (' + (s.user?.email || '') + '). Alterações são compartilhadas.';
+      else el.textContent = 'Nuvem configurada, mas você não está logado. Entre em /login para editar compartilhado.';
+    });
+  })();
   const busca = document.getElementById('busca');
   busca.addEventListener('input', () => {
     const t = busca.value.toLowerCase().trim();

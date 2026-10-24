@@ -48,7 +48,16 @@ import { albuns } from '../data/familia';
                   rel="noopener"
                   aria-label={`${album.titulo} — foto em destaque`}
                 >
-                  <img src={`/fotos/${foto}`} alt={`${album.titulo}`} loading="lazy" />
+                  <img
+                    src={`/fotos/mini/${foto.replace(/\.(jpe?g|png)$/i, '.webp')}`}
+                    data-full-src={`/fotos/${foto}`}
+                    alt={`${album.titulo}`}
+                    loading="lazy"
+                    decoding="async"
+                    fetchpriority="low"
+                    width="480"
+                    height="480"
+                  />
                 </a>
               ))}
             </div>
@@ -87,7 +96,7 @@ import { albuns } from '../data/familia';
   function abrir(grupo: number, foto: number) {
     grupoAtual = grupo;
     fotoAtual = foto;
-    imagem.src = grupos[grupo][foto].href;
+    imagem.src = grupos[grupo][foto].dataset.fullSrc || grupos[grupo][foto].href;
     imagem.alt = grupos[grupo][foto].querySelector('img')?.alt ?? '';
     legenda.textContent = `${grupos[grupo][foto].querySelector('img')?.alt ?? ''} · ${foto + 1}/${grupos[grupo].length}`;
     lightbox.hidden = false;
@@ -166,13 +175,15 @@ import { albuns } from '../data/familia';
   .album__item img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     background: var(--montanha-claro);
-    transition: transform 0.25s;
+    transition: transform 0.35s ease, filter 0.35s ease;
+    filter: saturate(.92);
   }
 
   .album__item:hover img {
-    transform: scale(1.04);
+    transform: scale(1.06);
+    filter: saturate(1.08);
   }
 
   .album__video {
@@ -268,4 +279,9 @@ import { albuns } from '../data/familia';
   .lightbox__seta:hover {
     background: rgba(255, 255, 255, 0.25);
   }
+
+  .album__item { position: relative; box-shadow: 0 5px 18px rgba(43,36,29,.08); }
+  .album__item img { display: block; background: linear-gradient(135deg,#eee9df,#dce4d9); }
+  .album__grade { gap: .9rem; }
+  @media (max-width:560px) { .album__grade { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .55rem; } .album__item { border-radius: 12px; } }
 </style>

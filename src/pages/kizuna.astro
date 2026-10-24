@@ -976,4 +976,123 @@ const kzPayload = JSON.stringify({ pessoas: dados, historias }).replace(/</g, '\
   @media (max-width:860px) { .kz-heading::after { right: -1rem; top: -1rem; font-size: 12rem; } .kz-focus { min-height: 0; } .kz-zone { padding: .8rem; } }
   @media (prefers-reduced-motion:reduce) { .kz-tool-button,.kz-node,.kz-zone { transition:none !important; } }
 
+
+  /* Kizuna art direction v2 — album de memórias, não dashboard */
+  :root { --kz-ink:#34362f; --kz-paper:#f3eedf; --kz-paper-light:#fbf8ef; --kz-moss:#536858; --kz-red:#9d6554; --kz-gold:#a58b5b; }
+  .kz-heading {
+    isolation:isolate; padding:clamp(3rem,7vw,6.5rem) 0;
+    color:#f5f0e4; background:
+      radial-gradient(ellipse at 8% 10%,rgba(141,157,105,.25),transparent 30%),
+      radial-gradient(ellipse at 92% 90%,rgba(168,119,87,.22),transparent 28%),
+      repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 4px),
+      #34342f;
+    border:0;
+  }
+  .kz-heading::before { content:""; position:absolute; z-index:-1; inset:0; opacity:.24; background-image:radial-gradient(#c9bd9e .65px,transparent .65px); background-size:5px 5px; }
+  .kz-heading::after { content:"絆"; right:8%; top:4%; color:rgba(233,216,174,.09); font-size:clamp(15rem,34vw,29rem); transform:rotate(-9deg); }
+  .kz-heading .kz-container { align-items:flex-end; }
+  .kz-eyebrow { color:#d7c59a; letter-spacing:.22em; }
+  .kz-eyebrow__mark { color:#d4c095; background:transparent; border-color:#9d8a60; border-radius:0; box-shadow:none; }
+  .kz-heading h1 { max-width:750px; color:#f6f0e3; font-family:var(--fonte-titulo,Georgia,serif); font-size:clamp(2.8rem,6vw,5.7rem); font-weight:500; letter-spacing:-.055em; line-height:.98; }
+  .kz-heading__lead { margin-top:1.4rem; color:#d8c8a3; font-family:Georgia,serif; font-size:clamp(1.25rem,2.3vw,1.8rem); font-style:italic; }
+  .kz-heading__text { max-width:540px; color:#d4d0c4; font-size:1rem; line-height:1.8; }
+  .kz-heading__note { width:180px; min-height:210px; display:flex; flex-direction:column; justify-content:center; align-items:center; border:1px solid #a58b5b; border-radius:0; background:#e8dfca; box-shadow:8px 9px 0 rgba(0,0,0,.2); transform:rotate(4deg); }
+  .kz-heading__note span { color:#465a49; font-family:serif; font-size:6rem; line-height:1; }
+  .kz-heading__note p { color:#465a49; font-family:Georgia,serif; font-style:italic; text-align:center; }
+  .kz-explorer { padding:2rem 0 4rem; background:#393934; }
+  .kz-toolbar { padding:1rem; border:1px solid rgba(230,220,196,.2); border-radius:2px; background:#292a26; box-shadow:0 10px 28px rgba(0,0,0,.18); }
+  .kz-search input, .kz-modal input { border-radius:2px !important; }
+  .kz-tool-button { border-radius:2px; border-color:#666657; background:#393a33; color:#f3eddd; box-shadow:none; }
+  .kz-tool-button:hover:not(:disabled) { transform:translateY(-1px); background:#4a4b40; box-shadow:none; }
+  .kz-tool-button--primary { color:#fff8e9; background:#68765d; border-color:#7e8a6d; box-shadow:none; }
+  .kz-tool-button--link { color:#e3d2a8; }
+  .kz-workspace { gap:1.4rem; }
+  .kz-stage {
+    position:relative; overflow:hidden; padding:clamp(1rem,3vw,2.4rem);
+    border:0; border-radius:1px; color:#34352f;
+    background:
+      radial-gradient(ellipse at 15% 20%,rgba(255,255,255,.8),transparent 36%),
+      repeating-linear-gradient(90deg,rgba(120,100,66,.025) 0 1px,transparent 1px 4px),
+      #f2eddf;
+    box-shadow:0 20px 60px rgba(0,0,0,.24);
+  }
+  .kz-stage::before { content:""; position:absolute; inset:10px; border:1px solid rgba(144,122,80,.28); pointer-events:none; }
+  .kz-stage::after { content:"KATO FAMILY · MEMORIES & CONNECTIONS"; position:absolute; right:2rem; bottom:1.2rem; color:rgba(73,76,62,.45); font:italic .68rem Georgia,serif; letter-spacing:.15em; }
+  .kz-stage__header { position:relative; z-index:1; border-bottom:1px solid rgba(144,122,80,.3); }
+  .kz-stage__kicker { color:#8b7143; letter-spacing:.2em; }
+  .kz-stage__header h2 { color:#35372f; font:500 clamp(1.8rem,3vw,2.7rem)/1.05 Georgia,serif; letter-spacing:-.03em; }
+  .kz-status { color:#727261; }
+  .kz-orbit { position:relative; z-index:1; gap:1.2rem; padding:1.3rem .25rem 2rem; }
+  .kz-zone { align-self:start; border:0; border-radius:0; padding:1rem .75rem; background:rgba(255,253,246,.52); box-shadow:none; }
+  .kz-zone:hover { border:0; box-shadow:none; }
+  .kz-zone__heading { padding-bottom:.6rem; border-bottom:1px solid rgba(141,118,75,.25); color:#62664f; font:italic 1.05rem Georgia,serif; }
+  .kz-zone__count { border:0; border-radius:50%; background:#e5ddc8; color:#64563c; }
+  .kz-zone__nodes { gap:1rem; }
+  .kz-node {
+    position:relative; display:flex; flex-direction:column; align-items:stretch; gap:.35rem;
+    min-height:0; padding:.55rem .55rem .8rem; border:0; border-radius:1px;
+    background:#fffdf6; box-shadow:2px 4px 8px rgba(48,42,29,.18);
+    transform:rotate(-1.1deg); transition:transform .2s ease,box-shadow .2s ease;
+  }
+  .kz-node:nth-child(3n) { transform:rotate(1.6deg); }
+  .kz-node:nth-child(3n + 1) { transform:rotate(-2deg); }
+  .kz-node::before { content:""; position:absolute; top:-7px; left:calc(50% - 22px); width:44px; height:14px; background:rgba(202,184,137,.68); transform:rotate(-2deg); box-shadow:0 1px 2px rgba(0,0,0,.06); }
+  .kz-node:hover { transform:translateY(-5px) rotate(0) scale(1.035); border:0; background:#fffdf6; box-shadow:4px 10px 18px rgba(48,42,29,.23); z-index:3; }
+  .kz-node[aria-current="true"] { background:#f9e9ca; box-shadow:0 0 0 2px #a58b5b,3px 8px 16px rgba(48,42,29,.18); }
+  .kz-portrait--small { width:100%; height:auto; aspect-ratio:4/3; border:0; border-radius:0; background:#e5decb; box-shadow:none; }
+  .kz-portrait--small img { filter:saturate(.83) sepia(.08); }
+  .kz-node__text { gap:.15rem; align-items:flex-start; }
+  .kz-node__name { color:#35372f; font:600 .88rem Georgia,serif; line-height:1.2; }
+  .kz-node__relationship { color:#77715e; font-size:.7rem; }
+  .kz-node__year { color:#8d7850; font:italic .7rem Georgia,serif; }
+  .kz-zone__empty { color:#8b8575; font:italic .84rem Georgia,serif; }
+  .kz-focus {
+    width:min(100%,360px); min-height:0; padding:1rem 1rem 1.3rem;
+    border:0; border-radius:1px; background:#fffdf5;
+    box-shadow:4px 9px 18px rgba(48,42,29,.2); transform:rotate(.6deg);
+  }
+  .kz-focus::before { content:""; top:-4px; right:auto; left:calc(50% - 36px); width:72px; height:20px; border:0; border-radius:0; background:rgba(202,184,137,.78); box-shadow:none; transform:rotate(-3deg); }
+  .kz-focus__overline { color:#8b7143; letter-spacing:.17em; }
+  .kz-portrait--large { width:min(100%,230px); height:auto; aspect-ratio:4/3; border:7px solid #fff; outline:1px solid #ddd1b7; border-radius:0; box-shadow:0 3px 12px rgba(50,44,31,.18); }
+  .kz-focus__name { color:#34362f; font:500 clamp(1.7rem,2.3vw,2.4rem)/1.1 Georgia,serif; }
+  .kz-focus__dates { color:#79715f; font:italic .85rem Georgia,serif; }
+  .kz-focus__generation { border:0; border-radius:0; background:#e8e0cb; color:#65583d; }
+  .kz-focus__nickname { color:#8b6d49; font:italic 1.1rem Georgia,serif; }
+  .kz-focus__bio { color:#68665a; line-height:1.65; }
+  .kz-focus__hint { color:#7b785f; font:italic .75rem Georgia,serif; }
+  .kz-legend { position:relative; z-index:1; color:#77715f; font:italic .8rem Georgia,serif; }
+  .kz-legend__line { border-color:#9e8a60; }
+  .kz-details { border:1px solid #d9cfb6; border-radius:1px; background:#f2eddf; color:#34362f; box-shadow:0 12px 32px rgba(0,0,0,.14); }
+  .kz-details__eyebrow { color:#8b7143; }
+  .kz-details__person-copy h2, .kz-details h2 { color:#34362f; font-family:Georgia,serif; font-weight:500; }
+  .kz-details__bio, .kz-details__metadata { color:#6b685b; line-height:1.7; }
+  .kz-details__relative { border-radius:0; background:#e8e0cb; color:#4d5143; }
+  .kz-footnote { color:#c7c2b3; }
+  .kz-modal__dialog { border:1px solid #c9b98f; border-radius:1px; background:#f5f0e3; color:#34362f; }
+  .kz-modal__dialog h2 { font-family:Georgia,serif; font-weight:500; }
+  .kz-result { border-radius:1px; background:#e9e1ce; }
+  @media (min-width:861px) {
+    .kz-orbit { grid-template-columns:minmax(0,1fr) minmax(220px,.9fr) minmax(0,1fr); grid-template-areas:"parents focus partners" "siblings focus children"; align-items:center; }
+    .kz-zone--parents { grid-area:parents; }
+    .kz-zone--siblings { grid-area:siblings; }
+    .kz-zone--partners { grid-area:partners; }
+    .kz-zone--children { grid-area:children; }
+    .kz-focus { grid-area:focus; justify-self:center; }
+  }
+  @media (max-width:860px) {
+    .kz-heading { padding:2.5rem 0; }
+    .kz-heading__note { display:none; }
+    .kz-stage { padding:1rem; }
+    .kz-stage::after { display:none; }
+    .kz-orbit { gap:1rem; }
+    .kz-zone { padding:.8rem .35rem; }
+    .kz-node { padding:.45rem; }
+    .kz-focus { width:min(100%,390px); }
+    .kz-portrait--large { width:min(100%,190px); }
+  }
+  @media (prefers-reduced-motion:reduce) {
+    .kz-node,.kz-tool-button { transition:none !important; }
+    .kz-node:hover { transform:none; }
+  }
+
 </style>

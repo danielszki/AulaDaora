@@ -449,6 +449,13 @@ const kzPayload = JSON.stringify({ pessoas: dados, historias }).replace(/</g, '\
       const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
       path.setAttribute('d', ['M', x1, y1, 'C', cx1, cy1, cx2, cy2, x2, y2].join(' '));
       path.setAttribute('class', 'kz-line');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('stroke', '#a9a080');
+      path.setAttribute('stroke-width', '1.25');
+      path.setAttribute('stroke-opacity', '.62');
+      path.setAttribute('stroke-linecap', 'round');
+      path.setAttribute('stroke-dasharray', '3 5');
+      path.setAttribute('vector-effect', 'non-scaling-stroke');
       paths.push(path);
     });
     linesSvg.setAttribute('width', String(orbitRect.width));
@@ -1095,4 +1102,61 @@ const kzPayload = JSON.stringify({ pessoas: dados, historias }).replace(/</g, '\
     .kz-node:hover { transform:none; }
   }
 
+
+
+  /* Correções de composição após validação visual em desktop */
+  .kz-explorer { background: #e9e3d4 !important; }
+  .kz-workspace { grid-template-columns: minmax(0, 1fr) 290px !important; gap: 1.1rem !important; align-items: start; }
+  .kz-stage { overflow: hidden; padding: clamp(1rem, 2vw, 1.6rem) !important; }
+  .kz-orbit {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(210px, .95fr) minmax(0, 1fr) !important;
+    grid-template-rows: auto auto;
+    grid-template-areas: "parents focus partners" "siblings focus children" !important;
+    align-items: center;
+    gap: 1rem .8rem !important;
+    min-height: 0 !important;
+    padding: 1rem .2rem 2rem !important;
+  }
+  .kz-lines { inset: 0; z-index: 0 !important; overflow: hidden !important; pointer-events: none; }
+  .kz-zone, .kz-focus { z-index: 1 !important; }
+  .kz-zone { min-width: 0; padding: .65rem !important; background: rgba(255,253,246,.9) !important; border: 1px solid #d9cfb9 !important; border-radius: 8px !important; box-shadow: 0 4px 12px rgba(56,47,32,.06) !important; }
+  .kz-zone--parents { grid-area: parents !important; width: 100% !important; }
+  .kz-zone--siblings { grid-area: siblings !important; }
+  .kz-zone--partners { grid-area: partners !important; }
+  .kz-zone--children { grid-area: children !important; width: 100% !important; }
+  .kz-zone__nodes { gap: .55rem !important; }
+  .kz-zone--children .kz-zone__nodes { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .kz-node, .kz-node:nth-child(3n), .kz-node:nth-child(3n + 1) {
+    min-width: 0; padding: .5rem !important; gap: .45rem !important; border: 1px solid #e3d9c5 !important;
+    border-radius: 4px !important; background: #fffdf7 !important; box-shadow: 0 3px 8px rgba(48,42,29,.1) !important;
+    transform: none !important; flex-direction: row; align-items: center;
+  }
+  .kz-node::before { display: none !important; }
+  .kz-node:hover { transform: translateY(-2px) !important; box-shadow: 0 7px 14px rgba(48,42,29,.14) !important; }
+  .kz-portrait--small { flex: 0 0 42px; width: 42px !important; height: 48px !important; aspect-ratio: auto !important; border-radius: 2px !important; }
+  .kz-node__name { font-size: .78rem !important; }
+  .kz-focus { grid-area: focus !important; width: 100% !important; min-width: 0; min-height: 0 !important; padding: .9rem .8rem 1rem !important; border: 1px solid #c7b78e !important; border-radius: 4px !important; background: #fffdf5 !important; box-shadow: 0 12px 24px rgba(48,42,29,.15) !important; transform: none !important; }
+  .kz-focus::before { content: ""; top: -5px; right: auto; left: calc(50% - 28px); width: 56px; height: 15px; background: #d8c89f; transform: rotate(-2deg); border: 0; box-shadow: none; }
+  .kz-portrait--large { width: min(100%, 150px) !important; height: 170px !important; aspect-ratio: 4 / 5; margin: .1rem auto .8rem !important; border: 5px solid white !important; border-radius: 2px !important; outline: 1px solid #d8c9a8 !important; }
+  .kz-focus__overline { margin-bottom: .6rem !important; }
+  .kz-focus__bio { text-align: center !important; }
+  .kz-focus__hint { font-size: .65rem; }
+  .kz-stage::after { bottom: .55rem !important; right: 1.2rem !important; font-size: .58rem !important; }
+  .kz-details { position: sticky; top: 1rem; max-height: calc(100vh - 2rem); overflow: auto; border-radius: 8px !important; }
+  .kz-heading { padding: 2.5rem 0 !important; }
+  @media (max-width: 1250px) {
+    .kz-workspace { grid-template-columns: minmax(0, 1fr) !important; }
+    .kz-details { position: static; max-height: none; overflow: visible; }
+  }
+  @media (max-width: 860px) {
+    .kz-orbit { grid-template-columns: minmax(0,1fr) !important; grid-template-rows: auto !important; grid-template-areas: "focus" "parents" "siblings" "partners" "children" !important; gap: .75rem !important; }
+    .kz-zone--children .kz-zone__nodes { grid-template-columns: repeat(2,minmax(0,1fr)) !important; }
+    .kz-lines { display: none !important; }
+    .kz-focus { width: min(100%, 340px) !important; justify-self: center; }
+    .kz-portrait--large { height: 180px !important; }
+  }
+  @media (max-width: 560px) {
+    .kz-zone--children .kz-zone__nodes { grid-template-columns: minmax(0,1fr) !important; }
+  }
 </style>

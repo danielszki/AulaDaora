@@ -53,6 +53,22 @@ export async function signOut(): Promise<void> {
   if (sb) await sb.auth.signOut();
 }
 
+// Login social via OAuth (Google, Facebook, GitHub).
+// Redireciona o usuário para o provedor; ao voltar, o Supabase cria/sessão automaticamente.
+export type provedorSocial = 'google' | 'facebook' | 'github';
+
+export async function signInSocial(provedor: provedorSocial): Promise<{ ok: boolean; error?: string }> {
+  const sb = getSupabase();
+  if (!sb) return { ok: false, error: 'Nuvem não configurada.' };
+  const redirectTo = window.location.origin + window.location.pathname;
+  const { error } = await sb.auth.signInWithOAuth({
+    provider: provedor,
+    options: { redirectTo },
+  });
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}
+
 export async function isAdmin(): Promise<boolean> {
   const s = await getSession();
   if (!s) return false;

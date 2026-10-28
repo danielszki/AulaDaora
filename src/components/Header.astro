@@ -1,4 +1,6 @@
 ---
+import { Show, SignInButton, SignUpButton, UserButton } from '@clerk/astro/components';
+
 const links = [
   { href: '/', label: 'Início' },
   { href: '/arvore', label: 'Árvore Genealógica' },
@@ -30,6 +32,23 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
           ))
         }
       </ul>
+      <div class="menu__auth">
+        <Show when="signed-out">
+          <SignInButton mode="modal" class="menu__auth-btn" />
+          <SignUpButton mode="modal" class="menu__auth-btn menu__auth-btn--destaque" />
+        </Show>
+        <Show when="signed-in">
+          <UserButton afterSignOutUrl="/" />
+        </Show>
+      </div>
     </nav>
   </div>
 </header>
+
+<style>
+  .menu__auth { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
+  .menu__auth-btn { font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.9rem; border: 1.5px solid var(--montanha, #6b7d6f); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; }
+  .menu__auth-btn:hover { border-color: var(--vinho, #8a3b3b); }
+  .menu__auth-btn--destaque { background: var(--vinho, #8a3b3b); border-color: var(--vinho, #8a3b3b); color: #fff; }
+  .menu__auth-btn--destaque:hover { filter: brightness(1.1); }
+</style>

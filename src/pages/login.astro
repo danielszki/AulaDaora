@@ -11,6 +11,15 @@ import Base from '../layouts/Base.astro';
 
       <div id="login-status" class="card" style="margin-top: 1rem;">
         <p id="login-msg" style="margin: 0 0 0.8rem;">Verificando configuração…</p>
+        <div id="login-social" hidden>
+          <p style="margin: 0 0 0.6rem; font-weight:600;">Entrar com:</p>
+          <div class="botoes-sociais">
+            <button type="button" class="btn-social" data-provedor="google">Google</button>
+            <button type="button" class="btn-social" data-provedor="facebook">Facebook</button>
+            <button type="button" class="btn-social" data-provedor="github">GitHub</button>
+          </div>
+          <p style="text-align:center; margin: 0.6rem 0; font-size:0.85rem; color: var(--texto-suave);">— ou —</p>
+        </div>
         <form id="login-form" hidden>
           <label class="campo">E-mail
             <input type="email" id="login-email" autocomplete="email" required />
@@ -39,10 +48,11 @@ import Base from '../layouts/Base.astro';
   </section>
 
   <script>
-    import { isCloudEnabled, getSession, signIn, signUp, signOut } from '../scripts/supabase';
+    import { isCloudEnabled, getSession, signIn, signUp, signOut, signInSocial } from '../scripts/supabase';
     const status = document.getElementById('login-status');
     const msg = document.getElementById('login-msg');
     const form = document.getElementById('login-form');
+    const social = document.getElementById('login-social');
     const logado = document.getElementById('login-logado');
     const fb = document.getElementById('login-feedback');
     const emailAtual = document.getElementById('login-email-atual');
@@ -51,6 +61,7 @@ import Base from '../layouts/Base.astro';
       if (!isCloudEnabled()) {
         msg.textContent = 'Nuvem não configurada: usando armazenamento local do dispositivo.';
         form.hidden = true;
+        social.hidden = true;
         logado.hidden = true;
         return;
       }
@@ -58,14 +69,25 @@ import Base from '../layouts/Base.astro';
       if (s) {
         msg.textContent = 'Conectado.';
         form.hidden = true;
+        social.hidden = true;
         logado.hidden = false;
         emailAtual.textContent = s.user?.email || '';
       } else {
         msg.textContent = 'Entre com sua conta de familiar autorizado.';
         form.hidden = false;
+        social.hidden = false;
         logado.hidden = true;
       }
     }
+
+    document.querySelectorAll<HTMLButtonElement>('.btn-social').forEach((b) => {
+      b.addEventListener('click', async () => {
+        fb.textContent = '';
+        const r = await signInSocial(b.dataset.provedor as any);
+        if (!r.ok) fb.textContent = 'Erro: ' + r.error;
+        // Em caso de sucesso o navegador é redirecionado para o provedor.
+      });
+    });
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -100,5 +122,8 @@ import Base from '../layouts/Base.astro';
     .campo { display: block; font-size: 0.92rem; color: var(--texto-suave); margin-bottom: 0.85rem; }
     .campo input { width: 100%; font-family: inherit; font-size: 1.05rem; padding: 0.6rem 0.75rem; margin-top: 0.25rem; border: 1.5px solid var(--montanha); border-radius: 10px; color: var(--texto); }
     .campo input:focus { outline: none; border-color: var(--vinho); }
+    .botoes-sociais { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+    .btn-social { font-family: inherit; font-size: 0.95rem; padding: 0.55rem 0.4rem; border: 1.5px solid var(--montanha); border-radius: 10px; background: #fff; cursor: pointer; transition: border-color .15s, transform .1s; }
+    .btn-social:hover { border-color: var(--vinho); transform: translateY(-1px); }
   </style>
 </Base>

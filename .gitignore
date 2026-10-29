@@ -21,3 +21,6 @@ pnpm-debug.log*
 .DS_Store
 .vercel
 .env*
+
+# capturas de QA do Kizuna
+screenshots-kizuna/

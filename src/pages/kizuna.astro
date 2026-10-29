@@ -1,6 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
-import { pessoas, historias, albuns, eventos, filhosDe, irmaosDe, anosDe, geracaoLabel, pessoaPorId } from '../data/familia';
+import { pessoas, historias, eventos } from '../data/familia';
 
 const dados = pessoas.map((p) => ({
   id: p.id,
@@ -18,75 +18,149 @@ const dados = pessoas.map((p) => ({
   observacao: p.observacao || '',
 }));
 
-const storiesByPerson = {};
-for (const h of historias) {
-  // heuristic: stories mention names; we just keep list and link by id not available, so skip linking
-}
-const fotosCount = {};
-for (const a of albuns) for (const f of a.fotos) {
-  // no person mapping in data; leave empty
-}
+const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: e.pessoa }));
 ---
 
-<Base title="Kizuna — Laços da Família Kato" description="Descubra sua família de pessoa em pessoa.">
+<Base title="Kizuna — Laços da Família Kato" description="Cada pessoa tem uma história. Cada história nos conecta. Explore os vínculos da Família Kato pessoa a pessoa.">
+  <!-- ===================== HERO JAPONÊS ===================== -->
   <section class="kz-hero">
-    <div class="container">
-      <span class="eyebrow">Kizuna · laços</span>
-      <h1>Kizuna — Laços da Família Kato</h1>
-      <p class="kz-sub">“Cada pessoa tem uma história. Cada história nos conecta.”</p>
-      <p class="kz-intro">
-        Escolha um familiar e veja quem está ao seu redor. Toque em um cartão para seguir explorando.
-      </p>
+    <svg class="kz-hero__paisagem" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <linearGradient id="kzCeu" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#202d26" />
+          <stop offset="0.55" stop-color="#33443a" />
+          <stop offset="1" stop-color="#4c5a48" />
+        </linearGradient>
+        <linearGradient id="kzAquecer" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="#000000" stop-opacity="0" />
+          <stop offset="1" stop-color="#7a6a45" stop-opacity="0.22" />
+        </linearGradient>
+      </defs>
+      <rect width="1440" height="300" fill="url(#kzCeu)" />
+      <rect width="1440" height="300" fill="url(#kzAquecer)" />
+      <!-- montanhas distantes -->
+      <path d="M0 218 L160 150 L300 205 L430 140 L470 250 L850 250 L900 165 L1050 215 L1200 150 L1330 210 L1440 165 L1440 300 L0 300 Z" fill="#2c3a31" opacity="0.9" />
+      <!-- Monte Fuji -->
+      <path d="M430 252 L640 78 L852 252 Z" fill="#37453c" />
+      <path d="M584 126 L640 78 L696 126 L674 117 L640 130 L612 115 Z" fill="#dfe6dc" opacity="0.85" />
+      <!-- névoa -->
+      <ellipse cx="640" cy="258" rx="520" ry="26" fill="#cdd8cc" opacity="0.14" />
+      <ellipse cx="240" cy="270" rx="360" ry="22" fill="#cdd8cc" opacity="0.1" />
+      <!-- pagode -->
+      <g fill="#151d18">
+        <rect x="1146" y="120" width="8" height="132" />
+        <path d="M1110 138 L1190 138 L1176 152 L1124 152 Z" />
+        <rect x="1122" y="152" width="56" height="22" />
+        <path d="M1098 174 L1202 174 L1186 190 L1114 190 Z" />
+        <rect x="1116" y="190" width="68" height="24" />
+        <path d="M1084 214 L1216 214 L1198 232 L1102 232 Z" />
+        <rect x="1110" y="232" width="80" height="20" />
+        <rect x="1148" y="98" width="4" height="24" />
+      </g>
+      <!-- cerejeira -->
+      <g stroke="#1a231c" stroke-width="7" fill="none" stroke-linecap="round">
+        <path d="M1440 16 C1330 34 1262 66 1212 118" />
+        <path d="M1330 48 C1300 74 1284 102 1280 132" />
+        <path d="M1262 78 C1236 88 1218 104 1206 124" />
+      </g>
+      <g fill="#e5aeb8">
+        <circle cx="1382" cy="40" r="7" /><circle cx="1348" cy="60" r="6" /><circle cx="1316" cy="78" r="7" />
+        <circle cx="1288" cy="98" r="6" /><circle cx="1262" cy="118" r="7" /><circle cx="1238" cy="140" r="6" />
+        <circle cx="1306" cy="52" r="5" /><circle cx="1276" cy="66" r="5" /><circle cx="1250" cy="84" r="6" />
+        <circle cx="1298" cy="118" r="6" /><circle cx="1284" cy="146" r="5" /><circle cx="1222" cy="106" r="5" />
+        <circle cx="1204" cy="132" r="6" /><circle cx="1360" cy="30" r="5" /><circle cx="1416" cy="24" r="6" />
+      </g>
+      <g fill="#f2cdd4" opacity="0.8">
+        <circle cx="1330" cy="94" r="3" /><circle cx="1268" cy="150" r="3" /><circle cx="1200" cy="164" r="3" /><circle cx="1388" cy="66" r="3" />
+      </g>
+    </svg>
+    <div class="kz-hero__conteudo container">
+      <div class="kz-kanji" aria-hidden="true">絆</div>
+      <div class="kz-hero__textos">
+        <h1>Kizuna</h1>
+        <p class="kz-hero__sub">Laços que atravessam gerações</p>
+        <p class="kz-hero__desc">Explore os parentes ao redor e descubra as conexões que formam nossa história.</p>
+      </div>
     </div>
   </section>
 
-  <section class="kz-app">
-    <div class="container">
-      <div class="kz-toolbar">
-        <div class="kz-search">
-          <input type="search" id="kz-busca" placeholder="Pesquisar familiar…" autocomplete="off" aria-label="Pesquisar familiar" />
+  <!-- ===================== ÁREA PRINCIPAL ===================== -->
+  <section class="kz-main">
+    <div class="container kz-main__grid">
+
+      <!-- barra lateral de comandos -->
+      <nav class="kz-rail" aria-label="Comandos do Kizuna">
+        <button type="button" class="kz-rail__btn" id="kz-inicio" aria-label="Início da exploração (Yotaro Kato)">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="8" cy="8" r="3.2" /><circle cx="16" cy="9" r="2.6" /><path d="M3.5 19c.6-3.2 2.4-5 4.5-5s3.9 1.8 4.5 5" /><path d="M13 18.6c.5-2.4 1.8-3.8 3.4-3.8 1.7 0 3 1.4 3.5 3.8" /></svg>
+          <span>Explorar</span>
+        </button>
+        <button type="button" class="kz-rail__btn" id="kz-voltar" aria-label="Voltar ao familiar anterior" disabled>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 6l-6 6 6 6" /></svg>
+          <span>Voltar</span>
+        </button>
+        <button type="button" class="kz-rail__btn" id="kz-centrar" aria-label="Recentralizar na pessoa selecionada">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5" /><rect x="13" y="4" width="7" height="7" rx="1.5" /><rect x="4" y="13" width="7" height="7" rx="1.5" /><rect x="13" y="13" width="7" height="7" rx="1.5" /></svg>
+          <span>Centralizar</span>
+        </button>
+        <button type="button" class="kz-rail__btn" id="kz-relacao" aria-label="Como somos parentes?">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5 14.5l5-5" /><path d="M7 12l-2.2 2.2a3.1 3.1 0 004.4 4.4L11.5 16" /><path d="M17 12l2.2-2.2a3.1 3.1 0 00-4.4-4.4L12.5 8" /></svg>
+          <span>Parentesco</span>
+        </button>
+        <a class="kz-rail__btn" href="/arvore" aria-label="Abrir a árvore genealógica tradicional">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="4.4" rx="1" /><rect x="3" y="16.6" width="6" height="4.4" rx="1" /><rect x="15" y="16.6" width="6" height="4.4" rx="1" /><path d="M12 7.4v4.4M6 16.6v-2.4h12v2.4M12 11.8v2.4" /></svg>
+          <span>Árvore</span>
+        </a>
+      </nav>
+
+      <!-- palco -->
+      <div class="kz-palco-col">
+        <div class="kz-busca">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>
+          <input type="search" id="kz-busca-input" placeholder="Pesquisar familiar pelo nome…" autocomplete="off" aria-label="Pesquisar familiar pelo nome" />
           <ul id="kz-sugestoes" class="kz-sugestoes" hidden></ul>
         </div>
-        <div class="kz-acoes">
-          <button type="button" id="kz-voltar" class="btn btn--ghost" disabled aria-label="Voltar ao familiar anterior">← Voltar</button>
-          <button type="button" id="kz-centrar" class="btn btn--ghost" aria-label="Centralizar pessoa atual">⌖ Centralizar</button>
-          <button type="button" id="kz-inicio" class="btn btn--ghost" aria-label="Voltar ao início da exploração">Início</button>
-          <button type="button" id="kz-relacao" class="btn btn--ghost" aria-label="Como somos parentes?">Como somos parentes?</button>
-          <a class="btn btn--ghost" href="/arvore" aria-label="Abrir árvore tradicional">Árvore tradicional</a>
+
+        <div class="kz-palco" id="kz-palco">
+          <svg class="kz-linhas" id="kz-linhas" aria-hidden="true"></svg>
+          <div class="kz-zona kz-zona--topo" id="kz-zona-pais"></div>
+          <div class="kz-zona kz-zona--esq" id="kz-zona-irmaos"></div>
+          <div class="kz-centro" id="kz-centro"></div>
+          <div class="kz-zona kz-zona--dir" id="kz-zona-conjuge"></div>
+          <div class="kz-zona kz-zona--baixo" id="kz-zona-filhos"></div>
+          <div class="kz-overlay" id="kz-overlay" hidden></div>
+        </div>
+
+        <div class="kz-rodape">
+          <p class="kz-rodape__dica">Clique em um parente para ver mais detalhes e explorar suas conexões.</p>
+          <p class="kz-rodape__cont" id="kz-contador"></p>
         </div>
       </div>
 
-      <div class="kz-canvas" id="kz-canvas">
-        <svg class="kz-linhas" id="kz-linhas" aria-hidden="true"></svg>
-        <div class="kz-centro" id="kz-centro"></div>
-        <div class="kz-grupos" id="kz-grupos"></div>
-      </div>
-
-      <aside class="kz-painel" id="kz-painel" hidden>
-        <button type="button" class="kz-painel__fechar" id="kz-painel-fechar" aria-label="Fechar painel">×</button>
-        <div id="kz-painel-conteudo"></div>
+      <!-- painel de detalhes -->
+      <aside class="kz-painel" id="kz-painel" aria-label="Detalhes da pessoa selecionada">
+        <header class="kz-painel__topo">
+          <span class="kz-painel__marca" aria-hidden="true">✿</span>
+          <h2>Detalhes da pessoa</h2>
+          <button type="button" class="kz-painel__fechar" id="kz-painel-fechar" aria-label="Fechar painel">×</button>
+        </header>
+        <div class="kz-painel__corpo" id="kz-painel-conteudo"></div>
       </aside>
     </div>
   </section>
 
+  <!-- ===================== MODAL PARENTESCO ===================== -->
   <div class="kz-relacao-modal" id="kz-relacao-modal" hidden>
     <div class="kz-relacao-backdrop" data-close></div>
-    <div class="kz-relacao-caixa">
-      <h2>Como somos parentes?</h2>
-      <p class="kz-relacao-hint">Escolha duas pessoas. O sistema encontra o caminho entre elas usando apenas os vínculos registrados.</p>
+    <div class="kz-relacao-caixa" role="dialog" aria-modal="true" aria-labelledby="kz-rel-titulo">
+      <h2 id="kz-rel-titulo">Como somos parentes?</h2>
+      <p class="kz-relacao-hint">Escolha duas pessoas. O caminho é calculado apenas com os vínculos registrados — nada é inventado.</p>
       <div class="kz-relacao-escolhas">
-        <div>
-          <label>Primeira pessoa
-            <input type="search" id="kz-rel-a" placeholder="Pesquisar…" />
-          </label>
-          <ul id="kz-rel-a-list" class="kz-sugestoes"></ul>
-        </div>
-        <div>
-          <label>Segunda pessoa
-            <input type="search" id="kz-rel-b" placeholder="Pesquisar…" />
-          </label>
-          <ul id="kz-rel-b-list" class="kz-sugestoes"></ul>
-        </div>
+        <label>Primeira pessoa
+          <input type="search" id="kz-rel-a" placeholder="Pesquisar…" autocomplete="off" />
+        </label>
+        <label>Segunda pessoa
+          <input type="search" id="kz-rel-b" placeholder="Pesquisar…" autocomplete="off" />
+        </label>
       </div>
       <div class="kz-relacao-resultado" id="kz-rel-resultado"></div>
       <div class="kz-relacao-acoes">
@@ -97,218 +171,304 @@ for (const a of albuns) for (const f of a.fotos) {
   </div>
 
   <script type="application/json" id="kz-dados" set:html={JSON.stringify(dados)}></script>
+  <script type="application/json" id="kz-eventos" set:html={JSON.stringify(eventosJSON)}></script>
 </Base>
 
 <script>
-  import { fetchPessoas, isCloudEnabled, savePessoa, uploadPhoto } from '../scripts/data';
-  import { getSession, signIn, signUp, signOut, isAdmin } from '../scripts/supabase';
-  window.__katoCloud = { fetchPessoas, isCloudEnabled, savePessoa, uploadPhoto, getSession, signIn, signUp, signOut, isAdmin };
-  window.dispatchEvent(new Event('kato-cloud-ready'));
-</script>
+  import { fetchPessoas, isCloudEnabled } from '../scripts/data';
 
-<script define:vars={{ dados, historias }}>
-  // Kizuna client
   const dataEl = document.getElementById('kz-dados');
-  const PESSOAS = dataEl ? JSON.parse(dataEl.textContent || '[]') : (dados || []);
+  const evEl = document.getElementById('kz-eventos');
+  const PESSOAS = dataEl ? JSON.parse(dataEl.textContent || '[]') : [];
+  const EVENTOS = evEl ? JSON.parse(evEl.textContent || '[]') : [];
   const byId = new Map(PESSOAS.map((p) => [p.id, p]));
 
-  const centroEl = document.getElementById('kz-centro');
-  const gruposEl = document.getElementById('kz-grupos');
-  const linhasSvg = document.getElementById('kz-linhas');
-  const painel = document.getElementById('kz-painel');
-  const painelCont = document.getElementById('kz-painel-conteudo');
-  const busca = document.getElementById('kz-busca');
-  const sugestoes = document.getElementById('kz-sugestoes');
-  const btnVoltar = document.getElementById('kz-voltar');
-  const btnCentrar = document.getElementById('kz-centrar');
-  const btnInicio = document.getElementById('kz-inicio');
-  const btnRelacao = document.getElementById('kz-relacao');
-  const modalRel = document.getElementById('kz-relacao-modal');
+  const $ = (id) => document.getElementById(id);
+  const palco = $('kz-palco');
+  const centroEl = $('kz-centro');
+  const zonaPais = $('kz-zona-pais');
+  const zonaIrmaos = $('kz-zona-irmaos');
+  const zonaConjuge = $('kz-zona-conjuge');
+  const zonaFilhos = $('kz-zona-filhos');
+  const linhasSvg = $('kz-linhas');
+  const painel = $('kz-painel');
+  const painelCont = $('kz-painel-conteudo');
+  const busca = $('kz-busca-input');
+  const sugestoes = $('kz-sugestoes');
+  const btnVoltar = $('kz-voltar');
+  const btnCentrar = $('kz-centrar');
+  const btnInicio = $('kz-inicio');
+  const btnRelacao = $('kz-relacao');
+  const modalRel = $('kz-relacao-modal');
+  const contador = $('kz-contador');
 
   const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const LIMITE_GRUPO = 6;
+  const LIMITE = 6;
+  const ENTRADA = 'yotaro-kato';
 
   let selecionado = null;
   const historico = [];
 
-  function esc(s) { return String(s || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c])); }
-  function geracaoLabel(g) { const o=['1ª','2ª','3ª','4ª','5ª','6ª','7ª','8ª','9ª','10ª']; return g===0?'Antepassados':`${o[g-1]??g+'ª'} geração`; }
+  /* ---------- utilitários ---------- */
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+  function geracaoLabel(g) {
+    const o = ['1ª', '2ª', '3ª', '4ª', '5ª', '6ª', '7ª', '8ª', '9ª', '10ª'];
+    return g === 0 ? 'Antepassados' : (o[g - 1] || g + 'ª') + ' geração';
+  }
   function anos(p) {
     if (p.nascimento && p.falecimento) return `${p.nascimento} – ${p.falecimento}`;
-    if (p.nascimento) return p.nascimento;
-    if (p.falecimento) return `f. ${p.falecimento}`;
+    if (p.nascimento) return p.nascimento + ' –';
+    if (p.falecimento) return '† ' + p.falecimento;
     return 'Datas a confirmar';
   }
-  function iniciais(nome) { return nome.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase(); }
-  function irmaos(id) {
+  function iniciais(nome) {
+    return nome.split(' ').map((n) => n[0]).slice(0, 2).join('').toUpperCase();
+  }
+  /* consultas genealógicas — sempre a partir dos dados reais */
+  function paisDe(id) { const p = byId.get(id); return (p?.pais || []).map((x) => byId.get(x)).filter(Boolean); }
+  function filhosDe(id) {
+    return PESSOAS.filter((p) => p.pais.includes(id))
+      .sort((a, b) => (a.nascimento || '9999').localeCompare(b.nascimento || '9999'));
+  }
+  function irmaosDe(id) {
     const p = byId.get(id);
     if (!p || !p.pais.length) return [];
     const ids = new Set(p.pais);
     return PESSOAS.filter((q) => q.id !== id && q.pais.some((pp) => ids.has(pp)));
   }
-  function filhos(id) { return PESSOAS.filter((p) => p.pais.includes(id)).sort((a,b) => (a.nascimento||'').localeCompare(b.nascimento||'')); }
-  function pais(id) { const p = byId.get(id); return (p?.pais || []).map((x) => byId.get(x)).filter(Boolean); }
-  function conjuge(id) { const p = byId.get(id); return (p?.conjuges || []).map((x) => byId.get(x)).filter(Boolean); }
-  function exs(id) { const p = byId.get(id); return (p?.exDe || []).map((x) => byId.get(x)).filter(Boolean); }
+  function conjugesDe(id) { const p = byId.get(id); return (p?.conjuges || []).map((x) => byId.get(x)).filter(Boolean); }
+  function exDe(id) { const p = byId.get(id); return (p?.exDe || []).map((x) => byId.get(x)).filter(Boolean); }
 
-  function cardHTML(p, extra = '') {
-    const foto = p.foto ? `<img src="${esc(p.foto)}" alt="" loading="lazy" />` : `<span class="kz-avatar">${esc(iniciais(p.nome))}</span>`;
-    return `<button type="button" class="kz-card" data-id="${esc(p.id)}" aria-label="Selecionar ${esc(p.nome)}">
-      <div class="kz-card__foto">${foto}</div>
-      <div class="kz-card__info">
+  /* rótulos de vínculo — neutros quando o sexo não está registrado nos dados */
+
+  /* ---------- cartões ---------- */
+  function fotoHTML(p, classe) {
+    if (p.foto) {
+      return `<img src="${esc(p.foto)}" alt="Foto de ${esc(p.nome)}" loading="lazy" decoding="async" />`;
+    }
+    return `<span class="kz-avt ${classe || ''}" aria-hidden="true">${esc(iniciais(p.nome))}</span>`;
+  }
+
+  function cardHTML(p, rotulo) {
+    return `<button type="button" class="kz-card" data-id="${esc(p.id)}" aria-label="Selecionar ${esc(p.nome)}${rotulo ? ', ' + esc(rotulo) : ''}">
+      <span class="kz-card__foto">${fotoHTML(p)}</span>
+      <span class="kz-card__txt">
+        ${rotulo ? `<span class="kz-card__rot">${esc(rotulo)}</span>` : ''}
         <strong class="kz-card__nome">${esc(p.nome)}</strong>
         <span class="kz-card__anos">${esc(anos(p))}</span>
-        ${p.geracao ? `<span class="kz-card__gen">${esc('G' + p.geracao)}</span>` : ''}
-      </div>
-      ${extra}
+        <span class="kz-card__ger">${esc(geracaoLabel(p.geracao))}</span>
+      </span>
     </button>`;
   }
 
-  function grupoHTML(titulo, lista, expandido) {
-    const visiveis = expandido ? lista : lista.slice(0, LIMITE_GRUPO);
-    const mais = lista.length > LIMITE_GRUPO && !expandido;
-    return `<section class="kz-grupo" data-grupo="${esc(titulo)}">
-      <header class="kz-grupo__head">
-        <h3>${esc(titulo)}</h3>
-        <span class="kz-grupo__count">${lista.length}</span>
-      </header>
-      ${lista.length ? `<div class="kz-grupo__cards">${visiveis.map((p) => cardHTML(p)).join('')}</div>` : `<p class="kz-grupo__vazio">Nenhum registro.</p>`}
-      ${mais ? `<button type="button" class="kz-grupo__mais" data-expandir>Ver todos (${lista.length})</button>` : ''}
-    </section>`;
+  function zonaHTML(titulo, lista, chave, rotuloFn, limite) {
+    if (!lista.length) return '';
+    const lim = limite || LIMITE;
+    const vis = lista.slice(0, lim);
+    const resto = lista.length - vis.length;
+    return `<div class="kz-grupo">
+      <h3 class="kz-grupo__tit">${esc(titulo)}</h3>
+      <div class="kz-grupo__cards">${vis.map((p, i) => cardHTML(p, rotuloFn ? rotuloFn(p, i) : titulo.replace(/s$/, ''))).join('')}</div>
+      ${resto > 0 ? `<button type="button" class="kz-grupo__mais" data-ver-todos="${esc(chave)}" data-titulo="${esc(titulo)}">+ ${resto} — Ver todos (${lista.length})</button>` : ''}
+    </div>`;
   }
 
-  function renderSelecionado(id) {
+  /* overlay com todos os membros de um grupo grande */
+  const overlay = $('kz-overlay');
+  function abrirOverlay(chave, titulo) {
+    const lista = listasAtuais[chave] || [];
+    if (!lista.length) return;
+    const rotulos = { pais: 'Pai/Mãe', irmaos: 'Irmão(a)', conjuges: 'Cônjuge', filhos: 'Filho(a)' };
+    overlay.innerHTML = `<div class="kz-overlay__fundo" data-fechar-overlay></div>
+      <div class="kz-overlay__caixa" role="dialog" aria-modal="true" aria-label="${esc(titulo)}">
+        <header class="kz-overlay__topo">
+          <h3>${esc(titulo)} <span>${lista.length}</span></h3>
+          <button type="button" data-fechar-overlay aria-label="Fechar lista">×</button>
+        </header>
+        <div class="kz-overlay__cards">${lista.map((p) => cardHTML(p, rotulos[chave] || titulo)).join('')}</div>
+      </div>`;
+    overlay.hidden = false;
+    overlay.querySelectorAll('[data-fechar-overlay]').forEach((el) => el.addEventListener('click', fecharOverlay));
+    overlay.querySelectorAll('.kz-card').forEach((btn) => btn.addEventListener('click', () => { fecharOverlay(); selecionar(btn.dataset.id); }));
+    const f = overlay.querySelector('[data-fechar-overlay]');
+    if (f) f.focus();
+  }
+  function fecharOverlay() { overlay.hidden = true; overlay.innerHTML = ''; }
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) fecharOverlay(); });
+
+  /* ---------- render do palco ---------- */
+  let listasAtuais = {};
+
+  function render(id) {
     const p = byId.get(id);
     if (!p) return;
-    selecionado = id;
-    // history
-    if (historico.length === 0 || historico[historico.length - 1] !== id) historico.push(id);
-    btnVoltar.disabled = historico.length <= 1;
+    const ps = paisDe(id);
+    const cs = conjugesDe(id);
+    const xs = exDe(id);
+    const is = irmaosDe(id);
+    const fs = filhosDe(id);
+    listasAtuais = { pais: ps, conjuges: cs.concat(xs), irmaos: is, filhos: fs };
 
-    const ps = pais(id);
-    const cs = conjuge(id);
-    const xs = exs(id);
-    const is = irmaos(id);
-    const fs = filhos(id);
+    const bioCurta = p.bio ? (p.bio.length > 150 ? p.bio.slice(0, 148).trim() + '…' : p.bio) : '';
+    centroEl.innerHTML = `<article class="kz-foco">
+      <span class="kz-foco__selo">Pessoa em foco</span>
+      <div class="kz-foco__foto">${fotoHTML(p, 'kz-avt--foco')}</div>
+      <h2 class="kz-foco__nome">${esc(p.nome)}</h2>
+      <p class="kz-foco__anos">${esc(anos(p))}</p>
+      <p class="kz-foco__ger">${esc(geracaoLabel(p.geracao))}</p>
+      ${bioCurta ? `<p class="kz-foco__bio">${esc(bioCurta)}</p>` : ''}
+      <span class="kz-foco__orn" aria-hidden="true">✿</span>
+      <button type="button" class="kz-foco__det" data-abrir-painel>Ver detalhes</button>
+    </article>`;
 
-    const centro = `<div class="kz-centro__card">
-      <div class="kz-centro__foto">${p.foto ? `<img src="${esc(p.foto)}" alt="" />` : `<span class="kz-avatar kz-avatar--lg">${esc(iniciais(p.nome))}</span>`}</div>
-      <h2 class="kz-centro__nome">${esc(p.nome)}</h2>
-      <p class="kz-centro__anos">${esc(anos(p))}${p.geracao ? ' · ' + esc(geracaoLabel(p.geracao)) : ''}</p>
-      ${p.bio ? `<p class="kz-centro__bio">${esc(p.bio)}</p>` : ''}
-      <div class="kz-centro__acoes">
-        <a class="btn btn--ghost" href="/pessoa/${esc(p.id)}">Ver perfil completo</a>
-        <button type="button" class="btn btn--ghost" data-abrir-painel>Detalhes</button>
-      </div>
-    </div>`;
-    centroEl.innerHTML = centro;
+    zonaPais.innerHTML = zonaHTML('Pais', ps, 'pais', () => 'Pai/Mãe', 2);
+    zonaIrmaos.innerHTML = zonaHTML('Irmãos', is, 'irmaos', () => 'Irmão(a)', 3);
+    const csRot = (pp) => (xs.some((x) => x.id === pp.id) ? 'Ex-cônjuge' : 'Cônjuge');
+    zonaConjuge.innerHTML = zonaHTML(cs.length + xs.length > 1 ? 'Cônjuges' : 'Cônjuge', cs.concat(xs), 'conjuges', csRot, 2);
+    zonaFilhos.innerHTML = zonaHTML('Filhos', fs, 'filhos', () => 'Filho(a)', 3);
 
-    let gruposHTML = '';
-    gruposHTML += grupoHTML('Pais', ps, false);
-    gruposHTML += grupoHTML('Cônjuge', cs.concat(xs), false);
-    gruposHTML += grupoHTML('Irmãos', is, false);
-    gruposHTML += grupoHTML('Filhos', fs, false);
-    gruposEl.innerHTML = gruposHTML;
-
-    // expand handlers
-    gruposEl.querySelectorAll('[data-expandir]').forEach((b) => {
-      b.addEventListener('click', () => {
-        const sec = b.closest('.kz-grupo');
-        const titulo = sec.dataset.grupo;
-        const listas = { Pais: ps, 'Cônjuge': cs.concat(xs), 'Irmãos': is, 'Filhos': fs };
-        const lista = listas[titulo] || [];
-        sec.querySelector('.kz-grupo__cards').innerHTML = lista.map((p) => cardHTML(p)).join('');
-        b.remove();
-        ligarCards();
-        desenharLinhas();
-      });
-    });
-
-    ligarCards();
-    desenharLinhas();
+    ligarEventos();
+    requestAnimationFrame(desenharLinhas);
     atualizarURL(id);
-    abrirPainel(id);
+    renderPainel(p);
+    const total = ps.length + cs.length + xs.length + is.length + fs.length;
+    contador.textContent = total
+      ? `${total} ${total === 1 ? 'parente relacionado' : 'parentes relacionados'}`
+      : 'Nenhum vínculo registrado para esta pessoa.';
 
-    // animate in (unless reduced motion)
     if (!reduzido) {
-      centroEl.classList.remove('kz-in');
-      void centroEl.offsetWidth;
-      centroEl.classList.add('kz-in');
-      gruposEl.classList.remove('kz-in');
-      void gruposEl.offsetWidth;
-      gruposEl.classList.add('kz-in');
+      [zonaPais, zonaIrmaos, zonaConjuge, zonaFilhos, centroEl].forEach((z) => {
+        z.classList.remove('kz-in');
+        void z.offsetWidth;
+        z.classList.add('kz-in');
+      });
     }
   }
 
-  function ligarCards() {
-    gruposEl.querySelectorAll('.kz-card').forEach((btn) => {
-      btn.addEventListener('click', () => renderSelecionado(btn.dataset.id));
+  function ligarEventos() {
+    document.querySelectorAll('.kz-palco .kz-card').forEach((btn) => {
+      btn.addEventListener('click', () => selecionar(btn.dataset.id));
+    });
+    document.querySelectorAll('[data-ver-todos]').forEach((btn) => {
+      btn.addEventListener('click', () => abrirOverlay(btn.dataset.verTodos, btn.dataset.titulo));
     });
     const ab = centroEl.querySelector('[data-abrir-painel]');
-    if (ab) ab.addEventListener('click', () => abrirPainel(selecionado));
+    if (ab) ab.addEventListener('click', () => {
+      painel.classList.add('kz-painel--aberto');
+      const f = painel.querySelector('button, a');
+      if (f) f.focus();
+    });
   }
 
+  /* ---------- conexões SVG ---------- */
   function desenharLinhas() {
-    if (!linhasSvg) return;
-    const canvas = document.getElementById('kz-canvas');
-    const cRect = canvas.getBoundingClientRect();
-    const centroCard = centroEl.querySelector('.kz-centro__card');
-    if (!centroCard) return;
-    const cr = centroCard.getBoundingClientRect();
-    const cx = cr.left + cr.width / 2 - cRect.left;
-    const cy = cr.top + cr.height / 2 - cRect.top;
+    if (!palco || !linhasSvg) return;
+    const foco = centroEl.querySelector('.kz-foco');
+    if (!foco) return;
+    const pr = palco.getBoundingClientRect();
+    const fr = foco.getBoundingClientRect();
+    const cx = fr.left + fr.width / 2 - pr.left;
+    const cy = fr.top + fr.height / 2 - pr.top;
     let svg = '';
-    gruposEl.querySelectorAll('.kz-grupo__cards .kz-card').forEach((card) => {
-      const r = card.getBoundingClientRect();
-      const x = r.left + r.width / 2 - cRect.left;
-      const y = r.top + r.height / 2 - cRect.top;
-      svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(73,107,84,0.35)" stroke-width="1.5" stroke-linecap="round" />`;
-    });
-    linhasSvg.setAttribute('width', cRect.width);
-    linhasSvg.setAttribute('height', cRect.height);
-    linhasSvg.setAttribute('viewBox', `0 0 ${cRect.width} ${cRect.height}`);
+    const pontos = (zona, lado) => {
+      zona.querySelectorAll('.kz-card').forEach((card) => {
+        const r = card.getBoundingClientRect();
+        let x1 = cx, y1 = cy, x2, y2;
+        if (lado === 'top') { x2 = r.left + r.width / 2 - pr.left; y2 = r.bottom - pr.top + 2; y1 = fr.top - pr.top - 2; }
+        else if (lado === 'bottom') { x2 = r.left + r.width / 2 - pr.left; y2 = r.top - pr.top - 2; y1 = fr.bottom - pr.top + 2; }
+        else if (lado === 'left') { x2 = r.right - pr.left + 2; y2 = r.top + r.height / 2 - pr.top; x1 = fr.left - pr.left - 2; }
+        else { x2 = r.left - pr.left - 2; y2 = r.top + r.height / 2 - pr.top; x1 = fr.right - pr.left + 2; }
+        const mx = (x1 + x2) / 2;
+        const my = (y1 + y2) / 2;
+        const horizontal = lado === 'left' || lado === 'right';
+        const d = horizontal
+          ? `M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`
+          : `M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`;
+        svg += `<path class="kz-linha" d="${d}" />`;
+        svg += `<circle class="kz-linha__pt" cx="${x2}" cy="${y2}" r="3.5" />`;
+      });
+    };
+    pontos(zonaPais, 'top');
+    pontos(zonaIrmaos, 'left');
+    pontos(zonaConjuge, 'right');
+    pontos(zonaFilhos, 'bottom');
+    linhasSvg.setAttribute('width', pr.width);
+    linhasSvg.setAttribute('height', pr.height);
+    linhasSvg.setAttribute('viewBox', `0 0 ${pr.width} ${pr.height}`);
     linhasSvg.innerHTML = svg;
   }
 
-  function abrirPainel(id) {
-    const p = byId.get(id);
-    if (!p) return;
-    const ps = pais(id);
-    const cs = conjuge(id).concat(exs(id));
-    const is = irmaos(id);
-    const fs = filhos(id);
-    const hist = historias.filter((h) => h.texto.toLowerCase().includes(p.nome.toLowerCase().split(' ')[0].toLowerCase())).slice(0, 5);
+  /* ---------- painel de detalhes ---------- */
+  function miniHTML(p, rot) {
+    return `<button type="button" class="kz-mini" data-nav="${esc(p.id)}">
+      <span class="kz-mini__foto">${fotoHTML(p)}</span>
+      <span class="kz-mini__txt">
+        ${rot ? `<span class="kz-mini__rot">${esc(rot)}</span>` : ''}
+        <strong>${esc(p.nome)}</strong>
+        <span>${esc(anos(p))} · ${esc(geracaoLabel(p.geracao))}</span>
+      </span>
+      <span class="kz-mini__seta" aria-hidden="true">›</span>
+    </button>`;
+  }
+
+  function renderPainel(p) {
+    const ps = paisDe(p.id);
+    const cs = conjugesDe(p.id);
+    const xs = exDe(p.id);
+    const is = irmaosDe(p.id);
+    const fs = filhosDe(p.id);
+    const evs = EVENTOS.filter((e) => e.pessoa === p.id);
+    const obsCurta = p.observacao && p.observacao !== p.bio ? p.observacao : '';
+
     painelCont.innerHTML = `
-      <h3 class="kz-painel__titulo">${esc(p.nome)}</h3>
-      <p class="kz-painel__anos">${esc(anos(p))}${p.geracao ? ' · ' + esc(geracaoLabel(p.geracao)) : ''}</p>
-      ${p.bio ? `<p class="kz-painel__bio">${esc(p.bio)}</p>` : ''}
-      ${p.local ? `<p class="kz-painel__linha"><strong>Local:</strong> ${esc(p.local)}</p>` : ''}
-      ${p.profissao ? `<p class="kz-painel__linha"><strong>Profissão:</strong> ${esc(p.profissao)}</p>` : ''}
-      <div class="kz-painel__sec">
-        <h4>Parentes</h4>
-        <ul class="kz-painel__lista">
-          ${ps.length ? `<li><strong>Pais:</strong> ${ps.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
-          ${cs.length ? `<li><strong>Cônjuge:</strong> ${cs.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
-          ${is.length ? `<li><strong>Irmãos:</strong> ${is.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
-          ${fs.length ? `<li><strong>Filhos:</strong> ${fs.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
-          ${!ps.length && !cs.length && !is.length && !fs.length ? '<li>Sem vínculos registrados.</li>' : ''}
-        </ul>
-      </div>
-      ${hist.length ? `<div class="kz-painel__sec"><h4>Histórias</h4><ul class="kz-painel__lista">${hist.map((h) => `<li><a href="/historias#${esc(h.id)}">${esc(h.titulo)}</a> <small>· ${esc(h.autor)}</small></li>`).join('')}</ul></div>` : ''}
-      <div class="kz-painel__sec">
-        <h4>Explorar</h4>
-        <div class="kz-painel__acoes">
-          <a class="btn btn--ghost" href="/pessoa/${esc(p.id)}">Perfil completo</a>
-          <a class="btn btn--ghost" href="/arvore?focar=${esc(p.id)}">Na árvore tradicional</a>
+      <div class="kz-painel__ident">
+        <span class="kz-painel__foto">${fotoHTML(p, 'kz-avt--painel')}</span>
+        <div>
+          <h3>${esc(p.nome)}</h3>
+          <p class="kz-painel__anos">${esc(anos(p))}</p>
+          <p class="kz-painel__ger">${esc(geracaoLabel(p.geracao))}</p>
         </div>
+      </div>
+      ${p.bio ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">☰</span> Sobre</h4><p>${esc(p.bio)}</p></section>` : ''}
+      ${p.local || p.profissao ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">◉</span> Vida</h4>${p.local ? `<p><strong>Local:</strong> ${esc(p.local)}</p>` : ''}${p.profissao ? `<p><strong>Profissão:</strong> ${esc(p.profissao)}</p>` : ''}</section>` : ''}
+      ${obsCurta ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">✎</span> Observações</h4><p>${esc(obsCurta)}</p></section>` : ''}
+      ${ps.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">⚭</span> Pais</h4>${ps.map((x) => miniHTML(x, 'Pai/Mãe')).join('')}</section>` : ''}
+      ${cs.length + xs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">♡</span> ${cs.length + xs.length > 1 ? 'Cônjuges' : 'Cônjuge'}</h4>${cs.concat(xs).map((x) => miniHTML(x, xs.some((e) => e.id === x.id) ? 'Ex-cônjuge' : 'Cônjuge')).join('')}</section>` : ''}
+      ${is.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">⚭</span> Irmãos</h4>${is.map((x) => miniHTML(x, 'Irmão(a)')).join('')}</section>` : ''}
+      ${fs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">⚭</span> Filhos <span class="kz-painel__n">${fs.length}</span></h4>${fs.map((x) => miniHTML(x, 'Filho(a)')).join('')}</section>` : ''}
+      ${evs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">◷</span> Acontecimentos</h4><ul class="kz-painel__evs">${evs.map((e) => `<li><strong>${esc(e.ano)}</strong> — ${esc(e.titulo)}</li>`).join('')}</ul></section>` : ''}
+      ${!ps.length && !cs.length && !xs.length && !is.length && !fs.length ? '<section class="kz-painel__sec"><p>Nenhum vínculo familiar registrado até o momento.</p></section>' : ''}
+      <div class="kz-painel__acoes">
+        <a class="btn" href="/pessoa/${esc(p.id)}">Ver perfil completo</a>
+        <a class="btn btn--ghost" href="/arvore?focar=${esc(p.id)}">Ver na árvore</a>
       </div>`;
-    painel.hidden = false;
+
     painelCont.querySelectorAll('[data-nav]').forEach((a) => {
-      a.addEventListener('click', (e) => { e.preventDefault(); renderSelecionado(a.dataset.nav); });
+      a.addEventListener('click', () => selecionar(a.dataset.nav));
     });
   }
 
-  function fecharPainel() { painel.hidden = true; }
+  /* ---------- seleção e navegação ---------- */
+  function selecionar(id, silencioso) {
+    if (!byId.has(id)) return;
+    if (!silencioso) {
+      if (selecionado && selecionado !== id) historico.push(selecionado);
+      if (historico.length > 30) historico.shift();
+    }
+    selecionado = id;
+    btnVoltar.disabled = historico.length === 0;
+    render(id);
+  }
+
+  function voltar() {
+    const anterior = historico.pop();
+    if (!anterior) return;
+    selecionado = anterior;
+    btnVoltar.disabled = historico.length === 0;
+    render(anterior);
+  }
 
   function atualizarURL(id) {
     const u = new URL(window.location.href);
@@ -316,372 +476,792 @@ for (const a of albuns) for (const f of a.fotos) {
     window.history.replaceState({}, '', u.toString());
   }
 
-  function voltar() {
-    if (historico.length <= 1) return;
-    historico.pop();
-    const prev = historico[historico.length - 1];
-    selecionado = prev;
-    btnVoltar.disabled = historico.length <= 1;
-    renderSelecionadoUI(prev);
-  }
-
-  function renderSelecionado(id, fromHistory = false) {
-    if (!byId.has(id)) return;
-    if (!fromHistory && selecionado && selecionado !== id) {
-      // already pushed in render? push happens inside
-    }
-    renderSelecionadoCore(id);
-  }
-  function renderSelecionadoCore(id) {
-    renderSelecionadoImpl(id);
-  }
-  // simplify: one function
-  function renderSelecionadoImpl(id) {
-    if (!byId.has(id)) return;
-    if (selecionado && selecionado !== id) historico.push(id);
-    else if (!selecionado) historico.push(id);
-    // dedupe consecutive
-    if (historico.length > 1 && historico[historico.length-1] === historico[historico.length-2]) historico.pop();
-    btnVoltar.disabled = historico.length <= 1;
-    renderSelecionadoUI(id);
-  }
-
-  // Replace the above convoluted history with a clean version by redefining render:
-  // We'll just use renderSelecionadoUI and manage history separately.
-
-  // ---- clean reimplementation ----
-  let _init = false;
-  function selecionar(id) {
-    if (!byId.has(id)) return;
-    if (selecionado && selecionado !== id) historico.push(id);
-    if (!selecionado) historico.push(id);
-    // dedupe
-    while (historico.length > 1 && historico[historico.length-1] === historico[historico.length-2]) historico.pop();
-    selecionado = id;
-    btnVoltar.disabled = historico.length <= 1;
-    renderSelecionadoUI(id);
-  }
-  function renderSelecionadoUI(id) {
-    const p = byId.get(id);
-    if (!p) return;
-    const ps = pais(id);
-    const cs = conjuge(id);
-    const xs = exs(id);
-    const is = irmaos(id);
-    const fs = filhos(id);
-
-    const centro = `<div class="kz-centro__card">
-      <div class="kz-centro__foto">${p.foto ? `<img src="${esc(p.foto)}" alt="" />` : `<span class="kz-avatar kz-avatar--lg">${esc(iniciais(p.nome))}</span>`}</div>
-      <h2 class="kz-centro__nome">${esc(p.nome)}</h2>
-      <p class="kz-centro__anos">${esc(anos(p))}${p.geracao ? ' · ' + esc(geracaoLabel(p.geracao)) : ''}</p>
-      ${p.bio ? `<p class="kz-centro__bio">${esc(p.bio)}</p>` : ''}
-      <div class="kz-centro__acoes">
-        <a class="btn btn--ghost" href="/pessoa/${esc(p.id)}">Ver perfil completo</a>
-        <button type="button" class="btn btn--ghost" data-abrir-painel>Detalhes</button>
-      </div>
-    </div>`;
-    centroEl.innerHTML = centro;
-
-    let gruposHTML = '';
-    gruposHTML += grupoHTML('Pais', ps, false);
-    gruposHTML += grupoHTML('Cônjuge', cs.concat(xs), false);
-    gruposHTML += grupoHTML('Irmãos', is, false);
-    gruposHTML += grupoHTML('Filhos', fs, false);
-    gruposEl.innerHTML = gruposHTML;
-
-    gruposEl.querySelectorAll('[data-expandir]').forEach((b) => {
-      b.addEventListener('click', () => {
-        const sec = b.closest('.kz-grupo');
-        const titulo = sec.dataset.grupo;
-        const listas = { 'Pais': ps, 'Cônjuge': cs.concat(xs), 'Irmãos': is, 'Filhos': fs };
-        const lista = listas[titulo] || [];
-        sec.querySelector('.kz-grupo__cards').innerHTML = lista.map((pp) => cardHTML(pp)).join('');
-        b.remove();
-        ligarCards();
-        desenharLinhas();
-      });
-    });
-
-    ligarCards();
-    desenharLinhas();
-    atualizarURL(id);
-    abrirPainel(id);
-
-    if (!reduzido) {
-      centroEl.classList.remove('kz-in');
-      void centroEl.offsetWidth;
-      centroEl.classList.add('kz-in');
-      gruposEl.classList.remove('kz-in');
-      void gruposEl.offsetWidth;
-      gruposEl.classList.add('kz-in');
-    }
-  }
-
-  function ligarCards() {
-    gruposEl.querySelectorAll('.kz-card').forEach((btn) => {
-      btn.addEventListener('click', () => selecionar(btn.dataset.id));
-    });
-    const ab = centroEl.querySelector('[data-abrir-painel]');
-    if (ab) ab.addEventListener('click', () => abrirPainel(selecionado));
-  }
-
-  function desenharLinhas() {
-    if (!linhasSvg) return;
-    const canvas = document.getElementById('kz-canvas');
-    const cRect = canvas.getBoundingClientRect();
-    const centroCard = centroEl.querySelector('.kz-centro__card');
-    if (!centroCard) return;
-    const cr = centroCard.getBoundingClientRect();
-    const cx = cr.left + cr.width / 2 - cRect.left;
-    const cy = cr.top + cr.height / 2 - cRect.top;
-    let svg = '';
-    gruposEl.querySelectorAll('.kz-grupo__cards .kz-card').forEach((card) => {
-      const r = card.getBoundingClientRect();
-      const x = r.left + r.width / 2 - cRect.left;
-      const y = r.top + r.height / 2 - cRect.top;
-      svg += `<line x1="${cx}" y1="${cy}" x2="${x}" y2="${y}" stroke="rgba(73,107,84,0.3)" stroke-width="1.5" stroke-linecap="round" />`;
-    });
-    linhasSvg.setAttribute('width', cRect.width);
-    linhasSvg.setAttribute('height', cRect.height);
-    linhasSvg.setAttribute('viewBox', `0 0 ${cRect.width} ${cRect.height}`);
-    linhasSvg.innerHTML = svg;
-  }
-
-  function abrirPainel(id) {
-    const p = byId.get(id);
-    if (!p) return;
-    const ps = pais(id);
-    const cs = conjuge(id).concat(exs(id));
-    const is = irmaos(id);
-    const fs = filhos(id);
-    const hist = historias.filter((h) => h.texto.toLowerCase().includes(p.nome.toLowerCase().split(' ')[0].toLowerCase())).slice(0, 5);
-    painelCont.innerHTML = `
-      <h3 class="kz-painel__titulo">${esc(p.nome)}</h3>
-      <p class="kz-painel__anos">${esc(anos(p))}${p.geracao ? ' · ' + esc(geracaoLabel(p.geracao)) : ''}</p>
-      ${p.bio ? `<p class="kz-painel__bio">${esc(p.bio)}</p>` : ''}
-      ${p.local ? `<p class="kz-painel__linha"><strong>Local:</strong> ${esc(p.local)}</p>` : ''}
-      ${p.profissao ? `<p class="kz-painel__linha"><strong>Profissão:</strong> ${esc(p.profissao)}</p>` : ''}
-      <div class="kz-painel__sec">
-        <h4>Parentes</h4>
-        <ul class="kz-painel__lista">
-          ${ps.length ? `<li><strong>Pais:</strong> ${ps.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
-          ${cs.length ? `<li><strong>Cônjuge:</strong> ${cs.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
-          ${is.length ? `<li><strong>Irmãos:</strong> ${is.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
-          ${fs.length ? `<li><strong>Filhos:</strong> ${fs.map((x) => `<a href="#" data-nav="${esc(x.id)}">${esc(x.nome)}</a>`).join(', ')}</li>` : ''}
-          ${!ps.length && !cs.length && !is.length && !fs.length ? '<li>Sem vínculos registrados.</li>' : ''}
-        </ul>
-      </div>
-      ${hist.length ? `<div class="kz-painel__sec"><h4>Histórias</h4><ul class="kz-painel__lista">${hist.map((h) => `<li><a href="/historias#${esc(h.id)}">${esc(h.titulo)}</a> <small>· ${esc(h.autor)}</small></li>`).join('')}</ul></div>` : ''}
-      <div class="kz-painel__sec">
-        <h4>Explorar</h4>
-        <div class="kz-painel__acoes">
-          <a class="btn btn--ghost" href="/pessoa/${esc(p.id)}">Perfil completo</a>
-          <a class="btn btn--ghost" href="/arvore?focar=${esc(p.id)}">Na árvore tradicional</a>
-        </div>
-      </div>`;
-    painel.hidden = false;
-    painelCont.querySelectorAll('[data-nav]').forEach((a) => {
-      a.addEventListener('click', (e) => { e.preventDefault(); selecionar(a.dataset.nav); });
-    });
-  }
-  function fecharPainel() { painel.hidden = true; }
-
-  // search
+  /* ---------- pesquisa ---------- */
   function filtrar(q) {
     q = (q || '').toLowerCase().trim();
     if (!q) return [];
     return PESSOAS.filter((p) => p.nome.toLowerCase().includes(q)).slice(0, 8);
   }
-  function renderSugestoes(el, q, onPick) {
+  function renderSug(el, q, onPick) {
     const res = filtrar(q);
-    if (!res.length || !q) { el.hidden = true; el.innerHTML = ''; return; }
+    if (!res.length) { el.hidden = true; el.innerHTML = ''; return; }
     el.hidden = false;
-    el.innerHTML = res.map((p) => `<li><button type="button" data-id="${esc(p.id)}">${esc(p.nome)} <small>${esc(p.nascimento || '')}</small></button></li>`).join('');
-    el.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => { onPick(b.dataset.id); el.hidden = true; }));
+    el.innerHTML = res.map((p) => `<li><button type="button" data-id="${esc(p.id)}"><strong>${esc(p.nome)}</strong><small>${esc(anos(p))} · ${esc(geracaoLabel(p.geracao))}</small></button></li>`).join('');
+    el.querySelectorAll('button').forEach((b) => b.addEventListener('click', () => onPick(b.dataset.id)));
   }
-  busca.addEventListener('input', () => renderSugestoes(sugestoes, busca.value, (id) => { busca.value = byId.get(id).nome; selecionar(id); }));
-  document.addEventListener('click', (e) => { if (!busca.contains(e.target) && !sugestoes.contains(e.target)) sugestoes.hidden = true; });
-
-  btnVoltar.addEventListener('click', () => {
-    if (historico.length <= 1) return;
-    historico.pop();
-    const prev = historico[historico.length - 1];
-    selecionado = null;
-    historico.length = 0;
-    historico.push(prev);
-    selecionado = prev;
-    btnVoltar.disabled = historico.length <= 1;
-    renderSelecionadoUI(prev);
+  busca.addEventListener('input', () => renderSug(sugestoes, busca.value, (id) => {
+    busca.value = byId.get(id).nome;
+    sugestoes.hidden = true;
+    selecionar(id);
+    document.querySelector('.kz-palco')?.scrollIntoView({ behavior: reduzido ? 'auto' : 'smooth', block: 'nearest' });
+  }));
+  document.addEventListener('click', (e) => {
+    if (!busca.contains(e.target) && !sugestoes.contains(e.target)) sugestoes.hidden = true;
   });
-  btnCentrar.addEventListener('click', () => { if (selecionado) { const c = centroEl.querySelector('.kz-centro__card'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'center' }); } });
-  btnInicio.addEventListener('click', () => selecionar(PESSOAS[0]?.id || 'yotaro-kato'));
-  btnRelacao.addEventListener('click', () => { modalRel.hidden = false; document.body.style.overflow = 'hidden'; });
 
-  // relation modal
-  modalRel.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', () => { modalRel.hidden = true; document.body.style.overflow = ''; }));
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modalRel.hidden) { modalRel.hidden = true; document.body.style.overflow = ''; } });
-  const relA = document.getElementById('kz-rel-a');
-  const relB = document.getElementById('kz-rel-b');
-  const relAList = document.getElementById('kz-rel-a-list');
-  const relBList = document.getElementById('kz-rel-b-list');
+  /* ---------- comandos ---------- */
+  btnVoltar.addEventListener('click', voltar);
+  btnCentrar.addEventListener('click', () => {
+    if (!selecionado) return;
+    render(selecionado);
+    centroEl.scrollIntoView({ behavior: reduzido ? 'auto' : 'smooth', block: 'center' });
+  });
+  btnInicio.addEventListener('click', () => {
+    historico.length = 0;
+    selecionar(byId.has(ENTRADA) ? ENTRADA : PESSOAS[0].id);
+  });
+  $('kz-painel-fechar').addEventListener('click', () => painel.classList.remove('kz-painel--aberto'));
+
+  /* ---------- modal parentesco ---------- */
+  function abrirModal() { modalRel.hidden = false; document.body.style.overflow = 'hidden'; $('kz-rel-a').focus(); }
+  function fecharModal() { modalRel.hidden = true; document.body.style.overflow = ''; }
+  btnRelacao.addEventListener('click', abrirModal);
+  modalRel.querySelectorAll('[data-close]').forEach((el) => el.addEventListener('click', fecharModal));
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modalRel.hidden) fecharModal(); });
+
+  const relA = $('kz-rel-a'), relB = $('kz-rel-b');
   let relAId = null, relBId = null;
-  relA.addEventListener('input', () => renderSugestoes(relAList, relA.value, (id) => { relA.value = byId.get(id).nome; relAId = id; relAList.hidden = true; }));
-  relB.addEventListener('input', () => renderSugestoes(relBList, relB.value, (id) => { relB.value = byId.get(id).nome; relBId = id; relBList.hidden = true; }));
+  const wrapA = document.createElement('ul'); wrapA.className = 'kz-sugestoes'; wrapA.hidden = true; relA.after(wrapA);
+  const wrapB = document.createElement('ul'); wrapB.className = 'kz-sugestoes'; wrapB.hidden = true; relB.after(wrapB);
+  relA.addEventListener('input', () => renderSug(wrapA, relA.value, (id) => { relA.value = byId.get(id).nome; relAId = id; wrapA.hidden = true; }));
+  relB.addEventListener('input', () => renderSug(wrapB, relB.value, (id) => { relB.value = byId.get(id).nome; relBId = id; wrapB.hidden = true; }));
+  document.addEventListener('click', (e) => {
+    if (!relA.contains(e.target) && !wrapA.contains(e.target)) wrapA.hidden = true;
+    if (!relB.contains(e.target) && !wrapB.contains(e.target)) wrapB.hidden = true;
+  });
 
-  function bfsPath(start, end) {
-    if (start === end) return [start];
-    const visited = new Set([start]);
-    const parent = new Map();
-    const q = [start];
-    while (q.length) {
-      const cur = q.shift();
+  function bfs(a, b) {
+    if (a === b) return [a];
+    const vis = new Set([a]);
+    const prev = new Map();
+    const fila = [a];
+    while (fila.length) {
+      const cur = fila.shift();
       const p = byId.get(cur);
       if (!p) continue;
       const viz = [...p.pais, ...p.conjuges, ...(p.exDe || []), ...PESSOAS.filter((x) => x.pais.includes(cur)).map((x) => x.id)];
       for (const v of viz) {
-        if (visited.has(v)) continue;
-        visited.add(v);
-        parent.set(v, cur);
-        if (v === end) {
-          const path = [end];
-          let c = end;
-          while (parent.has(c)) { c = parent.get(c); path.unshift(c); }
-          return path;
+        if (vis.has(v)) continue;
+        vis.add(v);
+        prev.set(v, cur);
+        if (v === b) {
+          const caminho = [b];
+          let c = b;
+          while (prev.has(c)) { c = prev.get(c); caminho.unshift(c); }
+          return caminho;
         }
-        q.push(v);
+        fila.push(v);
       }
     }
     return null;
   }
-  function descreverVinculo(a, b) {
+  function descreve(a, b) {
     const pa = byId.get(a), pb = byId.get(b);
-    if (!pa || !pb) return 'relacionados';
+    if (!pa || !pb) return 'parentesco';
     if (pa.pais.includes(b)) return 'pai/mãe';
     if (pb.pais.includes(a)) return 'filho(a)';
     if (pa.conjuges.includes(b)) return 'cônjuge';
-    if (pa.exDe && pa.exDe.includes(b)) return 'ex-cônjuge';
-    if (irmaos(a).some((x) => x.id === b)) return 'irmão/irmã';
+    if ((pa.exDe || []).includes(b)) return 'ex-cônjuge';
+    const ids = new Set(pa.pais);
+    if (pb.pais.some((pp) => ids.has(pp))) return 'irmão/irmã';
     return 'parente';
   }
-  document.getElementById('kz-rel-calcular').addEventListener('click', () => {
-    const res = document.getElementById('kz-rel-resultado');
-    if (!relAId || !relBId) { res.textContent = 'Escolha as duas pessoas.'; return; }
-    const path = bfsPath(relAId, relBId);
-    if (!path) { res.textContent = 'Não foi encontrado caminho entre essas duas pessoas pelos vínculos registrados.'; return; }
-    const steps = path.map((id, i) => {
+  $('kz-rel-calcular').addEventListener('click', () => {
+    const res = $('kz-rel-resultado');
+    if (!relAId || !relBId) { res.textContent = 'Escolha as duas pessoas para calcular o caminho.'; return; }
+    const caminho = bfs(relAId, relBId);
+    if (!caminho) { res.innerHTML = '<p>Não foi encontrado um caminho usando apenas os vínculos registrados. É possível que o parentesco seja real, mas esteja incompleto nos registros.</p>'; return; }
+    const partes = caminho.map((id, i) => {
       const p = byId.get(id);
-      const rel = i > 0 ? descreverVinculo(path[i-1], id) : '';
-      return `${esc(p.nome)}${rel ? ' (' + esc(rel) + ')' : ''}`;
-    }).join(' → ');
-    res.innerHTML = `<p><strong>Caminho encontrado (${path.length} pessoa${path.length===1?'':'s'}):</strong></p><p class="kz-rel-caminho">${steps}</p>`;
+      const rot = i > 0 ? ` <small>— ${esc(descreve(caminho[i - 1], id))} →</small>` : '';
+      return `<button type="button" class="kz-rel-pess" data-nav="${esc(id)}">${esc(p.nome)}</button>${rot}`;
+    }).join(' ');
+    res.innerHTML = `<p><strong>Caminho com ${caminho.length} ${caminho.length === 1 ? 'pessoa' : 'pessoas'}:</strong></p><p class="kz-rel-caminho">${partes}</p><p class="kz-rel-nota">Cada salto usa um vínculo registrado entre as pessoas.</p>`;
+    res.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => { fecharModal(); selecionar(b.dataset.nav); }));
   });
 
-  // painel fechar
-  document.getElementById('kz-painel-fechar').addEventListener('click', fecharPainel);
-
-  // URL state
+  /* ---------- arranque ---------- */
   (async () => {
-    const cloud = window.__katoCloud;
-    if (cloud && cloud.isCloudEnabled()) {
+    if (isCloudEnabled()) {
       try {
-        const remote = await cloud.fetchPessoas(PESSOAS.slice());
-        if (remote && remote.length) {
+        const remoto = await fetchPessoas(PESSOAS.slice());
+        if (remoto && remoto.length) {
           PESSOAS.length = 0;
-          PESSOAS.push(...remote);
+          PESSOAS.push(...remoto);
           byId.clear();
           for (const p of PESSOAS) byId.set(p.id, p);
         }
-      } catch (e) { console.warn('cloud fetch falhou:', e); }
+      } catch (e) { console.warn('Kizuna: nuvem indisponível, usando dados locais.', e); }
     }
     const foco = new URLSearchParams(window.location.search).get('pessoa');
-    const inicial = (foco && byId.has(foco)) ? foco : (byId.has('yotaro-kato') ? 'yotaro-kato' : (PESSOAS[0]?.id || 'yotaro-kato'));
-    selecionar(inicial);
-  })().catch((e) => console.error('boot falhou:', e));
+    const inicial = (foco && byId.has(foco)) ? foco : (byId.has(ENTRADA) ? ENTRADA : (PESSOAS[0]?.id || ''));
+    if (inicial) selecionar(inicial, true);
+    // no desktop o painel abre por padrão; no celular/folha inferior fica fechado até pedido
+    if (window.innerWidth > 1180) painel.classList.add('kz-painel--aberto');
+  })().catch((e) => console.error('Kizuna: falha no arranque.', e));
 
-  // window resize redraw lines
-  window.addEventListener('resize', () => { if (selecionado) desenharLinhas(); });
+  let tRedim;
+  window.addEventListener('resize', () => {
+    clearTimeout(tRedim);
+    tRedim = setTimeout(() => { if (selecionado) desenharLinhas(); }, 120);
+  });
 </script>
 
-<style>
-  .kz-hero { padding: 2.5rem 0 1.5rem; }
-  .kz-hero h1 { font-size: 2.2rem; margin: 0.3rem 0 0.4rem; }
-  .kz-sub { font-style: italic; color: var(--texto-suave); margin: 0 0 0.6rem; }
-  .kz-intro { max-width: 620px; }
+<style is:global>
+  /* ===================== HERO ===================== */
+  .kz-hero {
+    position: relative;
+    background: #26332b;
+    overflow: hidden;
+    color: #f3efe4;
+  }
+  .kz-hero__paisagem {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.96;
+  }
+  .kz-hero__conteudo {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 2.2rem;
+    padding: 2.6rem 1.5rem 2.8rem;
+  }
+  .kz-kanji {
+    flex: 0 0 auto;
+    font-family: var(--fonte-jp);
+    font-size: 3.4rem;
+    line-height: 1;
+    color: #d9b96a;
+    border: 1.5px solid rgba(217, 185, 106, 0.75);
+    outline: 1px solid rgba(217, 185, 106, 0.35);
+    outline-offset: 5px;
+    padding: 1.1rem 1.2rem;
+    background: rgba(15, 22, 17, 0.35);
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+  }
+  .kz-hero__textos h1 {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #f6f2e7;
+    text-shadow: 0 2px 18px rgba(0, 0, 0, 0.45);
+  }
+  .kz-hero__sub {
+    margin: 0.15rem 0 0.7rem;
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+    color: #e4d7ae;
+  }
+  .kz-hero__desc {
+    margin: 0;
+    max-width: 46ch;
+    font-size: 0.98rem;
+    line-height: 1.55;
+    color: rgba(243, 239, 228, 0.88);
+  }
 
-  .kz-toolbar { display: flex; flex-wrap: wrap; gap: 0.8rem; align-items: center; margin-bottom: 1rem; }
-  .kz-search { position: relative; flex: 1 1 260px; min-width: 200px; }
-  .kz-search input { width: 100%; padding: 0.6rem 0.8rem; border: 1.5px solid var(--borda); border-radius: 10px; font-size: 1rem; }
-  .kz-acoes { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .kz-sugestoes { position: absolute; top: 100%; left: 0; right: 0; background: var(--papel); border: 1px solid var(--borda); border-radius: 10px; list-style: none; padding: 0.3rem; margin: 0.3rem 0 0; max-height: 260px; overflow: auto; z-index: 50; box-shadow: var(--shadow); }
-  .kz-sugestoes li button { width: 100%; text-align: left; background: none; border: 0; padding: 0.5rem 0.6rem; border-radius: 6px; cursor: pointer; font-size: 0.95rem; }
-  .kz-sugestoes li button:hover { background: var(--creme); }
-  .kz-sugestoes small { color: var(--texto-suave); margin-left: 0.4rem; }
+  /* ===================== ÁREA PRINCIPAL ===================== */
+  .kz-main {
+    background:
+      radial-gradient(circle at 88% 12%, rgba(184, 158, 92, 0.07), transparent 42%),
+      radial-gradient(circle at 6% 92%, rgba(73, 107, 84, 0.08), transparent 40%),
+      #f6f1e5;
+    padding: 1.6rem 0 2.6rem;
+  }
+  .kz-main .kz-main__grid {
+    display: grid;
+    grid-template-columns: 84px minmax(0, 1fr) auto;
+    gap: 1.1rem;
+    align-items: stretch;
+    width: min(1500px, 100% - 3rem);
+    max-width: none;
+    margin-inline: auto;
+  }
 
-  .kz-canvas { position: relative; min-height: 60vh; border: 1px solid var(--borda); border-radius: 16px; background: var(--creme); padding: 1.5rem; overflow: hidden; }
-  .kz-linhas { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
-  .kz-centro { display: flex; justify-content: center; margin-bottom: 1.5rem; position: relative; z-index: 1; }
-  .kz-centro__card { background: var(--papel); border: 1px solid var(--borda); border-radius: 16px; padding: 1.2rem; text-align: center; box-shadow: var(--shadow); max-width: 320px; width: 100%; }
-  .kz-centro__foto { width: 96px; height: 96px; margin: 0 auto 0.7rem; border-radius: 50%; overflow: hidden; background: var(--creme); display: flex; align-items: center; justify-content: center; }
-  .kz-centro__foto img { width: 100%; height: 100%; object-fit: contain; }
-  .kz-centro__nome { margin: 0; font-size: 1.25rem; }
-  .kz-centro__anos { color: var(--texto-suave); font-size: 0.9rem; margin: 0.2rem 0 0.6rem; }
-  .kz-centro__bio { font-size: 0.92rem; margin: 0.6rem 0; }
-  .kz-centro__acoes { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-top: 0.6rem; }
-  .kz-avatar { display: inline-flex; align-items: center; justify-content: center; width: 100%; height: 100%; background: var(--verde); color: #fff; font-weight: 700; border-radius: 50%; }
-  .kz-avatar--lg { font-size: 2rem; }
+  /* ---------- rail de comandos ---------- */
+  .kz-rail {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+    padding: 0.8rem 0.4rem;
+    background: rgba(255, 253, 247, 0.85);
+    border: 1px solid #e6ddc7;
+    border-radius: 16px;
+    box-shadow: 0 4px 18px rgba(64, 52, 28, 0.06);
+    height: fit-content;
+    position: sticky;
+    top: 1rem;
+  }
+  .kz-rail__btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.28rem;
+    width: 66px;
+    padding: 0.55rem 0.2rem;
+    border: 0;
+    background: none;
+    border-radius: 12px;
+    color: #3c4a40;
+    font-size: 0.66rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+  }
+  .kz-rail__btn svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.7;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .kz-rail__btn:hover:not(:disabled) { background: #efe7d3; color: #274736; transform: translateY(-1px); }
+  .kz-rail__btn:focus-visible { outline: 2px solid #496b54; outline-offset: 2px; }
+  .kz-rail__btn:disabled { opacity: 0.38; cursor: default; }
 
-  .kz-grupos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; position: relative; z-index: 1; }
-  @media (max-width: 720px) { .kz-grupos { grid-template-columns: 1fr; } }
+  /* ---------- pesquisa ---------- */
+  .kz-palco-col { min-width: 0; }
+  .kz-busca {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 420px;
+    margin: 0 auto 0.9rem;
+    background: #fffdf8;
+    border: 1px solid #e2d8bf;
+    border-radius: 999px;
+    padding: 0.42rem 1rem;
+    box-shadow: 0 3px 12px rgba(64, 52, 28, 0.05);
+  }
+  .kz-busca svg { width: 17px; height: 17px; fill: none; stroke: #8a7d5c; stroke-width: 1.8; stroke-linecap: round; flex: 0 0 auto; }
+  .kz-busca input {
+    flex: 1;
+    border: 0;
+    background: none;
+    font-size: 0.95rem;
+    color: #2e3630;
+    outline: none;
+    min-width: 0;
+  }
+  .kz-sugestoes {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: #fffdf8;
+    border: 1px solid #e2d8bf;
+    border-radius: 14px;
+    list-style: none;
+    margin: 0;
+    padding: 0.3rem;
+    max-height: 300px;
+    overflow: auto;
+    z-index: 60;
+    box-shadow: 0 14px 38px rgba(46, 40, 22, 0.16);
+  }
+  .kz-sugestoes li button {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: 0;
+    padding: 0.5rem 0.7rem;
+    border-radius: 9px;
+    cursor: pointer;
+    font-size: 0.92rem;
+    color: #2e3630;
+  }
+  .kz-sugestoes li button:hover, .kz-sugestoes li button:focus-visible { background: #f1ead8; outline: none; }
+  .kz-sugestoes small { color: #8a7d5c; font-size: 0.76rem; }
 
-  .kz-grupo { background: var(--papel); border: 1px solid var(--borda); border-radius: 12px; padding: 0.8rem; }
-  .kz-grupo__head { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
-  .kz-grupo__head h3 { margin: 0; font-size: 1rem; color: var(--verde); }
-  .kz-grupo__count { background: var(--creme); border-radius: 999px; padding: 0.1rem 0.6rem; font-size: 0.8rem; font-weight: 700; }
-  .kz-grupo__cards { display: flex; flex-wrap: wrap; gap: 0.6rem; }
-  .kz-grupo__vazio { color: var(--texto-suave); font-size: 0.9rem; margin: 0; }
-  .kz-grupo__mais { margin-top: 0.6rem; border: 1px solid var(--borda); background: var(--creme); border-radius: 999px; padding: 0.4rem 0.9rem; cursor: pointer; font-size: 0.85rem; }
+  /* ---------- palco ---------- */
+  .kz-palco {
+    position: relative;
+    display: grid;
+    grid-template-columns: 218px minmax(272px, 1fr) 218px;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      ".      topo    ."
+      "esq    centro  dir"
+      ".      baixo   .";
+    gap: 0.9rem 1.4rem;
+    align-content: center;
+    min-height: 720px;
+    background:
+      linear-gradient(180deg, rgba(255, 253, 247, 0.75), rgba(250, 245, 232, 0.9)),
+      #faf6ea;
+    border: 1px solid #e6ddc7;
+    border-radius: 22px;
+    box-shadow: 0 10px 40px rgba(64, 52, 28, 0.08), inset 0 1px 0 #fff;
+    overflow: hidden;
+  }
+  /* seigaiha discreto no canto */
+  .kz-palco::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    bottom: -30px;
+    width: 340px;
+    height: 220px;
+    background-image: radial-gradient(circle at 50% 100%, transparent 22%, rgba(73, 107, 84, 0.06) 23%, rgba(73, 107, 84, 0.06) 25%, transparent 26%, transparent 33%, rgba(73, 107, 84, 0.05) 34%, rgba(73, 107, 84, 0.05) 36%, transparent 37%);
+    background-size: 68px 40px;
+    pointer-events: none;
+  }
+  .kz-linhas { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+  .kz-linha { fill: none; stroke: #b3a06a; stroke-width: 1.6; opacity: 0.75; }
+  .kz-linha__pt { fill: #f7f2e5; stroke: #8a7d5c; stroke-width: 1.4; }
 
-  .kz-card { display: flex; align-items: center; gap: 0.6rem; background: var(--creme); border: 1px solid var(--borda); border-radius: 10px; padding: 0.5rem; cursor: pointer; text-align: left; transition: transform 0.15s, box-shadow 0.15s; }
-  .kz-card:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
-  .kz-card__foto { width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: var(--papel); flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
-  .kz-card__foto img { width: 100%; height: 100%; object-fit: contain; }
-  .kz-card__info { display: flex; flex-direction: column; min-width: 0; }
-  .kz-card__nome { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px; }
-  .kz-card__anos { font-size: 0.78rem; color: var(--texto-suave); }
-  .kz-card__gen { font-size: 0.7rem; color: var(--verde); font-weight: 700; }
+  /* ---------- zonas (grid areas) ---------- */
+  .kz-zona { z-index: 2; min-width: 0; }
+  .kz-zona--topo { grid-area: topo; }
+  .kz-zona--esq { grid-area: esq; display: flex; align-items: center; }
+  .kz-zona--dir { grid-area: dir; display: flex; align-items: center; }
+  .kz-zona--baixo { grid-area: baixo; }
 
-  .kz-painel { position: fixed; top: 0; right: 0; bottom: 0; width: min(380px, 92vw); background: var(--papel); border-left: 1px solid var(--borda); box-shadow: -8px 0 32px rgba(0,0,0,0.18); padding: 1.2rem; overflow: auto; z-index: 60; }
-  .kz-painel[hidden] { display: none; }
-  .kz-painel__fechar { position: absolute; top: 0.6rem; right: 0.6rem; border: 0; background: var(--creme); width: 36px; height: 36px; border-radius: 999px; cursor: pointer; font-size: 1.3rem; }
-  .kz-painel__titulo { margin: 0 0 0.2rem; font-size: 1.2rem; }
-  .kz-painel__anos { color: var(--texto-suave); font-size: 0.9rem; margin: 0 0 0.8rem; }
-  .kz-painel__bio { font-size: 0.92rem; margin: 0 0 0.8rem; }
-  .kz-painel__linha { font-size: 0.9rem; margin: 0.3rem 0; }
-  .kz-painel__sec { margin-top: 1rem; }
-  .kz-painel__sec h4 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--texto-suave); margin: 0 0 0.4rem; }
-  .kz-painel__lista { list-style: none; padding: 0; margin: 0; font-size: 0.92rem; line-height: 1.6; }
-  .kz-painel__lista a { color: var(--verde); text-decoration: none; }
-  .kz-painel__lista a:hover { text-decoration: underline; }
-  .kz-painel__acoes { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+  .kz-grupo { display: flex; flex-direction: column; gap: 0.45rem; align-items: center; }
+  .kz-zona--esq .kz-grupo { align-items: flex-end; }
+  .kz-zona--dir .kz-grupo { align-items: flex-start; }
+  .kz-grupo__tit {
+    margin: 0;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #8a7d5c;
+  }
+  .kz-grupo__cards { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
+  .kz-zona--esq .kz-grupo__cards, .kz-zona--dir .kz-grupo__cards { flex-direction: column; flex-wrap: nowrap; }
+  .kz-grupo__mais {
+    border: 1px dashed #c3b587;
+    background: rgba(255, 253, 247, 0.8);
+    color: #6c6248;
+    border-radius: 999px;
+    padding: 0.28rem 0.85rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .kz-grupo__mais:hover { background: #efe7d3; color: #3c4a40; }
 
-  .kz-relacao-modal { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; }
+  /* ---------- overlay de grupo grande ---------- */
+  .kz-overlay { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 1.2rem; }
+  .kz-overlay[hidden] { display: none; }
+  .kz-overlay__fundo { position: absolute; inset: 0; background: rgba(38, 44, 36, 0.45); backdrop-filter: blur(2px); border-radius: 22px; }
+  .kz-overlay__caixa {
+    position: relative;
+    z-index: 1;
+    background: #fffdf8;
+    border: 1px solid #ddd2b2;
+    border-radius: 18px;
+    padding: 1rem 1.1rem 1.2rem;
+    width: min(100%, 760px);
+    max-height: 88%;
+    overflow: auto;
+    box-shadow: 0 24px 64px rgba(20, 24, 20, 0.35);
+  }
+  .kz-overlay__topo { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.8rem; padding-bottom: 0.6rem; border-bottom: 1px solid #efe7d3; }
+  .kz-overlay__topo h3 { margin: 0; font-family: var(--fonte-titulo); font-size: 1.15rem; color: #26332b; }
+  .kz-overlay__topo h3 span { background: #efe7d3; border-radius: 999px; padding: 0.05rem 0.5rem; font-size: 0.75rem; color: #6c6248; font-family: var(--fonte-corpo); }
+  .kz-overlay__topo button { border: 0; background: #f1ead8; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; color: #5d6a5f; flex: 0 0 auto; }
+  .kz-overlay__topo button:hover { background: #e5dcc2; }
+  .kz-overlay__cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(218px, 1fr)); gap: 0.6rem; }
+  .kz-overlay__cards .kz-card { width: 100%; }
+
+  /* ---------- cartão de parente ---------- */
+  .kz-card {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 218px;
+    padding: 0.5rem 0.65rem 0.5rem 0.5rem;
+    background: #fffdf8;
+    border: 1px solid #e8dfc9;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px rgba(64, 52, 28, 0.07);
+    cursor: pointer;
+    text-align: left;
+    scroll-margin-top: 96px;
+    scroll-margin-bottom: 24px;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+  .kz-card:hover, .kz-card:focus-visible {
+    transform: translateY(-2px);
+    border-color: #b3a06a;
+    box-shadow: 0 8px 22px rgba(64, 52, 28, 0.13);
+    outline: none;
+  }
+  .kz-card__foto {
+    flex: 0 0 auto;
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #efe7d3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .kz-card__foto img { width: 100%; height: 100%; object-fit: cover; }
+  .kz-card__txt { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; }
+  .kz-card__rot { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #9a8c64; }
+  .kz-card__nome {
+    font-family: var(--fonte-titulo);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #26332b;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .kz-card__anos { font-size: 0.72rem; color: #5d6a5f; }
+  .kz-card__ger { font-size: 0.64rem; color: #9a8c64; }
+
+  .kz-avt {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(150deg, #496b54, #2f4a3a);
+    color: #efe7d3;
+    font-family: var(--fonte-titulo);
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  /* ---------- cartão protagonista ---------- */
+  .kz-centro { grid-area: centro; z-index: 3; display: flex; align-items: center; justify-content: center; min-width: 0; }
+  .kz-foco {
+    width: 272px;
+    background: #fffdf8;
+    border: 1px solid #ddd2b2;
+    border-radius: 20px;
+    padding: 1.15rem 1.2rem 1.2rem;
+    text-align: center;
+    box-shadow: 0 18px 48px rgba(46, 40, 22, 0.18), 0 2px 6px rgba(46, 40, 22, 0.08);
+    position: relative;
+    scroll-margin-top: 96px;
+  }
+  .kz-foco::after {
+    content: '';
+    position: absolute;
+    inset: 5px;
+    border: 1px solid rgba(179, 160, 106, 0.4);
+    border-radius: 15px;
+    pointer-events: none;
+  }
+  .kz-foco__selo {
+    display: inline-block;
+    font-size: 0.6rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #a8935a;
+    margin-bottom: 0.6rem;
+  }
+  .kz-foco__foto {
+    width: 156px;
+    height: 178px;
+    margin: 0 auto 0.75rem;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #efe7d3;
+    border: 3px solid #f3ecd9;
+    box-shadow: 0 6px 18px rgba(46, 40, 22, 0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .kz-foco__foto img { width: 100%; height: 100%; object-fit: cover; }
+  .kz-avt--foco { font-size: 2.6rem; }
+  .kz-foco__nome {
+    margin: 0;
+    font-family: var(--fonte-titulo);
+    font-size: 1.42rem;
+    font-weight: 600;
+    color: #26332b;
+    line-height: 1.15;
+  }
+  .kz-foco__anos { margin: 0.2rem 0 0; font-size: 0.82rem; color: #5d6a5f; }
+  .kz-foco__ger { margin: 0.12rem 0 0; font-size: 0.7rem; color: #a8935a; font-weight: 600; }
+  .kz-foco__bio { margin: 0.55rem 0 0; font-size: 0.76rem; line-height: 1.5; color: #4c574d; }
+  .kz-foco__orn { display: block; margin: 0.5rem 0 0.15rem; color: #b3a06a; font-size: 0.8rem; }
+  .kz-foco__det {
+    border: 1px solid #496b54;
+    background: #496b54;
+    color: #f6f2e7;
+    border-radius: 999px;
+    padding: 0.42rem 1.1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .kz-foco__det:hover { background: #38553f; transform: translateY(-1px); }
+  .kz-foco__det:focus-visible { outline: 2px solid #b3a06a; outline-offset: 2px; }
+
+  /* ---------- rodapé do palco ---------- */
+  .kz-rodape {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 0.8rem;
+    padding: 0 0.4rem;
+    flex-wrap: wrap;
+  }
+  .kz-rodape__dica { margin: 0; font-size: 0.78rem; color: #8a7d5c; max-width: 46ch; }
+  .kz-rodape__cont { margin: 0; font-size: 0.78rem; font-weight: 600; color: #496b54; }
+
+  /* ---------- painel de detalhes ---------- */
+  .kz-painel {
+    background: #fffdf8;
+    border: 1px solid #e6ddc7;
+    border-radius: 18px;
+    box-shadow: 0 6px 26px rgba(64, 52, 28, 0.08);
+    padding: 1rem 1.05rem 1.2rem;
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    position: sticky;
+    top: 1rem;
+    height: fit-content;
+    width: 340px;
+  }
+  .kz-painel:not(.kz-painel--aberto) { display: none; }
+  .kz-painel__topo {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.7rem;
+    border-bottom: 1px solid #efe7d3;
+    margin-bottom: 0.9rem;
+  }
+  .kz-painel__marca { color: #a8935a; }
+  .kz-painel__topo h2 {
+    margin: 0;
+    flex: 1;
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: #5d6a5f;
+  }
+  .kz-painel__fechar {
+    border: 0;
+    background: #f1ead8;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.05rem;
+    line-height: 1;
+    color: #5d6a5f;
+  }
+  .kz-painel__fechar:hover { background: #e5dcc2; }
+  .kz-painel__ident { display: flex; gap: 0.85rem; align-items: center; margin-bottom: 1rem; }
+  .kz-painel__foto {
+    flex: 0 0 auto;
+    width: 86px;
+    height: 96px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #efe7d3;
+    border: 2px solid #f3ecd9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 14px rgba(46, 40, 22, 0.12);
+  }
+  .kz-painel__foto img { width: 100%; height: 100%; object-fit: cover; }
+  .kz-avt--painel { font-size: 1.7rem; }
+  .kz-painel__ident h3 { margin: 0; font-family: var(--fonte-titulo); font-size: 1.22rem; color: #26332b; line-height: 1.15; }
+  .kz-painel__anos { margin: 0.15rem 0 0; font-size: 0.84rem; color: #5d6a5f; }
+  .kz-painel__ger { margin: 0.1rem 0 0; font-size: 0.72rem; color: #a8935a; font-weight: 600; }
+  .kz-painel__sec { margin-bottom: 1rem; }
+  .kz-painel__sec h4 {
+    margin: 0 0 0.45rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+    color: #26332b;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .kz-painel__sec h4 span { color: #a8935a; font-size: 0.8rem; }
+  .kz-painel__sec p { margin: 0 0 0.35rem; font-size: 0.85rem; line-height: 1.55; color: #4c574d; }
+  .kz-painel__n { background: #efe7d3; border-radius: 999px; padding: 0 0.42rem; font-size: 0.7rem; color: #6c6248; }
+  .kz-painel__evs { list-style: none; margin: 0; padding: 0; font-size: 0.83rem; line-height: 1.55; color: #4c574d; }
+  .kz-painel__evs li { padding: 0.22rem 0; border-bottom: 1px dashed #efe7d3; }
+  .kz-painel__evs strong { color: #8a7d5c; }
+  .kz-painel__acoes { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.2rem; }
+  .kz-painel__acoes .btn { flex: 1; justify-content: center; text-decoration: none; text-align: center; }
+
+  /* mini-linha de parente no painel */
+  .kz-mini {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.4rem 0.3rem;
+    background: none;
+    border: 0;
+    border-bottom: 1px solid #f4eedd;
+    cursor: pointer;
+    text-align: left;
+    border-radius: 8px;
+    transition: background 0.18s;
+  }
+  .kz-mini:hover, .kz-mini:focus-visible { background: #f6f1e2; outline: none; }
+  .kz-mini__foto { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 9px; overflow: hidden; background: #efe7d3; display: flex; align-items: center; justify-content: center; }
+  .kz-mini__foto img { width: 100%; height: 100%; object-fit: cover; }
+  .kz-mini__foto .kz-avt { font-size: 0.75rem; }
+  .kz-mini__txt { display: flex; flex-direction: column; gap: 0.02rem; min-width: 0; flex: 1; }
+  .kz-mini__txt strong { font-family: var(--fonte-titulo); font-size: 0.9rem; color: #26332b; font-weight: 600; }
+  .kz-mini__txt > span { font-size: 0.72rem; color: #8a7d5c; }
+  .kz-mini__rot { font-size: 0.58rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #a8935a; }
+  .kz-mini__seta { color: #c3b587; font-size: 1.1rem; }
+
+  /* ---------- modal parentesco ---------- */
+  .kz-relacao-modal { position: fixed; inset: 0; z-index: 900; display: flex; align-items: center; justify-content: center; padding: 1rem; }
   .kz-relacao-modal[hidden] { display: none; }
-  .kz-relacao-backdrop { position: absolute; inset: 0; background: rgba(20,24,22,0.75); }
-  .kz-relacao-caixa { position: relative; z-index: 1; background: var(--papel); border-radius: 16px; padding: 1.4rem; width: min(92vw, 640px); max-height: 90vh; overflow: auto; box-shadow: 0 24px 64px rgba(0,0,0,0.4); }
-  .kz-relacao-escolhas { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin: 0.8rem 0; }
-  @media (max-width: 520px) { .kz-relacao-escolhas { grid-template-columns: 1fr; } }
-  .kz-relacao-escolhas label { display: block; font-size: 0.9rem; color: var(--texto-suave); }
-  .kz-relacao-escolhas input { width: 100%; margin-top: 0.3rem; padding: 0.5rem 0.7rem; border: 1.5px solid var(--borda); border-radius: 10px; font-size: 1rem; }
-  .kz-relacao-resultado { margin: 0.8rem 0; padding: 0.8rem; background: var(--creme); border-radius: 10px; font-size: 0.92rem; min-height: 2rem; }
-  .kz-rel-caminho { word-break: break-word; }
+  .kz-relacao-backdrop { position: absolute; inset: 0; background: rgba(24, 30, 25, 0.62); backdrop-filter: blur(2px); }
+  .kz-relacao-caixa {
+    position: relative;
+    z-index: 1;
+    background: #fffdf8;
+    border: 1px solid #e6ddc7;
+    border-radius: 20px;
+    padding: 1.5rem 1.6rem 1.4rem;
+    width: min(94vw, 620px);
+    max-height: 88vh;
+    overflow: auto;
+    box-shadow: 0 30px 80px rgba(20, 24, 20, 0.4);
+  }
+  .kz-relacao-caixa h2 { margin: 0 0 0.3rem; font-family: var(--fonte-titulo); font-size: 1.4rem; color: #26332b; }
+  .kz-relacao-hint { margin: 0 0 1rem; font-size: 0.85rem; color: #6c6248; line-height: 1.5; }
+  .kz-relacao-escolhas { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
+  .kz-relacao-escolhas label { position: relative; display: block; font-size: 0.78rem; font-weight: 600; color: #5d6a5f; }
+  .kz-relacao-escolhas input {
+    width: 100%;
+    margin-top: 0.3rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid #ddd2b2;
+    border-radius: 11px;
+    font-size: 0.95rem;
+    background: #fdfbf4;
+    outline: none;
+  }
+  .kz-relacao-escolhas input:focus { border-color: #496b54; }
+  .kz-relacao-resultado { margin: 1rem 0; padding: 0.9rem 1rem; background: #f6f1e2; border-radius: 13px; font-size: 0.88rem; line-height: 1.6; min-height: 2.6rem; color: #4c574d; }
+  .kz-rel-caminho { display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem 0.15rem; margin-top: 0.4rem; }
+  .kz-rel-caminho small { color: #a8935a; font-size: 0.7rem; }
+  .kz-rel-pess {
+    border: 1px solid #cfc3a0;
+    background: #fffdf8;
+    border-radius: 999px;
+    padding: 0.22rem 0.75rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #38553f;
+    cursor: pointer;
+  }
+  .kz-rel-pess:hover { background: #efe7d3; }
+  .kz-rel-nota { margin: 0.5rem 0 0; font-size: 0.74rem; color: #8a7d5c; }
   .kz-relacao-acoes { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
-  .kz-in { animation: kzFade 0.35s ease; }
-  @keyframes kzFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-  @media (prefers-reduced-motion: reduce) { .kz-in { animation: none; } }
+  /* ---------- animações ---------- */
+  .kz-in { animation: kzFade 0.28s ease both; }
+  .kz-zona--esq.kz-in { animation-name: kzEsq; }
+  .kz-zona--dir.kz-in { animation-name: kzDir; }
+  .kz-zona--topo.kz-in { animation-name: kzTopo; }
+  .kz-zona--baixo.kz-in { animation-name: kzBaixo; }
+  @keyframes kzFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes kzTopo { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+  @keyframes kzBaixo { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes kzEsq { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
+  @keyframes kzDir { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .kz-in { animation: none !important; }
+    .kz-card, .kz-rail__btn, .kz-foco__det { transition: none; }
+  }
 
-  @media (max-width: 720px) {
-    .kz-centro__card { max-width: 100%; }
-    .kz-painel { width: 100%; }
+  /* ===================== RESPONSIVO ===================== */
+  /* notebook */
+  @media (max-width: 1180px) {
+    .kz-main .kz-main__grid { grid-template-columns: 76px minmax(0, 1fr); }
+    .kz-painel:not(.kz-painel--aberto) { display: block; visibility: hidden; }
+    .kz-painel {
+      position: fixed;
+      top: auto;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      width: auto;
+      z-index: 800;
+      max-height: 72vh;
+      border-radius: 20px 20px 0 0;
+      transform: translateY(103%);
+      transition: transform 0.28s ease, visibility 0.28s;
+      box-shadow: 0 -14px 44px rgba(20, 24, 20, 0.25);
+    }
+    .kz-painel--aberto { transform: translateY(0); visibility: visible; }
+  }
+  /* tablet */
+  @media (max-width: 900px) {
+    .kz-hero__conteudo { gap: 1.3rem; padding: 2rem 1.1rem 2.2rem; }
+    .kz-kanji { font-size: 2.4rem; padding: 0.8rem 0.9rem; }
+    .kz-main .kz-main__grid { grid-template-columns: minmax(0, 1fr); }
+    .kz-rail {
+      position: static;
+      flex-direction: row;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 0.5rem;
+    }
+    .kz-palco { min-height: 0; padding: 1rem; overflow: hidden; display: flex; flex-direction: column; gap: 1rem; }
+    .kz-palco::before { display: none; }
+    .kz-linhas { display: none; }
+    /* empilha em blocos: foco primeiro, depois grupos */
+    .kz-centro { order: 0; align-self: center; }
+    .kz-zona { order: 1; }
+    .kz-zona--esq .kz-grupo, .kz-zona--dir .kz-grupo { align-items: center; }
+    .kz-grupo__cards { gap: 0.5rem; }
+    .kz-zona--esq .kz-grupo__cards, .kz-zona--dir .kz-grupo__cards { flex-direction: row; flex-wrap: wrap; }
+    .kz-in { animation: kzFade 0.25s ease both; }
+    @keyframes kzFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+  }
+  /* celular */
+  @media (max-width: 640px) {
+    .kz-hero__conteudo { flex-direction: column; align-items: flex-start; gap: 1rem; padding: 1.6rem 1rem 1.8rem; }
+    .kz-kanji { font-size: 2rem; padding: 0.6rem 0.7rem; }
+    .kz-hero__desc { font-size: 0.9rem; }
+    .kz-busca { max-width: none; }
+    .kz-foco { width: min(300px, 86vw); }
+    .kz-foco__foto { width: 138px; height: 158px; }
+    .kz-card { width: 100%; max-width: 340px; }
+    .kz-rail__btn { width: 58px; font-size: 0.6rem; }
+    .kz-rodape { justify-content: center; text-align: center; }
+    .kz-relacao-escolhas { grid-template-columns: 1fr; }
+    .kz-relacao-caixa { padding: 1.2rem 1.1rem; }
+    .kz-painel__ident h3 { font-size: 1.08rem; }
   }
 </style>

@@ -1159,4 +1159,26 @@ const kzPayload = JSON.stringify({ pessoas: dados, historias }).replace(/</g, '\
   @media (max-width: 560px) {
     .kz-zone--children .kz-zone__nodes { grid-template-columns: minmax(0,1fr) !important; }
   }
+
+
+  /* Correções de legibilidade e fotografia da pessoa selecionada */
+  .kz-node { display:flex !important; flex-direction:row !important; align-items:center !important; gap:.55rem !important; }
+  .kz-node__text { display:flex !important; flex:1 1 auto !important; flex-direction:column !important; align-items:flex-start !important; justify-content:center !important; min-width:0 !important; width:1px; gap:.16rem !important; text-align:left !important; }
+  .kz-node__name, .kz-node__relationship, .kz-node__year { display:block !important; width:100%; white-space:normal !important; overflow-wrap:anywhere !important; line-height:1.28 !important; }
+  .kz-node__relationship { font-size:.66rem !important; }
+  .kz-node__year { font-size:.64rem !important; }
+  .kz-portrait--large { display:grid !important; flex:0 0 auto !important; place-items:center !important; position:relative; overflow:hidden !important; width:min(100%,190px) !important; height:190px !important; aspect-ratio:4/5 !important; margin:.25rem auto .9rem !important; background:linear-gradient(145deg,#e6dcc4,#c9d0bd) !important; }
+  .kz-portrait--large .kz-initials { display:block !important; color:#536858 !important; font:500 2.6rem Georgia,serif !important; }
+  .kz-portrait--large img { display:block !important; width:100% !important; height:100% !important; object-fit:cover !important; }
+  .kz-focus { display:flex !important; flex-direction:column !important; align-items:stretch !important; }
+  .kz-focus__overline, .kz-focus__name, .kz-focus__dates, .kz-focus__generation { align-self:center; }
+  .kz-focus__bio { max-width:34rem; margin-left:auto !important; margin-right:auto !important; }
+  @media (min-width:1260px) {
+    .kz-workspace { grid-template-columns:minmax(0,1fr) 300px !important; }
+    .kz-details { position:static !important; max-height:none !important; overflow:visible !important; }
+  }
+  @media (max-width:860px) {
+    .kz-node__text { width:auto !important; }
+    .kz-portrait--large { width:min(100%,180px) !important; height:180px !important; }
+  }
 </style>

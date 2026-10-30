@@ -1,7 +1,40 @@
 ---
-import { SignIn } from "@clerk/astro/components";
+import { clerkEnabled } from '../lib/clerk';
+
+const clerkAtivo = clerkEnabled();
 ---
 
-<div style="display:flex;min-height:100vh;align-items:center;justify-content:center">
-  <SignIn />
+<div style="display:flex;min-height:100vh;align-items:center;justify-content:center;padding:2rem;text-align:center">
+  <div style="max-width:34rem">
+    <h1 style="margin:0 0 0.6rem">
+      {clerkAtivo ? 'Entrar com conta social' : 'Login social indisponível'}
+    </h1>
+    <p style="margin:0 0 1rem;color:#5d6a5f;line-height:1.6">
+      {
+        clerkAtivo ? (
+          <>
+            O login com Google, Facebook e GitHub está disponível nesta página.
+          </>
+        ) : (
+          <>
+            O Clerk ainda não tem chaves configuradas neste ambiente. Enquanto isso, use o
+            <a href="/login">acesso da família</a>, que funciona com e-mail e senha.
+          </>
+        )
+      }
+    </p>
+    <p style="margin:0 0 1.2rem;font-size:0.85rem;color:#8a7d5c">
+      {
+        clerkAtivo ? (
+          'Use o botão abaixo para continuar.'
+        ) : (
+          <>
+            Para ativar o login social, defina <code>PUBLIC_CLERK_PUBLISHABLE_KEY</code> e
+            <code>CLERK_SECRET_KEY</code> no ambiente de deploy.
+          </>
+        )
+      }
+    </p>
+    <a class="btn" href="/login">Ir para o acesso da família</a>
+  </div>
 </div>

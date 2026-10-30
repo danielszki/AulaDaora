@@ -24,3 +24,6 @@ pnpm-debug.log*
 
 # capturas de QA do Kizuna
 screenshots-kizuna/
+
+# clerk configuration (can include secrets)
+/.clerk/

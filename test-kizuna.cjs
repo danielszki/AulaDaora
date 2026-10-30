@@ -1,7 +1,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 
-const BASE = 'http://127.0.0.1:4322';
+const BASE = process.env.KZ_BASE || 'http://127.0.0.1:4322';
 const OUT = '/home/mint/opencode/auladaora/AulaDaora/screenshots-kizuna';
 fs.mkdirSync(OUT, { recursive: true });
 

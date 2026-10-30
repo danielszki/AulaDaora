@@ -8,7 +8,7 @@ interface Props {
 const { historia } = Astro.props;
 ---
 
-<article class="card historia" id={historia.id}>
+<article class="card historia" id={historia.id} data-reveal>
   <h3>{historia.titulo}</h3>
   <p>{historia.texto}</p>
   <p class="historia__meta">

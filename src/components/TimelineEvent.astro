@@ -17,6 +17,7 @@ const rotuloTipo = { nascimento: 'Nascimento', despedida: 'Despedida', marco: 'M
 <article
   class:list={['evento', `evento--${tipo}`, { 'evento--compacto': compacto }]}
   data-tipo={tipo}
+  data-reveal
 >
   <div class="evento__linha">
     <span class="evento__ano">{evento.ano}</span>

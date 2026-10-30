@@ -1,7 +1,6 @@
 import clerk from '@clerk/astro';
 import vercel from '@astrojs/vercel';
 import { defineConfig } from 'astro/config';
-import { loadEnv } from 'vite';
 
 /**
  * A integração do Clerk é habilitada somente quando as chaves existem.
@@ -13,21 +12,27 @@ import { loadEnv } from 'vite';
  *   PUBLIC_CLERK_PUBLISHABLE_KEY
  *   CLERK_SECRET_KEY
  */
-export default defineConfig(({ mode }) => {
-  const env = { ...loadEnv(mode, process.cwd(), ''), ...process.env };
+const clerkAtivo = Boolean(process.env.PUBLIC_CLERK_PUBLISHABLE_KEY && process.env.CLERK_SECRET_KEY);
 
-  const clerkAtivo = Boolean(env.PUBLIC_CLERK_PUBLISHABLE_KEY && env.CLERK_SECRET_KEY);
+if (!clerkAtivo) {
+  console.warn(
+    '[astro] Clerk inativo: defina PUBLIC_CLERK_PUBLISHABLE_KEY e CLERK_SECRET_KEY para habilitar o login social.',
+  );
+}
 
-  if (!clerkAtivo) {
-    console.warn(
-      '[astro] Clerk inativo: defina PUBLIC_CLERK_PUBLISHABLE_KEY e CLERK_SECRET_KEY para habilitar o login social.',
-    );
-  }
-
-  return {
-    integrations: clerkAtivo ? [clerk()] : [],
-    site: 'https://familiakato.vercel.app',
-    output: 'server',
-    adapter: vercel(),
-  };
+export default defineConfig({
+  integrations: clerkAtivo ? [clerk()] : [],
+  site: 'https://familiakato.vercel.app',
+  output: 'server',
+  adapter: vercel(),
+  vite: {
+    ssr: { external: ['node:async_hooks'] },
+    build: {
+      target: 'es2022',
+      // O SDK do Clerk importa 'cloudflare:workers' de forma dinamica e
+      // tolerante (try/catch). Sem marcá-lo como external o Rollup falha
+      // ao resolver o modulo quando a integração do Clerk está desligada.
+      rollupOptions: { external: ['cloudflare:workers'] },
+    },
+  },
 });

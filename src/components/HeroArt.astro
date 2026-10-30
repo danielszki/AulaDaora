@@ -1,4 +1,5 @@
 <svg
+  id="hero-art"
   viewBox="0 0 1200 420"
   preserveAspectRatio="xMidYMax slice"
   xmlns="http://www.w3.org/2000/svg"
@@ -6,22 +7,28 @@
 >
   <rect width="1200" height="420" fill="#F3EEEB"></rect>
 
-  <path d="M0 250 L170 130 L290 250 Z" fill="#CFD6DD"></path>
-  <path d="M150 260 L360 90 L540 260 Z" fill="#E2E2E3"></path>
-  <path d="M420 265 L620 150 L790 265 Z" fill="#CFD6DD"></path>
-  <path d="M700 268 L900 120 L1120 268 Z" fill="#E2E2E3"></path>
+  <g class="hero-mountains">
+    <path d="M0 250 L170 130 L290 250 Z" fill="#CFD6DD"></path>
+    <path d="M150 260 L360 90 L540 260 Z" fill="#E2E2E3"></path>
+    <path d="M420 265 L620 150 L790 265 Z" fill="#CFD6DD"></path>
+    <path d="M700 268 L900 120 L1120 268 Z" fill="#E2E2E3"></path>
+  </g>
 
-  <circle cx="960" cy="110" r="52" fill="#E2C1CA"></circle>
+  <circle class="hero-sun" cx="960" cy="110" r="52" fill="#E2C1CA"></circle>
 
-  <path d="M0 255 Q300 215 600 250 T1200 245 L1200 420 L0 420 Z" fill="#D7D3BD"></path>
-  <path d="M0 320 Q400 285 760 320 T1200 315 L1200 420 L0 420 Z" fill="#ECE9E7"></path>
+  <g class="hero-fields">
+    <path d="M0 255 Q300 215 600 250 T1200 245 L1200 420 L0 420 Z" fill="#D7D3BD"></path>
+    <path d="M0 320 Q400 285 760 320 T1200 315 L1200 420 L0 420 Z" fill="#ECE9E7"></path>
+  </g>
 
-  <rect x="806" y="238" width="9" height="96" rx="4" fill="#93475F"></rect>
-  <circle cx="810" cy="228" r="52" fill="#B05D7A"></circle>
-  <circle cx="770" cy="252" r="34" fill="#B05D7A"></circle>
-  <circle cx="852" cy="254" r="30" fill="#B05D7A"></circle>
+  <g class="hero-tree">
+    <rect x="806" y="238" width="9" height="96" rx="4" fill="#93475F"></rect>
+    <circle cx="810" cy="228" r="52" fill="#B05D7A"></circle>
+    <circle cx="770" cy="252" r="34" fill="#B05D7A"></circle>
+    <circle cx="852" cy="254" r="30" fill="#B05D7A"></circle>
+  </g>
 
-  <g fill="#E2C1CA">
+  <g class="hero-petals" fill="#E2C1CA">
     <circle cx="180" cy="330" r="7"></circle>
     <circle cx="255" cy="365" r="5"></circle>
     <circle cx="340" cy="340" r="6"></circle>
@@ -32,3 +39,53 @@
     <circle cx="1075" cy="390" r="5"></circle>
   </g>
 </svg>
+
+<script>
+  import { animate, stagger } from 'animejs';
+
+  // entrada discreta da ilustração: nada de zoom, só opacidade e um deslize curto
+  if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const art = document.getElementById('hero-art');
+    if (art) {
+
+      animate(art.querySelectorAll('.hero-mountains path'), {
+        opacity: [0, 1],
+        translateY: [16, 0],
+        duration: 900,
+        delay: stagger(90),
+        ease: 'out(2)',
+      });
+
+      animate(art.querySelectorAll('.hero-fields path'), {
+        opacity: [0, 1],
+        translateY: [10, 0],
+        duration: 800,
+        delay: stagger(120, { start: 220 }),
+        ease: 'out(2)',
+      });
+
+      animate(art.querySelector('.hero-sun'), {
+        opacity: [0, 1],
+        duration: 900,
+        delay: 260,
+        ease: 'out(2)',
+      });
+
+      animate(art.querySelector('.hero-tree'), {
+        opacity: [0, 1],
+        translateY: [8, 0],
+        duration: 900,
+        delay: 420,
+        ease: 'out(2)',
+      });
+
+      animate(Array.from(art.querySelectorAll('.hero-petals circle')), {
+        opacity: [0, 1],
+        translateY: [-10, 0],
+        duration: 700,
+        delay: stagger(60, { start: 520 }),
+        ease: 'out(2)',
+      });
+    }
+  }
+</script>

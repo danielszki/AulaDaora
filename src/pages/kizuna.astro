@@ -246,9 +246,9 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   /* ---------- cartões ---------- */
   function fotoHTML(p, classe) {
     if (p.foto) {
-      return `<img src="${esc(p.foto)}" alt="Foto de ${esc(p.nome)}" loading="lazy" decoding="async" />`;
+      return `<span class="kz-retrato kz-retrato--real ${classe || ''}" aria-hidden="true"><img src="${esc(p.foto)}" alt="Foto de ${esc(p.nome)}" loading="lazy" decoding="async" /></span>`;
     }
-    return `<span class="kz-avt ${classe || ''}" aria-hidden="true">${esc(iniciais(p.nome))}</span>`;
+    return `<span class="kz-retrato kz-retrato--placeholder ${classe || ''}" aria-hidden="true">${esc(iniciais(p.nome))}</span>`;
   }
 
   function cardHTML(p, rotulo) {
@@ -312,7 +312,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     listasAtuais = { pais: ps, conjuges: cs.concat(xs), irmaos: is, filhos: fs };
 
     const bioCurta = p.bio ? (p.bio.length > 150 ? p.bio.slice(0, 148).trim() + '…' : p.bio) : '';
-    centroEl.innerHTML = `<article class="kz-foco">
+    centroEl.innerHTML = `<article class="kz-foco" data-tem-foto="${p.foto ? 1 : 0}">
       <span class="kz-foco__selo">Pessoa em foco</span>
       <div class="kz-foco__foto">${fotoHTML(p, 'kz-avt--foco')}</div>
       <h2 class="kz-foco__nome">${esc(p.nome)}</h2>
@@ -918,7 +918,21 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     justify-content: center;
   }
   .kz-card__foto img { width: 100%; height: 100%; object-fit: cover; }
-  .kz-card__txt { display: flex; flex-direction: column; gap: 0.05rem; min-width: 0; }
+  .kz-card__foto .kz-retrato { width: 100%; height: 100%; }
+  .kz-card__txt { display: flex; flex-direction: column; gap: 0.1rem; min-width: 0; }
+  .kz-card__rot { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #9a8c64; }
+  .kz-card__nome {
+    font-family: var(--fonte-titulo);
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: #26332b;
+    line-height: 1.15;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .kz-card__anos { font-size: 0.72rem; color: #5d6a5f; }
+  .kz-card__ger { font-size: 0.64rem; color: #9a8c64; }
   .kz-card__rot { font-size: 0.6rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #9a8c64; }
   .kz-card__nome {
     font-family: var(--fonte-titulo);
@@ -934,6 +948,36 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   }
   .kz-card__anos { font-size: 0.72rem; color: #5d6a5f; }
   .kz-card__ger { font-size: 0.64rem; color: #9a8c64; }
+
+  /* ---------- retrato (foto real ou placeholder premium) ---------- */
+  .kz-retrato {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    background: #efe7d3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .kz-retrato img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .kz-retrato--placeholder {
+    color: #a8935a;
+    font-family: var(--fonte-titulo);
+    font-weight: 600;
+  }
+  .kz-retrato--placeholder::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(150deg, #496b54, #2f4a3a);
+    opacity: 0.85;
+    border-radius: 10px;
+  }
+  .kz-retrato--placeholder span {
+    position: relative;
+    z-index: 1;
+    font-size: 1rem;
+  }
 
   .kz-avt {
     display: flex;
@@ -961,6 +1005,10 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     position: relative;
     scroll-margin-top: 96px;
   }
+  .kz-foco[data-tem-foto="1"] {
+    border: 1.5px solid #d9b96a;
+    box-shadow: 0 20px 52px rgba(46, 40, 22, 0.2), 0 0 0 1px rgba(217, 185, 106, 0.35);
+  }
   .kz-foco::after {
     content: '';
     position: absolute;
@@ -968,6 +1016,9 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     border: 1px solid rgba(179, 160, 106, 0.4);
     border-radius: 15px;
     pointer-events: none;
+  }
+  .kz-foco[data-tem-foto="1"]::after {
+    border-color: rgba(217, 185, 106, 0.5);
   }
   .kz-foco__selo {
     display: inline-block;
@@ -992,6 +1043,13 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     justify-content: center;
   }
   .kz-foco__foto img { width: 100%; height: 100%; object-fit: cover; }
+  .kz-foco[data-tem-foto="1"] .kz-foco__foto {
+    border: 3px solid #d9b96a;
+    box-shadow: 0 8px 24px rgba(179, 160, 106, 0.35);
+  }
+  .kz-foco[data-tem-foto="0"] .kz-foco__foto {
+    border: 3px solid #f3ecd9;
+  }
   .kz-avt--foco { font-size: 2.6rem; }
   .kz-foco__nome {
     margin: 0;

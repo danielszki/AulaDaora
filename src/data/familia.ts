@@ -137,6 +137,7 @@ export const pessoas: Pessoa[] = [
     geracao: 2,
     pais: ['yotaro-kato', 'toyo-kato'],
     conjuges: ['kiyoshi-suzuki'],
+    foto: '/fotos/IMG-20260907-WA0008.jpg',
     bio: 'A primeira filha do casal. Por ser a mais velha, muitas vezes tomou o lugar da mãe cuidando dos irmãos pequenos. Ficou viúva cedo e criou os filhos sozinha, sempre alegre. A família a chamava com carinho de "tia gorda" — fortinha, muito alegre e "pessoa boníssima".',
   },
   {
@@ -1069,7 +1070,6 @@ export const pessoas: Pessoa[] = [
     pais: [],
     conjuges: [],
     observacao: 'Primogênito citado na festa junina de 2026.',
-    foto: '/fotos/IMG-20261007-WA0010.jpg',
   },
   {
     id: 'giancarlo-kyomen-kato',

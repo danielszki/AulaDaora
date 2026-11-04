@@ -9,6 +9,11 @@ import {
   esposoDaFamilia,
 } from '../../data/familia';
 
+// O site roda com output: 'server'. Sem `prerender`, esta rota vira SSR e o
+// getStaticPaths é ignorado — `Astro.props.pessoa` fica undefined e a página
+// responde 500. Os dados são estáticos, então geramos uma página por pessoa.
+export const prerender = true;
+
 export function getStaticPaths() {
   return pessoas.map((pessoa) => ({ params: { id: pessoa.id }, props: { pessoa } }));
 }

@@ -21,6 +21,8 @@ pnpm-debug.log*
 .DS_Store
 .vercel
 .env*
+# modelo de variáveis (sem segredos) deve ser versionado
+!.env.example
 
 # capturas de QA do Kizuna
 screenshots-kizuna/

@@ -45,10 +45,20 @@ function anos(p: { nascimento?: string; falecimento?: string }): string {
                 <select id="f-familia" required>
                   <option value="">Selecione uma pessoa ou família…</option>
                   <optgroup label="Pessoas cadastradas">
-                    {pessoas.map(p => `<option value="pessoa:${p.id}">${esc(p.nome)} (${anos(p)})</option>`).join('')}
+                    {pessoas.map((p) => {
+                      const partes = [];
+                      if (p.nascimento) partes.push(`n. ${p.nascimento}`);
+                      if (p.falecimento) partes.push(`f. ${p.falecimento}`);
+                      const sufixo = partes.join(' · ');
+                      const nome = String(p.nome || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                      return `<option value="pessoa:${p.id}">${nome}${sufixo ? ' · ' + sufixo : ''}</option>`;
+                    }).join('')}
                   </optgroup>
                   <optgroup label="Álbuns existentes">
-                    {albuns.map(a => `<option value="album:${a.id}">${esc(a.titulo)} · ${a.periodo}</option>`).join('')}
+                    {albuns.map((a) => {
+                      const titulo = String(a.titulo || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+                      return `<option value="album:${a.id}">${titulo} · ${a.periodo}</option>`;
+                    }).join('')}
                   </optgroup>
                   <option value="__novo__">+ Adicionar nova pessoa/família</option>
                 </select>

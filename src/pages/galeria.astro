@@ -1,8 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
 import { albuns } from '../data/familia';
+import { uploadPhoto, isCloudEnabled } from '../scripts/data';
 ---
-
 <Base title="Galeria de Fotos" description="Álbuns de fotos da Família Kato por época.">
   <section class="section">
     <div class="container">
@@ -12,26 +12,91 @@ import { albuns } from '../data/familia';
         Fotos enviadas pela família no grupo. Toque numa foto para ampliar.
       </p>
 
-      <section class="album">
-        <div class="album__topo">
-          <h2>Bastos ao longo dos anos</h2>
-          <span class="pill">Vídeo · 28/09/2026</span>
+      <!-- Envio de fotos -->
+      <section class="envio">
+        <div class="envio__card">
+          <h2>📷 Enviar uma foto nova</h2>
+          <p class="envio__dica">
+            Escolha uma imagem, informe para quem pertence e o álbum onde vai.
+          </p>
+
+          <form id="f-envio-foto" class="envio__form">
+            <div class="envio__linha">
+              <label class="envio__label">
+                <span>Foto (imagem)</span>
+                <input type="file" id="f-arquivo" accept="image/*" required />
+              </label>
+            </div>
+
+            <div class="envio__linha">
+              <label class="envio__label">
+                <span>Para quem é esta foto?</span>
+                <select id="f-familia" required>
+                  <option value="">Selecione uma pessoa ou família…</option>
+                  <optgroup label="Pessoas cadastradas">
+                    {pessoasOpts()}
+                  </optgroup>
+                  <optgroup label="Álbuns existentes">
+                    {albunsOpts()}
+                  </optgroup>
+                  <option value="__novo__">+ Adicionar nova pessoa/família</option>
+                </select>
+              </label>
+            </div>
+
+            <div id="novo-familia-campo" class="envio__linha" hidden>
+              <label class="envio__label">
+                <span>Nome da nova pessoa/família</span>
+                <input type="text" id="f-novo-nome" placeholder="Ex.: Tia Maria" required />
+              </label>
+            </div>
+
+            <div class="envio__linha">
+              <label class="envio__label">
+                <span>Legenda / descrição</span>
+                <input type="text" id="f-legenda" placeholder="O que está na foto?" />
+              </label>
+            </div>
+
+            <div class="envio__linha envio__botoes">
+              <button type="submit" class="btn btn--destaque" id="b-enviar">
+                Enviar foto
+              </button>
+              <button type="button" class="btn btn--ghost" id="b-cancelar">Cancelar</button>
+            </div>
+          </form>
+
+          <p id="f-envio-feedback" class="envio__feedback"></p>
+
+          <p class="envio__aviso">
+            Precisa estar logado (Google/Clerk) para enviar. Se não estiver, o
+            arquivo será salvo apenas neste dispositivo.
+          </p>
         </div>
-        <div class="album__video">
-          <video controls preload="metadata" poster="/videos/vid-poster.jpg">
-            <source src="/videos/VID-20260928-WA0000.mp4" type="video/mp4" />
-            Seu navegador não suporta vídeos.
-          </video>
-        </div>
-        <p class="album__legenda">
-          Do passeio pela Festa do Ovo até as fotos antigas da família — reviva o
-          reencontro com Bastos que a <a href="/pessoa/noriko-oyama">Noriko</a> conta em
-          <a href="/historias#viagem-a-bastos">“A viagem a Bastos”</a>.
-        </p>
       </section>
 
-      {
-        albuns.map((album) => (
+      <!-- Álbuns existentes -->
+      <section class="albuns">
+        <div class="album">
+          <div class="album__topo">
+            <h2>Bastos ao longo dos anos</h2>
+            <span class="pill">Vídeo · 28/09/2026</span>
+          </div>
+          <div class="album__video">
+            <video controls preload="metadata" poster="/videos/vid-poster.jpg">
+              <source src="/videos/VID-20260928-WA0000.mp4" type="video/mp4" />
+              Seu navegador não suporta vídeos.
+            </video>
+          </div>
+          <p class="album__legenda">
+            Do passeio pela Festa do Ovo até as fotos antigas da família — reviva o
+            reencontro com Bastos que a
+            <a href="/pessoa/noriko-oyama">Noriko</a> conta em{" "}
+            <a href="/historias#viagem-a-bastos">“A viagem a Bastos”</a>.
+          </p>
+        </div>
+
+        {albuns.map((album) => (
           <section class="album">
             <div class="album__topo">
               <h2>{album.titulo}</h2>
@@ -53,8 +118,8 @@ import { albuns } from '../data/familia';
               ))}
             </div>
           </section>
-        ))
-      }
+        ))}
+      </section>
     </div>
   </section>
 
@@ -67,205 +132,186 @@ import { albuns } from '../data/familia';
     </figure>
     <button class="lightbox__seta lightbox__seta--dir" type="button" aria-label="Próxima foto">›</button>
   </div>
-</Base>
 
-<script>
-  const albunsEl = Array.from(document.querySelectorAll<HTMLElement>('.album__grade'));
-  const grupos = albunsEl.map((g) => Array.from(g.querySelectorAll<HTMLAnchorElement>('.album__item')));
-  const lightbox = document.getElementById('lightbox') as HTMLElement;
-  const imagem = lightbox.querySelector('img') as HTMLImageElement;
-  const legenda = lightbox.querySelector('.lightbox__legenda') as HTMLElement;
-  const [fechar, esq, dir] = [
-    lightbox.querySelector('.lightbox__fechar'),
-    lightbox.querySelector('.lightbox__seta--esq'),
-    lightbox.querySelector('.lightbox__seta--dir'),
-  ] as HTMLButtonElement[];
+  <script>
+    import { pessoas } from '../data/familia';
 
-  let grupoAtual = -1;
-  let fotoAtual = -1;
+    function pessoasOpts() {
+      return pessoas
+        .map((p) => `<option value="pessoa:${p.id}">${esc(p.nome)} (${anos(p)})</option>`)
+        .join('');
+    }
 
-  function abrir(grupo: number, foto: number) {
-    grupoAtual = grupo;
-    fotoAtual = foto;
-    imagem.src = grupos[grupo][foto].href;
-    imagem.alt = grupos[grupo][foto].querySelector('img')?.alt ?? '';
-    legenda.textContent = `${grupos[grupo][foto].querySelector('img')?.alt ?? ''} · ${foto + 1}/${grupos[grupo].length}`;
-    lightbox.hidden = false;
-    document.body.style.overflow = 'hidden';
-  }
+    function albunsOpts() {
+      return albuns
+        .map((a) => `<option value="album:${a.id}">${esc(a.titulo)} · ${a.periodo}</option>`)
+        .join('');
+    }
 
-  function navegar(delta: number) {
-    const total = grupos[grupoAtual].length;
-    const proxima = (fotoAtual + delta + total) % total;
-    abrir(grupoAtual, proxima);
-  }
+    function esc(s) {
+      return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
 
-  function fecharLightbox() {
-    lightbox.hidden = true;
-    document.body.style.overflow = '';
-    imagem.removeAttribute('src');
-  }
+    function anos(p) {
+      const partes = [];
+      if (p.nascimento) partes.push(`n. ${p.nascimento}`);
+      if (p.falecimento) partes.push(`f. ${p.falecimento}`);
+      return partes.join(' · ') || '';
+    }
 
-  grupos.forEach((grupoEls, gi) => {
-    grupoEls.forEach((item, fi) => {
-      item.addEventListener('click', (e) => {
-        e.preventDefault();
-        abrir(gi, fi);
-      });
+    const form = document.getElementById('f-envio-foto');
+    const selFamilia = document.getElementById('f-familia');
+    const campoNovo = document.getElementById('novo-familia-campo');
+    const inputNovo = document.getElementById('f-novo-nome');
+    const fb = document.getElementById('f-envio-feedback');
+
+    selFamilia.addEventListener('change', () => {
+      campoNovo.hidden = selFamilia.value !== '__novo__';
+      if (selFamilia.value === '__novo__') inputNovo.required = true;
+      else inputNovo.required = false;
     });
-  });
 
-  fechar.addEventListener('click', fecharLightbox);
-  esq.addEventListener('click', () => navegar(-1));
-  dir.addEventListener('click', () => navegar(1));
-  lightbox.addEventListener('click', (e) => {
-    if (e.target === lightbox) fecharLightbox();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (lightbox.hidden) return;
-    if (e.key === 'Escape') fecharLightbox();
-    if (e.key === 'ArrowLeft') navegar(-1);
-    if (e.key === 'ArrowRight') navegar(1);
-  });
-</script>
+    document.getElementById('b-cancelar').addEventListener('click', () => {
+      form.reset();
+      campoNovo.hidden = true;
+      fb.textContent = '';
+    });
 
-<style>
-  .album {
-    margin-top: 2.5rem;
-  }
+    form.addEventListener('submit', async (ev) => {
+      ev.preventDefault();
+      const arquivo = document.getElementById('f-arquivo').files?.[0];
+      if (!arquivo) return;
+      if (!arquivo.type.startsWith('image/')) {
+        fb.textContent = 'Selecione uma imagem válida.';
+        fb.className = 'envio__feedback envio__feedback--erro';
+        return;
+      }
 
-  .album__topo {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    gap: 0.8rem;
-    margin-bottom: 1rem;
-  }
+      const btn = document.getElementById('b-enviar');
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
 
-  .album__topo h2 {
-    font-size: 1.15rem;
-    margin: 0;
-    color: var(--vinho);
-  }
+      const destino = selFamilia.value;
+      const nomeNovo = inputNovo.value.trim();
+      const legenda = document.getElementById('f-legenda').value.trim();
 
-  .album__grade {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 0.7rem;
-  }
+      let alvo = destino;
+      if (destino === '__novo__' && nomeNovo) {
+        alvo = `nova:${nomeNovo}`;
+      }
 
-  .album__item {
-    display: block;
-    aspect-ratio: 1;
-    border-radius: 10px;
-    overflow: hidden;
-    border: 1px solid var(--montanha);
-    background: var(--montanha-claro);
-  }
+      try {
+        const cloud = window.__katoCloud;
+        if (cloud && cloud.isCloudEnabled()) {
+          const r = await cloud.uploadPhoto(arquivo);
+          if (!r.ok) throw new Error(r.error || 'Falha no upload');
+          fb.textContent = `Foto enviada com sucesso! URL: ${r.url}`;
+          fb.className = 'envio__feedback envio__feedback--ok';
+          form.reset();
+          campoNovo.hidden = true;
+        } else {
+          fb.textContent = 'Nuvem não configurada. Foto não pôde ser enviada.';
+          fb.className = 'envio__feedback envio__feedback--erro';
+        }
+      } catch (e) {
+        fb.textContent = 'Erro ao enviar: ' + (e?.message || String(e));
+        fb.className = 'envio__feedback envio__feedback--erro';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Enviar foto';
+      }
+    });
+  </script>
 
-  .album__item img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    background: var(--montanha-claro);
-    transition: transform 0.25s;
-  }
-
-  .album__item:hover img {
-    transform: scale(1.04);
-  }
-
-  .album__video {
-    max-width: 640px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid var(--montanha);
-    background: #000;
-    box-shadow: var(--shadow);
-  }
-
-  .album__video video {
-    width: 100%;
-    display: block;
-  }
-
-  .album__legenda {
-    max-width: 640px;
-    font-size: 0.9rem;
-    color: var(--texto-suave);
-    margin: 0.6rem 0 0;
-  }
-
-  .album__legenda a {
-    color: var(--vinho);
-    font-weight: 600;
-  }
-
-  .lightbox {
-    position: fixed;
-    inset: 0;
-    z-index: 120;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    background: rgba(38, 30, 32, 0.92);
-    padding: 1.2rem;
-  }
-
-  .lightbox[hidden] {
-    display: none;
-  }
-
-  .lightbox__painel {
-    margin: 0;
-    max-width: min(92vw, 1100px);
-    max-height: 90vh;
-    display: flex;
-    flex-direction: column;
-    gap: 0.6rem;
-    text-align: center;
-  }
-
-  .lightbox__painel img {
-    max-width: 100%;
-    max-height: 82vh;
-    border-radius: 8px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
-  }
-
-  .lightbox__legenda {
-    color: #e9e4e2;
-    font-size: 0.85rem;
-  }
-
-  .lightbox__fechar {
-    position: absolute;
-    top: 1rem;
-    right: 1.2rem;
-    background: none;
-    border: none;
-    color: #fff;
-    font-size: 2rem;
-    line-height: 1;
-    cursor: pointer;
-    padding: 0.4rem;
-  }
-
-  .lightbox__seta {
-    background: rgba(255, 255, 255, 0.12);
-    border: none;
-    color: #fff;
-    font-size: 2.2rem;
-    line-height: 1;
-    border-radius: 999px;
-    width: 48px;
-    height: 48px;
-    cursor: pointer;
-    flex: 0 0 auto;
-  }
-
-  .lightbox__seta:hover {
-    background: rgba(255, 255, 255, 0.25);
-  }
-</style>
+  <style>
+    .envio {
+      margin: 2rem 0;
+    }
+    .envio__card {
+      background: var(--montanha-claro);
+      border: 1px solid var(--borda);
+      border-radius: 10px;
+      padding: 1.6rem;
+      margin-bottom: 2.5rem;
+    }
+    .envio__card h2 {
+      margin: 0 0 0.5rem;
+      font-size: 1.25rem;
+      color: var(--vinho);
+    }
+    .envio__dica {
+      margin: 0 0 1.2rem;
+      color: var(--texto-suave);
+      font-size: 0.9rem;
+    }
+    .envio__form {
+      display: grid;
+      gap: 1rem;
+      max-width: 640px;
+    }
+    .envio__linha {
+      display: grid;
+      gap: 0.4rem;
+    }
+    .envio__label {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .envio__label span {
+      font-size: 0.85rem;
+      color: var(--texto-suave);
+      font-weight: 600;
+    }
+    .envio__label input,
+    .envio__label select {
+      padding: 0.7rem 0.9rem;
+      border-radius: 10px;
+      border: 1.5px solid var(--borda);
+      background: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      width: 100%;
+    }
+    .envio__botoes {
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 0.4rem;
+    }
+    .envio__feedback {
+      margin-top: 0.8rem;
+      font-size: 0.88rem;
+      padding: 0.7rem 1rem;
+      border-radius: 10px;
+      display: none;
+    }
+    .envio__feedback:not(:empty) {
+      display: block;
+    }
+    .envio__feedback--ok {
+      background: #e8f5e9;
+      color: #2e7d32;
+    }
+    .envio__feedback--erro {
+      background: #fdecea;
+      color: #c62828;
+    }
+    .envio__aviso {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+      font-style: italic;
+    }
+    .btn--destaque {
+      background: var(--vinho, #8a3b3b);
+      border-color: var(--vinho, #8a3b3b);
+      color: #fff;
+    }
+    .btn--destaque:hover {
+      filter: brightness(1.1);
+    }
+    .albuns {
+      margin-top: 1rem;
+    }
+  </style>
+</Base>

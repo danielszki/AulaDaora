@@ -195,10 +195,10 @@ const fotoHero = '/fotos/IMG-20260927-WA0014.jpg';
           <p>Nome errado, data errada, vínculo faltando? Fale com a família ou corrija na área de edição.</p>
           <p><a class="btn btn--ghost" href="/sobre">Falar conosco</a></p>
         </div>
-        <div class="card">
-          <h3>Enviar fotos e lembranças</h3>
-          <p>Fotos antigas, relatos de memória, gravações — manda pelo grupo da família ou escreve no sobre.</p>
-          <p><a class="btn btn--ghost" href="/historias">Ler o que já foi contado</a></p>
+        <div class="card card--foto">
+          <h3>📷 Enviar uma foto</h3>
+          <p>Tem uma foto da família? Envie direto pela galeria e escolha para quem ela pertence.</p>
+          <p><a class="btn" href="/galeria">Ir para a galeria</a></p>
         </div>
         <div class="card">
           <h3>Cadastrar um familiar</h3>
@@ -769,5 +769,39 @@ const fotoHero = '/fotos/IMG-20260927-WA0014.jpg';
 
   @media (prefers-reduced-motion: reduce) {
     .lightbox__img, .lightbox__backdrop { transition: none; }
+  }
+
+  /* ---- Card de envio de fotos na home ---- */
+  .card--foto {
+    border: 2px dashed var(--borda);
+    background: linear-gradient(135deg, #f7f4f0 0%, #fffefb 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .card--foto::before {
+    content: '📷';
+    position: absolute;
+    top: 0.6rem;
+    right: 0.8rem;
+    font-size: 1.6rem;
+    opacity: 0.4;
+  }
+  .card--foto h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--vinho);
+  }
+  .card--foto h3::before {
+    content: '📷';
+    font-size: 1.2rem;
+  }
+  .card--foto .btn {
+    background: var(--verde, #496b54);
+    border-color: var(--verde, #496b54);
+    color: #fff;
+  }
+  .card--foto .btn:hover {
+    filter: brightness(1.1);
   }
 </style>

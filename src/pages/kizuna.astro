@@ -518,24 +518,31 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     const fs = filhosDe(p.id);
     const evs = EVENTOS.filter((e) => e.pessoa === p.id);
     const obsCurta = p.observacao && p.observacao !== p.bio ? p.observacao : '';
+    const totalVinculos = ps.length + cs.length + xs.length + is.length + fs.length;
 
     painelCont.innerHTML = `
-      <div class="kz-painel__ident">
+      <header class="kz-painel__hero">
+        <span class="kz-painel__crest" aria-hidden="true">加</span>
+        <span class="kz-painel__onda" aria-hidden="true"></span>
         <span class="kz-painel__foto">${fotoHTML(p, 'kz-avt--painel')}</span>
-        <div>
-          <h3>${esc(p.nome)}</h3>
-          <p class="kz-painel__anos">${esc(anos(p))}</p>
-          <p class="kz-painel__ger">${esc(geracaoLabel(p.geracao))}</p>
+        <h3>${esc(p.nome)}</h3>
+        <p class="kz-painel__anos">${esc(anos(p))}</p>
+        <p class="kz-painel__ger">${esc(geracaoLabel(p.geracao))}</p>
+        <div class="kz-painel__meta">
+          <span class="kz-painel__chip">✦ ${totalVinculos} vínculo${totalVinculos === 1 ? '' : 's'}</span>
+          ${fs.length ? `<span class="kz-painel__chip">❋ ${fs.length} filho${fs.length === 1 ? '' : 's'}</span>` : ''}
+          ${ps.length ? `<span class="kz-painel__chip">· ${ps.length} ${ps.length === 1 ? 'pai/mãe' : 'pais'}</span>` : ''}
         </div>
-      </div>
-      ${p.bio ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">☰</span> Sobre</h4><p>${esc(p.bio)}</p></section>` : ''}
-      ${p.local || p.profissao ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">◉</span> Vida</h4>${p.local ? `<p><strong>Local:</strong> ${esc(p.local)}</p>` : ''}${p.profissao ? `<p><strong>Profissão:</strong> ${esc(p.profissao)}</p>` : ''}</section>` : ''}
+      </header>
+      <div class="kz-painel__divisor" aria-hidden="true"><span>✿</span></div>
+      ${p.bio ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">☰</span> Sobre</h4><p class="kz-painel__citacao">${esc(p.bio)}</p></section>` : ''}
+      ${p.local || p.profissao ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">◉</span> Vida</h4><div class="kz-painel__vidadb">${p.local ? `<div class="kz-painel__vida"><span class="kz-painel__vida-ic" aria-hidden="true">⌖</span><div><em>Local</em><p>${esc(p.local)}</p></div></div>` : ''}${p.profissao ? `<div class="kz-painel__vida"><span class="kz-painel__vida-ic" aria-hidden="true">⚙</span><div><em>Profissão</em><p>${esc(p.profissao)}</p></div></div>` : ''}</div></section>` : ''}
       ${obsCurta ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">✎</span> Observações</h4><p>${esc(obsCurta)}</p></section>` : ''}
-      ${ps.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">⚭</span> Pais</h4>${ps.map((x) => miniHTML(x, 'Pai/Mãe')).join('')}</section>` : ''}
-      ${cs.length + xs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">♡</span> ${cs.length + xs.length > 1 ? 'Cônjuges' : 'Cônjuge'}</h4>${cs.concat(xs).map((x) => miniHTML(x, xs.some((e) => e.id === x.id) ? 'Ex-cônjuge' : 'Cônjuge')).join('')}</section>` : ''}
-      ${is.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">⚭</span> Irmãos</h4>${is.map((x) => miniHTML(x, 'Irmão(a)')).join('')}</section>` : ''}
-      ${fs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">⚭</span> Filhos <span class="kz-painel__n">${fs.length}</span></h4>${fs.map((x) => miniHTML(x, 'Filho(a)')).join('')}</section>` : ''}
-      ${evs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">◷</span> Acontecimentos</h4><ul class="kz-painel__evs">${evs.map((e) => `<li><strong>${esc(e.ano)}</strong> — ${esc(e.titulo)}</li>`).join('')}</ul></section>` : ''}
+      ${ps.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">⚭</span> Pais <span class="kz-painel__n">${ps.length}</span></h4>${ps.map((x) => miniHTML(x, 'Pai/Mãe')).join('')}</section>` : ''}
+      ${cs.length + xs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">♡</span> ${cs.length + xs.length > 1 ? 'Cônjuges' : 'Cônjuge'} <span class="kz-painel__n">${cs.length + xs.length}</span></h4>${cs.concat(xs).map((x) => miniHTML(x, xs.some((e) => e.id === x.id) ? 'Ex-cônjuge' : 'Cônjuge')).join('')}</section>` : ''}
+      ${is.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">⚭</span> Irmãos <span class="kz-painel__n">${is.length}</span></h4>${is.map((x) => miniHTML(x, 'Irmão(a)')).join('')}</section>` : ''}
+      ${fs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">❋</span> Filhos <span class="kz-painel__n">${fs.length}</span></h4>${fs.map((x) => miniHTML(x, 'Filho(a)')).join('')}</section>` : ''}
+      ${evs.length ? `<section class="kz-painel__sec"><h4><span aria-hidden="true">◷</span> Acontecimentos <span class="kz-painel__n">${evs.length}</span></h4><ul class="kz-painel__evs">${evs.map((e) => `<li><strong>${esc(e.ano)}</strong> — ${esc(e.titulo)}</li>`).join('')}</ul></section>` : ''}
       ${!ps.length && !cs.length && !xs.length && !is.length && !fs.length ? '<section class="kz-painel__sec"><p>Nenhum vínculo familiar registrado até o momento.</p></section>' : ''}
       <div class="kz-painel__acoes">
         <a class="btn" href="/pessoa/${esc(p.id)}">Ver perfil completo</a>
@@ -1113,7 +1120,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   .kz-centro { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3; display: flex; align-items: center; justify-content: center; }
   .kz-foco {
     position: relative;
-    width: clamp(190px, 37%, 238px);
+    width: clamp(236px, 40%, 300px);
     aspect-ratio: 1 / 1;
     border-radius: 50%;
     background: radial-gradient(circle at 50% 38%, #fffdf4 0%, #f5edda 55%, #e7dbc0 100%);
@@ -1208,7 +1215,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     background: #fffdf8;
     border: 1px solid #e6ddc7;
     border-radius: 18px;
-    box-shadow: 0 6px 26px rgba(64, 52, 28, 0.08);
+    box-shadow: 0 14px 40px rgba(46, 40, 22, 0.18), 0 0 0 1px #ece2c6, inset 0 1px 0 #fffdf6;
     padding: 1rem 1.05rem 1.2rem;
     max-height: calc(100vh - 2rem);
     overflow: auto;
@@ -1248,40 +1255,110 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     color: #5d6a5f;
   }
   .kz-painel__fechar:hover { background: #e5dcc2; }
-  .kz-painel__ident { display: flex; gap: 0.85rem; align-items: center; margin-bottom: 1rem; }
+  /* ---------- hero do painel (dossiê) ---------- */
+  .kz-painel__hero {
+    position: relative;
+    margin: -0.55rem -0.55rem 0.85rem;
+    padding: 1.3rem 1rem 1rem;
+    border-radius: 14px;
+    text-align: center;
+    overflow: hidden;
+    color: #f3efe4;
+    background: radial-gradient(130% 130% at 50% -10%, #3b5142 0%, #26332b 55%, #19241c 100%);
+    border: 1px solid rgba(217, 185, 106, 0.4);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 28px rgba(22, 31, 24, 0.45);
+  }
+  .kz-painel__crest {
+    position: absolute;
+    top: -1.6rem; right: -0.5rem;
+    font-family: var(--fonte-jp);
+    font-size: 6.4rem;
+    line-height: 1;
+    color: rgba(217, 185, 106, 0.2);
+    pointer-events: none;
+    user-select: none;
+  }
+  .kz-painel__onda {
+    position: absolute;
+    left: 0; right: 0; bottom: -48px; height: 78px;
+    background-image: radial-gradient(circle at 50% 0, transparent 33%, rgba(217, 185, 106, 0.16) 34%, rgba(217, 185, 106, 0.16) 36%, transparent 37%, transparent 50%, rgba(217, 185, 106, 0.11) 51%, rgba(217, 185, 106, 0.11) 53%, transparent 54%);
+    background-size: 58px 34px;
+    pointer-events: none;
+    opacity: 0.9;
+  }
   .kz-painel__foto {
-    flex: 0 0 auto;
-    width: 86px;
-    height: 96px;
-    border-radius: 12px;
+    position: relative;
+    width: 80px; height: 80px;
+    margin: 0.1rem auto 0.6rem;
+    border-radius: 50%;
+    border: 2px solid #d9b96a;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.42), inset 0 0 0 3px rgba(217, 185, 106, 0.3);
     overflow: hidden;
     background: #efe7d3;
-    border: 2px solid #f3ecd9;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 14px rgba(46, 40, 22, 0.12);
+    display: flex; align-items: center; justify-content: center;
   }
   .kz-painel__foto img { width: 100%; height: 100%; object-fit: cover; }
-  .kz-avt--painel { font-size: 1.7rem; }
-  .kz-painel__ident h3 { margin: 0; font-family: var(--fonte-titulo); font-size: 1.22rem; color: #26332b; line-height: 1.15; }
-  .kz-painel__anos { margin: 0.15rem 0 0; font-size: 0.84rem; color: #5d6a5f; }
-  .kz-painel__ger { margin: 0.1rem 0 0; font-size: 0.72rem; color: #a8935a; font-weight: 600; }
-  .kz-painel__sec { margin-bottom: 1rem; }
-  .kz-painel__sec h4 {
-    margin: 0 0 0.45rem;
-    font-size: 0.86rem;
+  .kz-avt--painel { font-size: 1.6rem; }
+  .kz-painel__hero h3 { margin: 0; font-family: var(--fonte-titulo); font-size: 1.3rem; font-weight: 600; color: #f6f2e7; line-height: 1.15; }
+  .kz-painel__anos { margin: 0.24rem 0 0; font-size: 0.8rem; color: rgba(243, 239, 228, 0.85); }
+  .kz-painel__ger { margin: 0.12rem 0 0; font-size: 0.62rem; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: #d9b96a; }
+  .kz-painel__meta { position: relative; display: flex; justify-content: center; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.62rem; }
+  .kz-painel__chip {
+    display: inline-flex; align-items: center; gap: 0.3rem;
+    border: 1px solid rgba(217, 185, 106, 0.6);
+    background: rgba(217, 185, 106, 0.13);
+    color: #ecdfae;
+    padding: 0.16rem 0.62rem;
+    border-radius: 999px;
+    font-size: 0.62rem;
     font-weight: 600;
-    color: #26332b;
+    letter-spacing: 0.04em;
+  }
+  .kz-painel__divisor { display: flex; align-items: center; gap: 0.6rem; color: #c8b075; margin: 0 0 0.85rem; }
+  .kz-painel__divisor::before, .kz-painel__divisor::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg, transparent, #dccd9e, transparent); }
+  .kz-painel__divisor span { font-size: 0.8rem; }
+
+  .kz-painel__sec { margin-bottom: 1.05rem; }
+  .kz-painel__sec h4 {
+    margin: 0 0 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: #6f5f37;
+    border-left: 3px solid #d9b96a;
+    padding-left: 0.55rem;
     display: flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.42rem;
   }
-  .kz-painel__sec h4 span { color: #a8935a; font-size: 0.8rem; }
+  .kz-painel__sec h4 span[aria-hidden] { color: #a8935a; font-size: 0.85rem; }
   .kz-painel__sec p { margin: 0 0 0.35rem; font-size: 0.85rem; line-height: 1.55; color: #4c574d; }
+  .kz-painel__citacao { font-style: italic; border-left: 2px solid #ece2c6; padding-left: 0.7rem; color: #56503c; }
+
+  .kz-painel__vidadb { display: flex; flex-direction: column; gap: 0.45rem; }
+  .kz-painel__vida {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: #fbf6ea;
+    border: 1px solid #efe7d3;
+    border-radius: 12px;
+    padding: 0.38rem 0.55rem;
+  }
+  .kz-painel__vida-ic {
+    flex: 0 0 auto; width: 32px; height: 32px;
+    border-radius: 9px;
+    background: #efe7d3;
+    color: #7b6c48;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem;
+  }
+  .kz-painel__vida em { display: block; font-style: normal; font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.16em; color: #a8935a; font-weight: 700; }
+  .kz-painel__vida p { margin: 0; font-size: 0.8rem; color: #38362a; }
   .kz-painel__n { background: #efe7d3; border-radius: 999px; padding: 0 0.42rem; font-size: 0.7rem; color: #6c6248; }
-  .kz-painel__evs { list-style: none; margin: 0; padding: 0; font-size: 0.83rem; line-height: 1.55; color: #4c574d; }
-  .kz-painel__evs li { padding: 0.22rem 0; border-bottom: 1px dashed #efe7d3; }
+  .kz-painel__evs { list-style: none; margin: 0; padding: 0.15rem 0 0.15rem 1.35rem; font-size: 0.83rem; line-height: 1.5; color: #4c574d; position: relative; }
+  .kz-painel__evs::before { content: ''; position: absolute; left: 0.42rem; top: 0.5rem; bottom: 0.5rem; width: 2px; background: linear-gradient(#e3d6b6, #ece2c6); border-radius: 2px; }
+  .kz-painel__evs li { position: relative; padding: 0.32rem 0; border: 0; }
+  .kz-painel__evs li::before { content: ''; position: absolute; left: -1.15rem; top: 0.5rem; width: 11px; height: 11px; border-radius: 50%; background: #d9b96a; border: 2px solid #fffdf8; box-shadow: 0 0 0 1.5px #d9c99b; }
   .kz-painel__evs strong { color: #8a7d5c; }
   .kz-painel__acoes { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 1.2rem; }
   .kz-painel__acoes .btn { flex: 1; justify-content: center; text-decoration: none; text-align: center; }
@@ -1290,19 +1367,26 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   .kz-mini {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.62rem;
     width: 100%;
-    padding: 0.4rem 0.3rem;
-    background: none;
-    border: 0;
-    border-bottom: 1px solid #f4eedd;
+    padding: 0.44rem 0.5rem;
+    background: #fffdf4;
+    border: 1px solid #ece4cc;
     cursor: pointer;
     text-align: left;
-    border-radius: 8px;
-    transition: background 0.18s;
+    border-radius: 12px;
+    margin-bottom: 0.34rem;
+    box-shadow: 0 1px 3px rgba(46, 40, 22, 0.06);
+    transition: background 0.18s, border-color 0.18s, transform 0.18s, box-shadow 0.18s;
   }
-  .kz-mini:hover, .kz-mini:focus-visible { background: #f6f1e2; outline: none; }
-  .kz-mini__foto { flex: 0 0 auto; width: 40px; height: 40px; border-radius: 9px; overflow: hidden; background: #efe7d3; display: flex; align-items: center; justify-content: center; }
+  .kz-mini:hover, .kz-mini:focus-visible {
+    background: #f8f2e0;
+    border-color: #d9c99b;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(46, 40, 22, 0.12);
+    outline: none;
+  }
+  .kz-mini__foto { flex: 0 0 auto; width: 44px; height: 44px; border-radius: 50%; overflow: hidden; background: #efe7d3; display: flex; align-items: center; justify-content: center; border: 1.5px solid #efe7d3; }
   .kz-mini__foto img { width: 100%; height: 100%; object-fit: cover; }
   .kz-mini__foto .kz-avt { font-size: 0.75rem; }
   .kz-mini__txt { display: flex; flex-direction: column; gap: 0.02rem; min-width: 0; flex: 1; }
@@ -1497,7 +1581,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     .kz-sat__anos { font-size: 0.5rem; }
     .kz-sat__rot { font-size: 0.46rem; }
     .kz-linhas { display: block; }
-    .kz-foco { width: 152px; }
+    .kz-foco { width: 172px; }
     .kz-foco__selo { font-size: 0.45rem; }
     .kz-foco__foto { width: 40%; }
     .kz-foco__nome { font-size: 0.85rem; }
@@ -1516,7 +1600,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     .kz-rod__tit { font-size: 0.62rem; }
     .kz-rod__navbtn { font-size: 0.55rem; padding: 0.18rem 0.42rem; border-radius: 999px; }
     .kz-rod__rodape { font-size: 0.56rem; bottom: 0.3rem; left: 0.4rem; right: 0.4rem; }
-    .kz-foco { width: 112px; padding: 0.32rem; }
+    .kz-foco { width: 132px; padding: 0.32rem; }
     .kz-foco__selo, .kz-foco__anos, .kz-foco__ger { display: none; }
     .kz-foco__nome { font-size: 0.76rem; }
     .kz-foco__foto { width: 36%; border-width: 2px; }
@@ -1532,6 +1616,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     .kz-rodape { justify-content: center; text-align: center; }
     .kz-relacao-escolhas { grid-template-columns: 1fr; }
     .kz-relacao-caixa { padding: 1.2rem 1.1rem; }
-    .kz-painel__ident h3 { font-size: 1.08rem; }
+    .kz-painel__hero h3 { font-size: 1.15rem; }
+    .kz-painel__foto { width: 64px; height: 64px; }
   }
 </style>

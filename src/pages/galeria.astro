@@ -154,6 +154,7 @@ ${albuns.map((a) => {
   </div>
 
   <script>
+    /* ---------- Envio de fotos ---------- */
     const form = document.getElementById('f-envio-foto');
     const selFamilia = document.getElementById('f-familia');
     const campoNovo = document.getElementById('novo-familia-campo');
@@ -215,6 +216,65 @@ ${albuns.map((a) => {
         btn.disabled = false;
         btn.textContent = 'Enviar foto';
       }
+    });
+
+    /* ---------- Lightbox / carrossel de fotos ---------- */
+    const albunsEl = Array.from(document.querySelectorAll<HTMLElement>('.album__grade'));
+    const grupos = albunsEl.map((g) => Array.from(g.querySelectorAll<HTMLAnchorElement>('.album__item')));
+    const lightbox = document.getElementById('lightbox') as HTMLElement;
+    const imagem = lightbox.querySelector('img') as HTMLImageElement;
+    const legenda = lightbox.querySelector('.lightbox__legenda') as HTMLElement;
+    const [fechar, esq, dir] = [
+      lightbox.querySelector('.lightbox__fechar'),
+      lightbox.querySelector('.lightbox__seta--esq'),
+      lightbox.querySelector('.lightbox__seta--dir'),
+    ] as HTMLButtonElement[];
+
+    let grupoAtual = -1;
+    let fotoAtual = -1;
+
+    function abrir(grupo: number, foto: number) {
+      grupoAtual = grupo;
+      fotoAtual = foto;
+      imagem.src = grupos[grupo][foto].href;
+      imagem.alt = grupos[grupo][foto].querySelector('img')?.alt ?? '';
+      legenda.textContent = `${grupos[grupo][foto].querySelector('img')?.alt ?? ''} · ${foto + 1}/${grupos[grupo].length}`;
+      lightbox.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+
+    function navegar(delta: number) {
+      const total = grupos[grupoAtual].length;
+      const proxima = (fotoAtual + delta + total) % total;
+      abrir(grupoAtual, proxima);
+    }
+
+    function fecharLightbox() {
+      lightbox.hidden = true;
+      document.body.style.overflow = '';
+      imagem.removeAttribute('src');
+    }
+
+    grupos.forEach((grupoEls, gi) => {
+      grupoEls.forEach((item, fi) => {
+        item.addEventListener('click', (e) => {
+          e.preventDefault();
+          abrir(gi, fi);
+        });
+      });
+    });
+
+    fechar.addEventListener('click', fecharLightbox);
+    esq.addEventListener('click', () => navegar(-1));
+    dir.addEventListener('click', () => navegar(1));
+    lightbox.addEventListener('click', (e) => {
+      if (e.target === lightbox) fecharLightbox();
+    });
+    document.addEventListener('keydown', (e) => {
+      if (lightbox.hidden) return;
+      if (e.key === 'Escape') fecharLightbox();
+      if (e.key === 'ArrowLeft') navegar(-1);
+      if (e.key === 'ArrowRight') navegar(1);
     });
   </script>
 

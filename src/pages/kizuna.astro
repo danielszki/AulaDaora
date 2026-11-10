@@ -120,19 +120,33 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
           <ul id="kz-sugestoes" class="kz-sugestoes" hidden></ul>
         </div>
 
-        <div class="kz-palco" id="kz-palco">
+        <div class="kz-palco kz-rod" id="kz-palco" aria-label="Roda da família — núcleo central com anel de parentes">
           <svg class="kz-linhas" id="kz-linhas" aria-hidden="true"></svg>
-          <div class="kz-zona kz-zona--topo" id="kz-zona-pais"></div>
-          <div class="kz-zona kz-zona--esq" id="kz-zona-irmaos"></div>
+          <div class="kz-rod__aneis" aria-hidden="true"><span></span><span></span><span></span></div>
           <div class="kz-centro" id="kz-centro"></div>
-          <div class="kz-zona kz-zona--dir" id="kz-zona-conjuge"></div>
-          <div class="kz-zona kz-zona--baixo" id="kz-zona-filhos"></div>
+          <div class="kz-rod__anel" id="kz-anel"></div>
           <div class="kz-overlay" id="kz-overlay" hidden></div>
+
+          <div class="kz-rod__topo">
+            <span class="kz-rod__tit">Roda da família</span>
+            <div class="kz-rod__nav">
+              <button type="button" id="kz-rod-voltar" class="kz-rod__navbtn">Voltar</button>
+              <button type="button" id="kz-rod-prox" class="kz-rod__navbtn">Próximo →</button>
+            </div>
+          </div>
+          <div class="kz-rod__rodape">
+            <span id="kz-rod-status">Pessoa em foco: <strong id="kz-rod-status-nome">—</strong></span>
+            <span id="kz-rod-cont">0 vínculos</span>
+          </div>
         </div>
 
-        <div class="kz-rodape">
-          <p class="kz-rodape__dica">Clique em um parente para ver mais detalhes e explorar suas conexões.</p>
-          <p class="kz-rodape__cont" id="kz-contador"></p>
+        <div class="kz-filtros" id="kz-filtros" role="tablist" aria-label="Filtrar vínculos exibidos">
+          <button type="button" role="tab" aria-selected="true"  class="kz-filtro is-ativo" data-filtro="todos">Parentesco</button>
+          <button type="button" role="tab" aria-selected="false" class="kz-filtro" data-filtro="geracao">Geração</button>
+          <button type="button" role="tab" aria-selected="false" class="kz-filtro" data-filtro="pais">Pais</button>
+          <button type="button" role="tab" aria-selected="false" class="kz-filtro" data-filtro="irmaos">Irmãos</button>
+          <button type="button" role="tab" aria-selected="false" class="kz-filtro" data-filtro="conjuges">Cônjuge</button>
+          <button type="button" role="tab" aria-selected="false" class="kz-filtro" data-filtro="filhos">Filhos</button>
         </div>
       </div>
 
@@ -186,10 +200,6 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   const $ = (id) => document.getElementById(id);
   const palco = $('kz-palco');
   const centroEl = $('kz-centro');
-  const zonaPais = $('kz-zona-pais');
-  const zonaIrmaos = $('kz-zona-irmaos');
-  const zonaConjuge = $('kz-zona-conjuge');
-  const zonaFilhos = $('kz-zona-filhos');
   const linhasSvg = $('kz-linhas');
   const painel = $('kz-painel');
   const painelCont = $('kz-painel-conteudo');
@@ -200,7 +210,16 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   const btnInicio = $('kz-inicio');
   const btnRelacao = $('kz-relacao');
   const modalRel = $('kz-relacao-modal');
-  const contador = $('kz-contador');
+  const anelEl = $('kz-anel');
+  const filtrosEl = $('kz-filtros');
+  const rodStatusNome = $('kz-rod-status-nome');
+  const rodCont = $('kz-rod-cont');
+  const btnRodProx = $('kz-rod-prox');
+  const btnRodVoltar = $('kz-rod-voltar');
+
+  let filtroAtivo = 'todos';
+  let orbitaIds = [];
+  let satAngs = [];
 
   const reduzido = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const LIMITE = 6;
@@ -280,7 +299,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   function abrirOverlay(chave, titulo) {
     const lista = listasAtuais[chave] || [];
     if (!lista.length) return;
-    const rotulos = { pais: 'Pai/Mãe', irmaos: 'Irmão(a)', conjuges: 'Cônjuge', filhos: 'Filho(a)' };
+    const rotulos = { pais: 'Pai/Mãe', irmaos: 'Irmão(a)', conjuges: 'Cônjuge', filhos: 'Filho(a)', geracao: 'Mesma geração' };
     overlay.innerHTML = `<div class="kz-overlay__fundo" data-fechar-overlay></div>
       <div class="kz-overlay__caixa" role="dialog" aria-modal="true" aria-label="${esc(titulo)}">
         <header class="kz-overlay__topo">
@@ -299,17 +318,109 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !overlay.hidden) fecharOverlay(); });
 
   /* ---------- render do palco ---------- */
-  let listasAtuais = {};
+  let listasAtuais = { pais: [], irmaos: [], conjuges: [], filhos: [], geracao: [] };
+  const MAX_SAT = 12;
+  const CAPS = { pais: 2, conjuges: 2, irmaos: 4, filhos: 6 };
+  const ORDEM = ['pais', 'conjuges', 'irmaos', 'filhos'];
+
+  function rotuloDe(f, t) {
+    const fp = f.id, tp = t.id;
+    if (f.pais.includes(tp)) return 'Pai/Mãe';
+    if (t.pais.includes(fp)) return 'Filho(a)';
+    if ((f.conjuges || []).includes(tp)) return 'Cônjuge';
+    if ((f.exDe || []).includes(tp)) return 'Ex-cônjuge';
+    if ((t.conjuges || []).includes(fp)) return 'Cônjuge';
+    if ((t.exDe || []).includes(fp)) return 'Ex-cônjuge';
+    if (f.pais.some((pp) => t.pais.includes(pp))) return 'Irmão(a)';
+    return 'Parente';
+  }
+
+  function satHTML(f, t, excesso) {
+    const lab = rotuloDe(f, t);
+    return `<button type="button" class="kz-sat" data-id="${esc(t.id)}" aria-label="Selecionar ${esc(t.nome)}, ${esc(lab)}">
+      <span class="kz-sat__rot">${esc(lab)}</span>
+      <span class="kz-sat__foto">${fotoHTML(t)}</span>
+      <strong class="kz-sat__nome">${esc(t.nome)}</strong>
+      <span class="kz-sat__anos">${esc(anos(t))}</span>
+    </button>`;
+  }
+
+  function excedenteHTML(chave) {
+    return `<button type="button" class="kz-sat kz-sat--mais" data-ver-todos="${esc(chave)}" data-titulo="Ver todos os parentes">
+      <span class="kz-sat__rot">Ver todos</span>
+      <span class="kz-sat__mais">+</span>
+      <strong class="kz-sat__nome">Ver lista completa</strong>
+    </button>`;
+  }
+
+  function montarOrbita(f) {
+    listasAtuais = { pais: [], irmaos: [], conjuges: [], filhos: [], geracao: [] };
+    const ps = paisDe(f.id);
+    const cs = conjugesDe(f.id);
+    const xs = exDe(f.id);
+    const is = irmaosDe(f.id);
+    const fs = filhosDe(f.id);
+    listasAtuais.pais = ps;
+    listasAtuais.irmaos = is;
+    listasAtuais.conjuges = cs.concat(xs);
+    listasAtuais.filhos = fs;
+    listasAtuais.geracao = PESSOAS.filter((x) => x.geracao === f.geracao && x.id !== f.id);
+
+    let ordemIds;
+
+    if (filtroAtivo === 'todos') {
+      const brutos = { pais: ps, conjuges: cs.concat(xs), irmaos: is, filhos: fs };
+      const cap = {};
+      for (const k of ORDEM) cap[k] = brutos[k].slice(0, CAPS[k]);
+      let total = 0;
+      for (const k of ORDEM) total += cap[k].length;
+      for (const k of ORDEM) while (cap[k].length > 0 && total > MAX_SAT) { cap[k].pop(); total--; }
+      ordemIds = ORDEM.flatMap((k) => cap[k].map((x) => x.id));
+      return { ids: ordemIds, excesso: (brutos.pais.length + brutos.conjuges.length + brutos.irmaos.length + brutos.filhos.length) > ordemIds.length ? ORDEM.find((k) => cap[k].length < brutos[k].length) : null, cat: null };
+    }
+    if (filtroAtivo === 'geracao') {
+      const g = listasAtuais.geracao.slice(0, MAX_SAT);
+      ordemIds = g.map((x) => x.id);
+      return { ids: ordemIds, excesso: listasAtuais.geracao.length > ordemIds.length ? 'geracao' : null, cat: 'geracao' };
+    }
+    const mapa = { pais: listasAtuais.pais, irmaos: listasAtuais.irmaos, conjuges: listasAtuais.conjuges, filhos: listasAtuais.filhos };
+    const lista = mapa[filtroAtivo] || [];
+    ordemIds = lista.slice(0, MAX_SAT).map((x) => x.id);
+    return { ids: ordemIds, excesso: lista.length > ordemIds.length ? filtroAtivo : null, cat: filtroAtivo };
+  }
+
+  function distribuirAngulos(ids, cat) {
+    const n = ids.length;
+    const ang = [];
+    if (cat === 'geracao') {
+      for (let i = 0; i < n; i++) ang.push(n <= 1 ? -90 : -90 + (i * 360) / n);
+      return ang;
+    }
+    if (cat) {
+      for (let i = 0; i < n; i++) ang.push(n <= 1 ? -90 : -90 + (i * 360) / n);
+      return ang;
+    }
+    const zonas = { pais: -90, conjuges: 0, filhos: 90, irmaos: 180 };
+    const esp = { pais: 34, conjuges: 24, filhos: 48, irmaos: 34 };
+    const grupos = { pais: [], irmaos: [], conjuges: [], filhos: [] };
+    for (const id of ids) {
+      for (const k of ORDEM) {
+        if (listasAtuais[k].some((x) => x.id === id)) { grupos[k].push(id); break; }
+      }
+    }
+    for (const k of ORDEM) {
+      const arr = grupos[k];
+      const nn = arr.length;
+      if (!nn) continue;
+      const base = zonas[k], spread = esp[k];
+      for (let i = 0; i < nn; i++) ang.push(nn === 1 ? base : base - spread + (i * (spread * 2)) / (nn - 1));
+    }
+    return ang;
+  }
 
   function render(id) {
     const p = byId.get(id);
     if (!p) return;
-    const ps = paisDe(id);
-    const cs = conjugesDe(id);
-    const xs = exDe(id);
-    const is = irmaosDe(id);
-    const fs = filhosDe(id);
-    listasAtuais = { pais: ps, conjuges: cs.concat(xs), irmaos: is, filhos: fs };
 
     const bioCurta = p.bio ? (p.bio.length > 150 ? p.bio.slice(0, 148).trim() + '…' : p.bio) : '';
     centroEl.innerHTML = `<article class="kz-foco" data-tem-foto="${p.foto ? 1 : 0}">
@@ -323,23 +434,27 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
       <button type="button" class="kz-foco__det" data-abrir-painel>Ver detalhes</button>
     </article>`;
 
-    zonaPais.innerHTML = zonaHTML('Pais', ps, 'pais', () => 'Pai/Mãe', 2);
-    zonaIrmaos.innerHTML = zonaHTML('Irmãos', is, 'irmaos', () => 'Irmão(a)', 3);
-    const csRot = (pp) => (xs.some((x) => x.id === pp.id) ? 'Ex-cônjuge' : 'Cônjuge');
-    zonaConjuge.innerHTML = zonaHTML(cs.length + xs.length > 1 ? 'Cônjuges' : 'Cônjuge', cs.concat(xs), 'conjuges', csRot, 2);
-    zonaFilhos.innerHTML = zonaHTML('Filhos', fs, 'filhos', () => 'Filho(a)', 3);
+    const { ids, excesso, cat } = montarOrbita(p);
+
+    let html = ids.map((sid) => byId.get(sid) ? satHTML(p, byId.get(sid)) : '').join('');
+    if (excesso) html += excedenteHTML(excesso);
+    anelEl.innerHTML = html;
+    orbitaIds = ids.slice();
+    satAngs = (distribuirAngulos(ids, cat) || []).slice();
+    if (excesso) satAngs.push(45);
 
     ligarEventos();
-    requestAnimationFrame(desenharLinhas);
+    posicionarSatelites();
     atualizarURL(id);
     renderPainel(p);
-    const total = ps.length + cs.length + xs.length + is.length + fs.length;
-    contador.textContent = total
-      ? `${total} ${total === 1 ? 'parente relacionado' : 'parentes relacionados'}`
-      : 'Nenhum vínculo registrado para esta pessoa.';
+    const mostrados = ids.length + (excesso ? 1 : 0);
+    rodStatusNome.textContent = p.nome;
+    rodCont.textContent = mostrados
+      ? `${mostrados} vínculo${mostrados > 1 ? 's' : ''} apresentad${mostrados > 1 ? 'os' : 'o'}`
+      : 'Nenhum vínculo registrado';
 
     if (!reduzido) {
-      [zonaPais, zonaIrmaos, zonaConjuge, zonaFilhos, centroEl].forEach((z) => {
+      [centroEl, anelEl].forEach((z) => {
         z.classList.remove('kz-in');
         void z.offsetWidth;
         z.classList.add('kz-in');
@@ -348,8 +463,11 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   }
 
   function ligarEventos() {
-    document.querySelectorAll('.kz-palco .kz-card').forEach((btn) => {
-      btn.addEventListener('click', () => selecionar(btn.dataset.id));
+    document.querySelectorAll('#kz-anel .kz-sat').forEach((sat) => {
+      sat.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selecionar(sat.dataset.id);
+      });
     });
     document.querySelectorAll('[data-ver-todos]').forEach((btn) => {
       btn.addEventListener('click', () => abrirOverlay(btn.dataset.verTodos, btn.dataset.titulo));
@@ -362,42 +480,46 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     });
   }
 
-  /* ---------- conexões SVG ---------- */
+  /* ---------- desenhar linhas do círculo ---------- */
+
+  function posicionarSatelites() {
+    const anel = $('kz-anel');
+    const palcoRect = palco.getBoundingClientRect();
+    const w = palcoRect.width, h = palcoRect.height;
+    const cx = w / 2, cy = h / 2;
+    const raio = Math.min(w * 0.34, h * 0.38);
+    const sats = anel.querySelectorAll('.kz-sat');
+    sats.forEach((sat, i) => {
+      const rad = ((satAngs[i] ?? 0) * Math.PI) / 180;
+      sat.style.left = `${cx + raio * Math.cos(rad)}px`;
+      sat.style.top = `${cy + raio * Math.sin(rad)}px`;
+    });
+    desenharLinhas();
+  }
+
   function desenharLinhas() {
-    if (!palco || !linhasSvg) return;
-    const foco = centroEl.querySelector('.kz-foco');
-    if (!foco) return;
-    const pr = palco.getBoundingClientRect();
-    const fr = foco.getBoundingClientRect();
-    const cx = fr.left + fr.width / 2 - pr.left;
-    const cy = fr.top + fr.height / 2 - pr.top;
-    let svg = '';
-    const pontos = (zona, lado) => {
-      zona.querySelectorAll('.kz-card').forEach((card) => {
-        const r = card.getBoundingClientRect();
-        let x1 = cx, y1 = cy, x2, y2;
-        if (lado === 'top') { x2 = r.left + r.width / 2 - pr.left; y2 = r.bottom - pr.top + 2; y1 = fr.top - pr.top - 2; }
-        else if (lado === 'bottom') { x2 = r.left + r.width / 2 - pr.left; y2 = r.top - pr.top - 2; y1 = fr.bottom - pr.top + 2; }
-        else if (lado === 'left') { x2 = r.right - pr.left + 2; y2 = r.top + r.height / 2 - pr.top; x1 = fr.left - pr.left - 2; }
-        else { x2 = r.left - pr.left - 2; y2 = r.top + r.height / 2 - pr.top; x1 = fr.right - pr.left + 2; }
-        const mx = (x1 + x2) / 2;
-        const my = (y1 + y2) / 2;
-        const horizontal = lado === 'left' || lado === 'right';
-        const d = horizontal
-          ? `M${x1} ${y1} C${mx} ${y1} ${mx} ${y2} ${x2} ${y2}`
-          : `M${x1} ${y1} C${x1} ${my} ${x2} ${my} ${x2} ${y2}`;
-        svg += `<path class="kz-linha" d="${d}" />`;
-        svg += `<circle class="kz-linha__pt" cx="${x2}" cy="${y2}" r="3.5" />`;
-      });
-    };
-    pontos(zonaPais, 'top');
-    pontos(zonaIrmaos, 'left');
-    pontos(zonaConjuge, 'right');
-    pontos(zonaFilhos, 'bottom');
-    linhasSvg.setAttribute('width', pr.width);
-    linhasSvg.setAttribute('height', pr.height);
-    linhasSvg.setAttribute('viewBox', `0 0 ${pr.width} ${pr.height}`);
-    linhasSvg.innerHTML = svg;
+    const anel = document.getElementById('kz-anel');
+    const linhasSvg = document.getElementById('kz-linhas');
+    const palcoRect = palco.getBoundingClientRect();
+    const w = palcoRect.width, h = palcoRect.height;
+    const cx = w / 2, cy = h / 2;
+
+    const linhasPts = Array.from(anel.querySelectorAll('.kz-sat')).map((sat) => {
+      const r = sat.getBoundingClientRect();
+      return { x: r.left + r.width / 2 - palcoRect.left, y: r.top + r.height / 2 - palcoRect.top };
+    });
+
+    let svgAninhadoLocal = '';
+    linhasPts.forEach((pt) => {
+      svgAninhadoLocal += `<line class="kz-linha" x1="${cx}" y1="${cy}" x2="${pt.x}" y2="${pt.y}" />`;
+      svgAninhadoLocal += `<circle class="kz-linha__pt" cx="${pt.x}" cy="${pt.y}" r="3.5" />`;
+    });
+    if (linhasSvg) {
+      linhasSvg.setAttribute('width', w);
+      linhasSvg.setAttribute('height', h);
+      linhasSvg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      linhasSvg.innerHTML = svgAninhadoLocal;
+    }
   }
 
   /* ---------- painel de detalhes ---------- */
@@ -501,6 +623,34 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
 
   /* ---------- comandos ---------- */
   btnVoltar.addEventListener('click', voltar);
+
+  /* filtros e navegação da roda */
+  filtrosEl.addEventListener('click', (e) => {
+    const tab = e.target.closest('[role="tab"]');
+    if (!tab || !filtrosEl.contains(tab)) return;
+    const filtro = tab.dataset.filtro || 'todos';
+    filtroAtivo = filtro;
+    filtrosEl.querySelectorAll('.kz-filtro').forEach((f) => {
+      const ativo = f.dataset.filtro === filtro;
+      f.classList.toggle('is-ativo', ativo);
+      f.setAttribute('aria-selected', ativo ? 'true' : 'false');
+    });
+    if (selecionado) render(selecionado);
+  });
+
+  btnRodProx.addEventListener('click', () => {
+    if (!orbitaIds.length) return;
+    const idx = orbitaIds.indexOf(selecionado);
+    const prox = idx >= 0 ? (idx + 1) % orbitaIds.length : 0;
+    selecionar(orbitaIds[prox], true);
+  });
+  btnRodVoltar.addEventListener('click', () => {
+    if (!orbitaIds.length) return;
+    const idx = orbitaIds.indexOf(selecionado);
+    const prev = idx >= 0 ? (idx - 1 + orbitaIds.length) % orbitaIds.length : 0;
+    selecionar(orbitaIds[prev], true);
+  });
+
   btnCentrar.addEventListener('click', () => {
     if (!selecionado) return;
     render(selecionado);
@@ -581,29 +731,38 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   });
 
   /* ---------- arranque ---------- */
+  // 1) pinta imediatamente com o seed local; não espera a nuvem
+  const focoBusca = new URLSearchParams(window.location.search).get('pessoa');
+  const primeiraSelecao = () => {
+    if (focoBusca && byId.has(focoBusca)) return focoBusca;
+    if (byId.has(ENTRADA)) return ENTRADA;
+    return PESSOAS[0]?.id || '';
+  };
+  const inicial = primeiraSelecao();
+  if (inicial) selecionar(inicial, true);
+  // no desktop o painel abre por padrão; no celular/folha inferior fica fechado até pedido
+  if (window.innerWidth > 1180) painel.classList.add('kz-painel--aberto');
+
+  // 2) em paralelo, tenta hidratar com a nuvem (atualiza se vier coisa)
   (async () => {
-    if (isCloudEnabled()) {
-      try {
-        const remoto = await fetchPessoas(PESSOAS.slice());
-        if (remoto && remoto.length) {
-          PESSOAS.length = 0;
-          PESSOAS.push(...remoto);
-          byId.clear();
-          for (const p of PESSOAS) byId.set(p.id, p);
-        }
-      } catch (e) { console.warn('Kizuna: nuvem indisponível, usando dados locais.', e); }
-    }
-    const foco = new URLSearchParams(window.location.search).get('pessoa');
-    const inicial = (foco && byId.has(foco)) ? foco : (byId.has(ENTRADA) ? ENTRADA : (PESSOAS[0]?.id || ''));
-    if (inicial) selecionar(inicial, true);
-    // no desktop o painel abre por padrão; no celular/folha inferior fica fechado até pedido
-    if (window.innerWidth > 1180) painel.classList.add('kz-painel--aberto');
+    if (!isCloudEnabled()) return;
+    try {
+      const remoto = await fetchPessoas(PESSOAS.slice());
+      if (remoto && remoto.length) {
+        PESSOAS.length = 0;
+        PESSOAS.push(...remoto);
+        byId.clear();
+        for (const p of PESSOAS) byId.set(p.id, p);
+        const alvo = (selecionado && byId.has(selecionado)) ? selecionado : primeiraSelecao();
+        if (alvo) selecionar(alvo, true);
+      }
+    } catch (e) { console.warn('Kizuna: nuvem indisponível, usando dados locais.', e); }
   })().catch((e) => console.error('Kizuna: falha no arranque.', e));
 
   let tRedim;
   window.addEventListener('resize', () => {
     clearTimeout(tRedim);
-    tRedim = setTimeout(() => { if (selecionado) desenharLinhas(); }, 120);
+    tRedim = setTimeout(() => { if (selecionado) posicionarSatelites(); }, 120);
   });
 </script>
 
@@ -733,6 +892,30 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
 
   /* ---------- pesquisa ---------- */
   .kz-palco-col { min-width: 0; }
+
+  /* filtros do palco */
+  .kz-filtros { display: flex; flex-wrap: wrap; gap: 0.45rem; padding-inline: 0.6rem; margin-top: 0.9rem; z-index: 3; }
+  .kz-filtro {
+    font-family: var(--fonte-corpo);
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #5d6a5f;
+    background: #efe7d3;
+    border: 1px solid #e6ddc7;
+    border-radius: 999px;
+    padding: 0.28rem 0.9rem;
+    cursor: pointer;
+    transition: background 0.16s, color 0.16s, border-color 0.16s, box-shadow 0.16s;
+  }
+  .kz-filtro:hover { background: #e5dcc2; color: #26332b; border-color: #d2c6a0; }
+  .kz-filtro[aria-selected="true"] {
+    background: #496b54;
+    border-color: #496b54;
+    color: #fffdf8;
+    box-shadow: 0 2px 8px rgba(73, 107, 84, 0.3);
+  }
+  .kz-filtro[role="tab"]:focus-visible { outline: 2px solid #b3a06a; outline-offset: 1px; }
+
   .kz-busca {
     position: relative;
     display: flex;
@@ -792,16 +975,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   /* ---------- palco ---------- */
   .kz-palco {
     position: relative;
-    display: grid;
-    grid-template-columns: 218px minmax(272px, 1fr) 218px;
-    grid-template-rows: auto minmax(0, 1fr) auto;
-    grid-template-areas:
-      ".      topo    ."
-      "esq    centro  dir"
-      ".      baixo   .";
-    gap: 0.9rem 1.4rem;
-    align-content: center;
-    min-height: 720px;
+    display: block;
     background:
       linear-gradient(180deg, rgba(255, 253, 247, 0.75), rgba(250, 245, 232, 0.9)),
       #faf6ea;
@@ -826,39 +1000,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   .kz-linha { fill: none; stroke: #b3a06a; stroke-width: 1.6; opacity: 0.75; }
   .kz-linha__pt { fill: #f7f2e5; stroke: #8a7d5c; stroke-width: 1.4; }
 
-  /* ---------- zonas (grid areas) ---------- */
-  .kz-zona { z-index: 2; min-width: 0; }
-  .kz-zona--topo { grid-area: topo; }
-  .kz-zona--esq { grid-area: esq; display: flex; align-items: center; }
-  .kz-zona--dir { grid-area: dir; display: flex; align-items: center; }
-  .kz-zona--baixo { grid-area: baixo; }
-
-  .kz-grupo { display: flex; flex-direction: column; gap: 0.45rem; align-items: center; }
-  .kz-zona--esq .kz-grupo { align-items: flex-end; }
-  .kz-zona--dir .kz-grupo { align-items: flex-start; }
-  .kz-grupo__tit {
-    margin: 0;
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.16em;
-    color: #8a7d5c;
-  }
-  .kz-grupo__cards { display: flex; gap: 0.6rem; flex-wrap: wrap; justify-content: center; }
-  .kz-zona--esq .kz-grupo__cards, .kz-zona--dir .kz-grupo__cards { flex-direction: column; flex-wrap: nowrap; }
-  .kz-grupo__mais {
-    border: 1px dashed #c3b587;
-    background: rgba(255, 253, 247, 0.8);
-    color: #6c6248;
-    border-radius: 999px;
-    padding: 0.28rem 0.85rem;
-    font-size: 0.74rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background 0.2s, color 0.2s;
-  }
-  .kz-grupo__mais:hover { background: #efe7d3; color: #3c4a40; }
-
+  /* ---------- zonas (grid areas) removidas: os satélites orbitam via #kz-anel ---------- */
   /* ---------- overlay de grupo grande ---------- */
   .kz-overlay { position: absolute; inset: 0; z-index: 40; display: flex; align-items: center; justify-content: center; padding: 1.2rem; }
   .kz-overlay[hidden] { display: none; }
@@ -1262,6 +1404,69 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     .kz-card, .kz-rail__btn, .kz-foco__det { transition: none; }
   }
 
+  /* ---------- Roda da família ---------- */
+  .kz-rod {
+    position: relative;
+    height: 640px;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.2rem 1rem 0;
+  }
+  .kz-rod__aneis { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, minmax(22px, 1fr)); gap: 9px; opacity: 0.55; z-index: 0; }
+  .kz-rod__aneis span { height: 64px; border-radius: 50%; border: 1px solid #d8cfae; background: #efe7d3; animation: kzAnelPulse 5s ease-in-out infinite; }
+  .kz-rod__aneis span:nth-child(2) { animation-delay: 1s; }
+  .kz-rod__aneis span:nth-child(3) { animation-delay: 2s; }
+  @keyframes kzAnelPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+  #kz-anel { position: absolute; inset: 0; z-index: 2; }
+  .kz-sat {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    width: 86px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    background: #fffdf8;
+    border: 1px solid #e6ddc7;
+    border-radius: 13px;
+    box-shadow: 0 4px 14px rgba(64, 52, 28, 0.08);
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.18s ease, box-shadow 0.18s ease;
+  }
+  .kz-sat:hover, .kz-sat:focus-visible { transform: translate(-50%, -50%) translateY(-3px); box-shadow: 0 8px 22px rgba(64, 52, 28, 0.14); outline: none; }
+  .kz-sat--mais { background: #f0eadb; color: #5d6a5f; }
+  .kz-sat__rot { font-size: 0.56rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #a8935a; padding: 0.1rem 0.35rem; }
+  .kz-sat__foto { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 2px solid #efe7d3; background: #ece4d2; flex: 0 0 auto; }
+  .kz-sat__foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .kz-sat__foto .kz-retrato--placeholder { width: 100%; height: 100%; background: #f3ead4; color: #8a7d5c; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+  .kz-sat__nome { font-size: 0.72rem; font-weight: 700; color: #26332b; line-height: 1.1; max-width: 86px; }
+  .kz-sat__anos { font-size: 0.58rem; color: #6c6248; }
+  .kz-sat__mais { width: 26px; height: 26px; border-radius: 50%; background: #496b54; color: #fffdf8; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
+  .kz-sat[aria-hidden="true"] { opacity: 0; pointer-events: none; }
+
+  .kz-rod__topo { position: absolute; top: 0.9rem; right: 1rem; display: flex; align-items: center; gap: 0.6rem; z-index: 5; }
+  .kz-rod__tit { font-family: var(--fonte-titulo); font-size: 0.85rem; color: #26332b; letter-spacing: 0.02em; }
+  .kz-rod__nav { display: flex; gap: 0.35rem; }
+  .kz-rod__navbtn {
+    font-family: var(--fonte-corpo); font-size: 0.72rem; font-weight: 700; color: #5d6a5f;
+    background: #efe7d3; border: 1px solid #e6ddc7; border-radius: 999px; padding: 0.25rem 0.7rem; cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .kz-rod__navbtn:hover { background: #496b54; color: #fffdf8; border-color: #496b54; }
+  .kz-rod__navbtn:disabled { opacity: 0.4; cursor: default; }
+
+  .kz-rod__rodape { position: absolute; bottom: 0.8rem; left: 0.9rem; right: 0.9rem; display: flex; align-items: center; justify-content: space-between; z-index: 5; font-size: 0.72rem; color: #6c6248; }
+  .kz-rod__status strong { color: #26332b; }
+
+  .kz-linha { stroke: #b3a06a; stroke-width: 1.2; fill: none; stroke-opacity: 0.7; }
+  .kz-linha__pt { fill: #9a8c64; }
+  .kz-foco__det { background: #496b54; }
+  .kz-foco__det:hover { background: #38553f; }
+
   /* ===================== RESPONSIVO ===================== */
   /* notebook */
   @media (max-width: 1180px) {
@@ -1295,15 +1500,18 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
       flex-wrap: wrap;
       padding: 0.5rem;
     }
-    .kz-palco { min-height: 0; padding: 1rem; overflow: hidden; display: flex; flex-direction: column; gap: 1rem; }
-    .kz-palco::before { display: none; }
+    .kz-rod { height: auto; min-height: 0; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; overflow: visible; }
+    .kz-rod__aneis { display: none; }
+    .kz-rod__rodape { position: static; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.72rem; color: #6c6248; margin-top: 0.2rem; }
+    .kz-rod__topo { position: static; align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
+    #kz-anel { position: static; inset: auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.55rem; width: 100%; z-index: 2; }
+    .kz-sat { position: static; transform: none; width: auto; min-width: 120px; flex-direction: row; gap: 0.35rem; align-items: center; padding: 0.35rem 0.45rem; }
+    .kz-sat:hover, .kz-sat:focus-visible { transform: none; }
+    .kz-sat__nome, .kz-sat__anos { max-width: none; }
+    .kz-sat__foto { width: 38px; height: 38px; }
     .kz-linhas { display: none; }
-    /* empilha em blocos: foco primeiro, depois grupos */
     .kz-centro { order: 0; align-self: center; }
-    .kz-zona { order: 1; }
-    .kz-zona--esq .kz-grupo, .kz-zona--dir .kz-grupo { align-items: center; }
-    .kz-grupo__cards { gap: 0.5rem; }
-    .kz-zona--esq .kz-grupo__cards, .kz-zona--dir .kz-grupo__cards { flex-direction: row; flex-wrap: wrap; }
+    .kz-filtros { padding-inline: 0.5rem; }
     .kz-in { animation: kzFade 0.25s ease both; }
     @keyframes kzFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   }

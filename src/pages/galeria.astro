@@ -219,21 +219,21 @@ ${albuns.map((a) => {
     });
 
     /* ---------- Lightbox / carrossel de fotos ---------- */
-    const albunsEl = Array.from(document.querySelectorAll<HTMLElement>('.album__grade'));
-    const grupos = albunsEl.map((g) => Array.from(g.querySelectorAll<HTMLAnchorElement>('.album__item')));
-    const lightbox = document.getElementById('lightbox') as HTMLElement;
-    const imagem = lightbox.querySelector('img') as HTMLImageElement;
-    const legenda = lightbox.querySelector('.lightbox__legenda') as HTMLElement;
+    const albunsEl = Array.from(document.querySelectorAll('.album__grade'));
+    const grupos = albunsEl.map((g) => Array.from(g.querySelectorAll('.album__item')));
+    const lightbox = document.getElementById('lightbox');
+    const imagem = lightbox.querySelector('img');
+    const legenda = lightbox.querySelector('.lightbox__legenda');
     const [fechar, esq, dir] = [
       lightbox.querySelector('.lightbox__fechar'),
       lightbox.querySelector('.lightbox__seta--esq'),
       lightbox.querySelector('.lightbox__seta--dir'),
-    ] as HTMLButtonElement[];
+    ];
 
     let grupoAtual = -1;
     let fotoAtual = -1;
 
-    function abrir(grupo: number, foto: number) {
+    function abrir(grupo, foto) {
       grupoAtual = grupo;
       fotoAtual = foto;
       imagem.src = grupos[grupo][foto].href;
@@ -243,7 +243,7 @@ ${albuns.map((a) => {
       document.body.style.overflow = 'hidden';
     }
 
-    function navegar(delta: number) {
+    function navegar(delta) {
       const total = grupos[grupoAtual].length;
       const proxima = (fotoAtual + delta + total) % total;
       abrir(grupoAtual, proxima);

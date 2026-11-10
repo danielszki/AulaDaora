@@ -34,7 +34,7 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
           ))
         }
       </ul>
-      <div class="menu__auth">
+      <div class="menu__auth" id="menu-auth">
         {
           clerkAtivo ? (
             <>
@@ -52,6 +52,65 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
           )
         }
       </div>
+
+      <script>
+        (function () {
+          const container = document.getElementById('menu-auth');
+          if (!container) return;
+
+          function atualizar() {
+            const c = window.Clerk;
+            const temSessao = c?.session;
+            if (!temSessao) return; // mantém Entrar/Criar conta visíveis
+
+            const email =
+              c.user?.primaryEmailAddress?.emailAddress ||
+              c.user?.email_addresses?.[0]?.emailAddress ||
+              '';
+            container.innerHTML = '';
+            const info = document.createElement('span');
+            info.className = 'menu__auth-info';
+            info.textContent = email || 'Usuário';
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'menu__auth-btn menu__auth-btn--sair';
+            btn.textContent = 'Sair';
+            btn.addEventListener('click', async () => {
+              try { await c.signOut(); } catch {}
+              container.innerHTML = '';
+              const a1 = document.createElement('a');
+              a1.className = 'menu__auth-btn';
+              a1.href = '/sign-in';
+              a1.textContent = 'Entrar';
+              const a2 = document.createElement('a');
+              a2.className = 'menu__auth-btn menu__auth-btn--destaque';
+              a2.href = '/sign-up';
+              a2.textContent = 'Criar conta';
+              container.appendChild(a1);
+              container.appendChild(a2);
+            });
+            container.appendChild(info);
+            container.appendChild(btn);
+          }
+
+          if (window.Clerk?.session) {
+            atualizar();
+          } else {
+            const verificar = () => {
+              if (window.Clerk?.session) {
+                atualizar();
+              } else if (window.Clerk && typeof window.Clerk.addListener === 'function') {
+                window.Clerk.addListener(({ session }) => {
+                  if (session) atualizar();
+                });
+              } else {
+                setTimeout(verificar, 300);
+              }
+            };
+            verificar();
+          }
+        })();
+      </script>
     </nav>
   </div>
 </header>
@@ -62,4 +121,24 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
   .menu__auth-btn:hover { border-color: var(--vinho, #8a3b3b); }
   .menu__auth-btn--destaque { background: var(--vinho, #8a3b3b); border-color: var(--vinho, #8a3b3b); color: #fff; }
   .menu__auth-btn--destaque:hover { filter: brightness(1.1); }
+  .menu__auth-info {
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+    margin-right: 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 14rem;
+  }
+  .menu__auth-btn--sair {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.75rem;
+    border-color: var(--vinho, #8a3b3b);
+    color: var(--vinho, #8a3b3b);
+    background: transparent;
+  }
+  .menu__auth-btn--sair:hover {
+    background: var(--vinho, #8a3b3b);
+    color: #fff;
+  }
 </style>

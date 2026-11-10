@@ -122,7 +122,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
 
         <div class="kz-palco kz-rod" id="kz-palco" aria-label="Roda da família — núcleo central com anel de parentes">
           <svg class="kz-linhas" id="kz-linhas" aria-hidden="true"></svg>
-          <div class="kz-rod__aneis" aria-hidden="true"><span></span><span></span><span></span></div>
+          <div class="kz-rod__orbit" aria-hidden="true"></div>
           <div class="kz-centro" id="kz-centro"></div>
           <div class="kz-rod__anel" id="kz-anel"></div>
           <div class="kz-overlay" id="kz-overlay" hidden></div>
@@ -389,32 +389,11 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     return { ids: ordemIds, excesso: lista.length > ordemIds.length ? filtroAtivo : null, cat: filtroAtivo };
   }
 
-  function distribuirAngulos(ids, cat) {
+  /* distribuir satélites uniformemente na circunferência */
+  function distribuirAngulos(ids) {
     const n = ids.length;
     const ang = [];
-    if (cat === 'geracao') {
-      for (let i = 0; i < n; i++) ang.push(n <= 1 ? -90 : -90 + (i * 360) / n);
-      return ang;
-    }
-    if (cat) {
-      for (let i = 0; i < n; i++) ang.push(n <= 1 ? -90 : -90 + (i * 360) / n);
-      return ang;
-    }
-    const zonas = { pais: -90, conjuges: 0, filhos: 90, irmaos: 180 };
-    const esp = { pais: 34, conjuges: 24, filhos: 48, irmaos: 34 };
-    const grupos = { pais: [], irmaos: [], conjuges: [], filhos: [] };
-    for (const id of ids) {
-      for (const k of ORDEM) {
-        if (listasAtuais[k].some((x) => x.id === id)) { grupos[k].push(id); break; }
-      }
-    }
-    for (const k of ORDEM) {
-      const arr = grupos[k];
-      const nn = arr.length;
-      if (!nn) continue;
-      const base = zonas[k], spread = esp[k];
-      for (let i = 0; i < nn; i++) ang.push(nn === 1 ? base : base - spread + (i * (spread * 2)) / (nn - 1));
-    }
+    for (let i = 0; i < n; i++) ang.push(n <= 1 ? -90 : -90 + (i * 360) / n);
     return ang;
   }
 
@@ -440,8 +419,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     if (excesso) html += excedenteHTML(excesso);
     anelEl.innerHTML = html;
     orbitaIds = ids.slice();
-    satAngs = (distribuirAngulos(ids, cat) || []).slice();
-    if (excesso) satAngs.push(45);
+    satAngs = (distribuirAngulos(new Array(ids.length + (excesso ? 1 : 0)).fill(0)) || []).slice();
 
     ligarEventos();
     posicionarSatelites();
@@ -453,13 +431,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
       ? `${mostrados} vínculo${mostrados > 1 ? 's' : ''} apresentad${mostrados > 1 ? 'os' : 'o'}`
       : 'Nenhum vínculo registrado';
 
-    if (!reduzido) {
-      [centroEl, anelEl].forEach((z) => {
-        z.classList.remove('kz-in');
-        void z.offsetWidth;
-        z.classList.add('kz-in');
-      });
-    }
+
   }
 
   function ligarEventos() {
@@ -487,7 +459,9 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     const palcoRect = palco.getBoundingClientRect();
     const w = palcoRect.width, h = palcoRect.height;
     const cx = w / 2, cy = h / 2;
-    const raio = Math.min(w * 0.34, h * 0.38);
+    const raio = Math.min(w * 0.36, h * 0.4);
+    palco.style.setProperty('--kz-r', String(Math.round(raio)));
+
     const sats = anel.querySelectorAll('.kz-sat');
     sats.forEach((sat, i) => {
       const rad = ((satAngs[i] ?? 0) * Math.PI) / 180;
@@ -503,6 +477,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     const palcoRect = palco.getBoundingClientRect();
     const w = palcoRect.width, h = palcoRect.height;
     const cx = w / 2, cy = h / 2;
+    const raio = Math.min(w * 0.36, h * 0.4);
 
     const linhasPts = Array.from(anel.querySelectorAll('.kz-sat')).map((sat) => {
       const r = sat.getBoundingClientRect();
@@ -1134,84 +1109,80 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     font-size: 1rem;
   }
 
-  /* ---------- cartão protagonista ---------- */
-  .kz-centro { grid-area: centro; z-index: 3; display: flex; align-items: center; justify-content: center; min-width: 0; }
+  /* ---------- centro da roda (disco) ---------- */
+  .kz-centro { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 3; display: flex; align-items: center; justify-content: center; }
   .kz-foco {
-    width: 272px;
-    background: #fffdf8;
-    border: 1px solid #ddd2b2;
-    border-radius: 20px;
-    padding: 1.15rem 1.2rem 1.2rem;
-    text-align: center;
-    box-shadow: 0 18px 48px rgba(46, 40, 22, 0.18), 0 2px 6px rgba(46, 40, 22, 0.08);
     position: relative;
+    width: clamp(190px, 37%, 238px);
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: radial-gradient(circle at 50% 38%, #fffdf4 0%, #f5edda 55%, #e7dbc0 100%);
+    border: 1.5px solid #c8b075;
+    box-shadow: 0 16px 42px rgba(46, 40, 22, 0.24), 0 0 0 6px rgba(250, 245, 232, 0.75), inset 0 2px 6px rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.12rem;
+    text-align: center;
+    padding: 0.6rem;
     scroll-margin-top: 96px;
   }
   .kz-foco[data-tem-foto="1"] {
-    border: 1.5px solid #d9b96a;
-    box-shadow: 0 20px 52px rgba(46, 40, 22, 0.2), 0 0 0 1px rgba(217, 185, 106, 0.35);
+    border-color: #d9b96a;
+    box-shadow: 0 18px 48px rgba(46, 40, 22, 0.28), 0 0 0 6px rgba(247, 239, 214, 0.8), inset 0 2px 6px rgba(255, 255, 255, 0.9);
   }
   .kz-foco::after {
     content: '';
     position: absolute;
-    inset: 5px;
-    border: 1px solid rgba(179, 160, 106, 0.4);
-    border-radius: 15px;
+    inset: 8px;
+    border-radius: 50%;
+    border: 1px dashed rgba(179, 160, 106, 0.55);
     pointer-events: none;
-  }
-  .kz-foco[data-tem-foto="1"]::after {
-    border-color: rgba(217, 185, 106, 0.5);
   }
   .kz-foco__selo {
     display: inline-block;
-    font-size: 0.6rem;
+    font-size: 0.52rem;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.2em;
+    letter-spacing: 0.22em;
     color: #a8935a;
-    margin-bottom: 0.6rem;
   }
   .kz-foco__foto {
-    width: 156px;
-    height: 178px;
-    margin: 0 auto 0.75rem;
-    border-radius: 12px;
+    width: 45%;
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
     overflow: hidden;
     background: #efe7d3;
-    border: 3px solid #f3ecd9;
-    box-shadow: 0 6px 18px rgba(46, 40, 22, 0.16);
+    border: 3px solid #efe6d0;
+    box-shadow: 0 4px 14px rgba(46, 40, 22, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
   }
+  .kz-foco[data-tem-foto="1"] .kz-foco__foto { border-color: #d9b96a; }
   .kz-foco__foto img { width: 100%; height: 100%; object-fit: cover; }
-  .kz-foco[data-tem-foto="1"] .kz-foco__foto {
-    border: 3px solid #d9b96a;
-    box-shadow: 0 8px 24px rgba(179, 160, 106, 0.35);
-  }
-  .kz-foco[data-tem-foto="0"] .kz-foco__foto {
-    border: 3px solid #f3ecd9;
-  }
-  .kz-avt--foco { font-size: 2.6rem; }
+  .kz-avt--foco { font-size: 1.55rem; }
   .kz-foco__nome {
     margin: 0;
     font-family: var(--fonte-titulo);
-    font-size: 1.42rem;
+    font-size: clamp(0.95rem, 1.9vmin, 1.12rem);
     font-weight: 600;
     color: #26332b;
-    line-height: 1.15;
+    line-height: 1.12;
+    max-width: 88%;
   }
-  .kz-foco__anos { margin: 0.2rem 0 0; font-size: 0.82rem; color: #5d6a5f; }
-  .kz-foco__ger { margin: 0.12rem 0 0; font-size: 0.7rem; color: #a8935a; font-weight: 600; }
-  .kz-foco__bio { margin: 0.55rem 0 0; font-size: 0.76rem; line-height: 1.5; color: #4c574d; }
-  .kz-foco__orn { display: block; margin: 0.5rem 0 0.15rem; color: #b3a06a; font-size: 0.8rem; }
+  .kz-foco__anos { margin: 0; font-size: 0.68rem; color: #5d6a5f; }
+  .kz-foco__ger { margin: 0; font-size: 0.6rem; color: #a8935a; font-weight: 600; }
+  .kz-foco__bio, .kz-foco__orn { display: none; }
   .kz-foco__det {
+    margin-top: 0.18rem;
     border: 1px solid #496b54;
     background: #496b54;
     color: #f6f2e7;
     border-radius: 999px;
-    padding: 0.42rem 1.1rem;
-    font-size: 0.8rem;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.68rem;
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
@@ -1388,19 +1359,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   .kz-rel-nota { margin: 0.5rem 0 0; font-size: 0.74rem; color: #8a7d5c; }
   .kz-relacao-acoes { display: flex; gap: 0.5rem; justify-content: flex-end; }
 
-  /* ---------- animações ---------- */
-  .kz-in { animation: kzFade 0.28s ease both; }
-  .kz-zona--esq.kz-in { animation-name: kzEsq; }
-  .kz-zona--dir.kz-in { animation-name: kzDir; }
-  .kz-zona--topo.kz-in { animation-name: kzTopo; }
-  .kz-zona--baixo.kz-in { animation-name: kzBaixo; }
-  @keyframes kzFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-  @keyframes kzTopo { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
-  @keyframes kzBaixo { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-  @keyframes kzEsq { from { opacity: 0; transform: translateX(-8px); } to { opacity: 1; transform: none; } }
-  @keyframes kzDir { from { opacity: 0; transform: translateX(8px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) {
-    .kz-in { animation: none !important; }
     .kz-card, .kz-rail__btn, .kz-foco__det { transition: none; }
   }
 
@@ -1410,41 +1369,67 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     height: 640px;
     min-width: 0;
     overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 1.2rem 1rem 0;
+    display: block;
+    padding: 1rem 1rem 0;
   }
-  .kz-rod__aneis { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, minmax(22px, 1fr)); gap: 9px; opacity: 0.55; z-index: 0; }
-  .kz-rod__aneis span { height: 64px; border-radius: 50%; border: 1px solid #d8cfae; background: #efe7d3; animation: kzAnelPulse 5s ease-in-out infinite; }
-  .kz-rod__aneis span:nth-child(2) { animation-delay: 1s; }
-  .kz-rod__aneis span:nth-child(3) { animation-delay: 2s; }
-  @keyframes kzAnelPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+  .kz-rod__orbit {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: calc(var(--kz-r, 200) * 2px);
+    height: calc(var(--kz-r, 200) * 2px);
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1.5px solid rgba(179, 160, 106, 0.6);
+    background: radial-gradient(circle, rgba(73, 107, 84, 0.07) 62%, rgba(73, 107, 84, 0.02) 100%);
+    box-shadow: inset 0 0 60px rgba(179, 160, 106, 0.18);
+    z-index: 0;
+  }
+  .kz-rod__orbit::before {
+    content: '';
+    position: absolute;
+    inset: 12%;
+    border-radius: 50%;
+    border: 1px dashed rgba(179, 160, 106, 0.42);
+  }
+  .kz-rod__orbit::after {
+    content: '';
+    position: absolute;
+    inset: -26px;
+    border-radius: 50%;
+    border: 1px dotted rgba(179, 160, 106, 0.3);
+  }
 
   #kz-anel { position: absolute; inset: 0; z-index: 2; }
   .kz-sat {
     position: absolute;
     transform: translate(-50%, -50%);
-    width: 86px;
+    width: 92px;
     display: flex;
     flex-direction: column;
-    gap: 0.2rem;
+    align-items: center;
+    gap: 0.15rem;
     background: #fffdf8;
-    border: 1px solid #e6ddc7;
-    border-radius: 13px;
-    box-shadow: 0 4px 14px rgba(64, 52, 28, 0.08);
-    text-align: left;
+    border: 1.5px solid #e0d2a8;
+    border-radius: 15px;
+    padding: 0.3rem 0.25rem 0.38rem;
+    box-shadow: 0 6px 18px rgba(64, 52, 28, 0.16);
+    text-align: center;
     cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
   }
-  .kz-sat:hover, .kz-sat:focus-visible { transform: translate(-50%, -50%) translateY(-3px); box-shadow: 0 8px 22px rgba(64, 52, 28, 0.14); outline: none; }
+  .kz-sat:hover, .kz-sat:focus-visible {
+    transform: translate(-50%, -50%) scale(1.06);
+    box-shadow: 0 10px 26px rgba(64, 52, 28, 0.22);
+    border-color: #c8b075;
+    outline: none;
+  }
   .kz-sat--mais { background: #f0eadb; color: #5d6a5f; }
-  .kz-sat__rot { font-size: 0.56rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: #a8935a; padding: 0.1rem 0.35rem; }
-  .kz-sat__foto { width: 42px; height: 42px; border-radius: 50%; overflow: hidden; border: 2px solid #efe7d3; background: #ece4d2; flex: 0 0 auto; }
+  .kz-sat__rot { font-size: 0.52rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #a8935a; }
+  .kz-sat__foto { width: 46px; height: 46px; border-radius: 50%; overflow: hidden; border: 2px solid #efe7d3; background: #ece4d2; flex: 0 0 auto; }
   .kz-sat__foto img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .kz-sat__foto .kz-retrato--placeholder { width: 100%; height: 100%; background: #f3ead4; color: #8a7d5c; display: flex; align-items: center; justify-content: center; font-weight: 700; }
-  .kz-sat__nome { font-size: 0.72rem; font-weight: 700; color: #26332b; line-height: 1.1; max-width: 86px; }
-  .kz-sat__anos { font-size: 0.58rem; color: #6c6248; }
+  .kz-sat__foto .kz-retrato--placeholder { width: 100%; height: 100%; background: #f3ead4; color: #8a7d5c; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.7rem; }
+  .kz-sat__nome { font-size: 0.68rem; font-weight: 700; color: #26332b; line-height: 1.15; max-width: 88px; }
+  .kz-sat__anos { font-size: 0.55rem; color: #6c6248; }
   .kz-sat__mais { width: 26px; height: 26px; border-radius: 50%; background: #496b54; color: #fffdf8; display: flex; align-items: center; justify-content: center; font-size: 1rem; }
   .kz-sat[aria-hidden="true"] { opacity: 0; pointer-events: none; }
 
@@ -1500,20 +1485,26 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
       flex-wrap: wrap;
       padding: 0.5rem;
     }
-    .kz-rod { height: auto; min-height: 0; padding: 1rem; display: flex; flex-direction: column; align-items: center; gap: 1rem; overflow: visible; }
-    .kz-rod__aneis { display: none; }
-    .kz-rod__rodape { position: static; width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; font-size: 0.72rem; color: #6c6248; margin-top: 0.2rem; }
-    .kz-rod__topo { position: static; align-self: stretch; display: flex; justify-content: space-between; align-items: center; }
-    #kz-anel { position: static; inset: auto; display: flex; flex-wrap: wrap; justify-content: center; gap: 0.55rem; width: 100%; z-index: 2; }
-    .kz-sat { position: static; transform: none; width: auto; min-width: 120px; flex-direction: row; gap: 0.35rem; align-items: center; padding: 0.35rem 0.45rem; }
-    .kz-sat:hover, .kz-sat:focus-visible { transform: none; }
-    .kz-sat__nome, .kz-sat__anos { max-width: none; }
-    .kz-sat__foto { width: 38px; height: 38px; }
-    .kz-linhas { display: none; }
-    .kz-centro { order: 0; align-self: center; }
+    .kz-rod { height: 580px; min-height: 0; padding: 0.6rem; display: block; overflow: hidden; }
+    .kz-rod__rodape { font-size: 0.66rem; padding: 0 0.7rem; }
+    .kz-rod__topo { position: absolute; top: 0.55rem; right: 0.55rem; display: flex; align-items: center; gap: 0.4rem; }
+    .kz-rod__tit { font-size: 0.75rem; }
+    .kz-rod__navbtn { font-size: 0.62rem; padding: 0.22rem 0.55rem; }
+    #kz-anel { position: absolute; inset: 0; z-index: 2; }
+    .kz-sat { width: 72px; padding: 0.25rem 0.15rem 0.28rem; gap: 0.1rem; border-radius: 12px; }
+    .kz-sat__foto { width: 38px; height: 38px; border-width: 1.5px; }
+    .kz-sat__nome { font-size: 0.6rem; max-width: 66px; }
+    .kz-sat__anos { font-size: 0.5rem; }
+    .kz-sat__rot { font-size: 0.46rem; }
+    .kz-linhas { display: block; }
+    .kz-foco { width: 152px; }
+    .kz-foco__selo { font-size: 0.45rem; }
+    .kz-foco__foto { width: 40%; }
+    .kz-foco__nome { font-size: 0.85rem; }
+    .kz-foco__anos { font-size: 0.6rem; }
+    .kz-foco__ger { font-size: 0.52rem; }
+    .kz-foco__det { padding: 0.25rem 0.62rem; font-size: 0.62rem; }
     .kz-filtros { padding-inline: 0.5rem; }
-    .kz-in { animation: kzFade 0.25s ease both; }
-    @keyframes kzFade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
   }
   /* celular */
   @media (max-width: 640px) {
@@ -1521,8 +1512,21 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     .kz-kanji { font-size: 2rem; padding: 0.6rem 0.7rem; }
     .kz-hero__desc { font-size: 0.9rem; }
     .kz-busca { max-width: none; }
-    .kz-foco { width: min(300px, 86vw); }
-    .kz-foco__foto { width: 138px; height: 158px; }
+    .kz-rod { height: 425px; padding: 0.35rem; }
+    .kz-rod__tit { font-size: 0.62rem; }
+    .kz-rod__navbtn { font-size: 0.55rem; padding: 0.18rem 0.42rem; border-radius: 999px; }
+    .kz-rod__rodape { font-size: 0.56rem; bottom: 0.3rem; left: 0.4rem; right: 0.4rem; }
+    .kz-foco { width: 112px; padding: 0.32rem; }
+    .kz-foco__selo, .kz-foco__anos, .kz-foco__ger { display: none; }
+    .kz-foco__nome { font-size: 0.76rem; }
+    .kz-foco__foto { width: 36%; border-width: 2px; }
+    .kz-foco__det { padding: 0.2rem 0.48rem; font-size: 0.56rem; }
+    .kz-sat { width: 55px; padding: 0.2rem 0.14rem 0.22rem; gap: 0.08rem; border-width: 1px; border-radius: 11px; }
+    .kz-sat__foto { width: 28px; height: 28px; border-width: 1.5px; }
+    .kz-sat__nome { font-size: 0.48rem; max-width: 50px; }
+    .kz-sat__anos { display: none; }
+    .kz-sat__rot { font-size: 0.38rem; letter-spacing: 0.09em; }
+    .kz-sat__mais { width: 20px; height: 20px; font-size: 0.72rem; }
     .kz-card { width: 100%; max-width: 340px; }
     .kz-rail__btn { width: 58px; font-size: 0.6rem; }
     .kz-rodape { justify-content: center; text-align: center; }

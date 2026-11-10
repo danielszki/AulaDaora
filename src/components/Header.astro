@@ -61,26 +61,29 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
           if (!wrap) return;
           const container = wrap.querySelector('.menu__auth');
 
-          function atualizar() {
-            const c = window.Clerk;
-            const temSessao = c?.session;
-            if (!temSessao) return;
-
-            const email =
-              c.user?.primaryEmailAddress?.emailAddress ||
-              c.user?.email_addresses?.[0]?.emailAddress ||
-              '';
+          function montarLogado(email) {
+            const nome =
+              email ? email.split('@')[0] : 'Usuário';
             container.innerHTML = '';
             const info = document.createElement('span');
             info.className = 'menu__auth-info';
-            info.textContent = email || 'Usuário';
+            info.textContent = nome;
+            info.title = email || '';
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'menu__auth-btn menu__auth-btn--sair';
             btn.textContent = 'Sair';
             btn.addEventListener('click', async () => {
-              try { await c.signOut(); } catch {}
-              container.innerHTML = '';
+              try { await window.Clerk.signOut(); } catch {}
+              montarDeslogado();
+            });
+            container.appendChild(info);
+            container.appendChild(btn);
+          }
+
+          function montarDeslogado() {
+            container.innerHTML = '';
+            if (clerkAtivo) {
               const a1 = document.createElement('a');
               a1.className = 'menu__auth-btn';
               a1.href = '/sign-in';
@@ -91,9 +94,24 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
               a2.textContent = 'Criar conta';
               container.appendChild(a1);
               container.appendChild(a2);
-            });
-            container.appendChild(info);
-            container.appendChild(btn);
+            } else {
+              const a = document.createElement('a');
+              a.className = 'menu__auth-btn';
+              a.href = '/login';
+              a.textContent = 'Entrar';
+              container.appendChild(a);
+            }
+          }
+
+          function atualizar() {
+            const c = window.Clerk;
+            const temSessao = c?.session;
+            if (!temSessao) return;
+            const email =
+              c.user?.primaryEmailAddress?.emailAddress ||
+              c.user?.email_addresses?.[0]?.emailAddress ||
+              '';
+            montarLogado(email);
           }
 
           if (window.Clerk?.session) {
@@ -125,20 +143,32 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
   .menu__auth-btn--destaque { background: var(--vinho, #8a3b3b); border-color: var(--vinho, #8a3b3b); color: #fff; }
   .menu__auth-btn--destaque:hover { filter: brightness(1.1); }
   .menu__auth-info {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
     font-size: 0.85rem;
     color: var(--texto-suave);
-    margin-right: 0.5rem;
+    margin-right: 0.4rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 14rem;
+    max-width: 12rem;
+  }
+  .menu__auth-info::before {
+    content: '👤';
+    font-size: 1rem;
   }
   .menu__auth-btn--sair {
     font-size: 0.85rem;
     padding: 0.35rem 0.75rem;
-    border-color: var(--vinho, #8a3b3b);
-    color: var(--vinho, #8a3b3b);
+    border: 1.5px solid var(--vinho, #8a3b3b);
+    border-radius: 999px;
     background: transparent;
+    color: var(--vinho, #8a3b3b);
+    font-family: inherit;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1;
   }
   .menu__auth-btn--sair:hover {
     background: var(--vinho, #8a3b3b);

@@ -1,28 +1,61 @@
 ---
 import Base from '../../layouts/Base.astro';
-import {
-  pessoas,
-  filhosDe,
-  nomeDe,
-  anosDe,
-  geracaoLabel,
-  esposoDaFamilia,
-} from '../../data/familia';
+import { pessoas as seedPessoas, geracaoLabel, anosDe, type Pessoa } from '../../data/familia';
+import { getSupabase } from '../../scripts/supabase';
 
-// O site roda com output: 'server'. Sem `prerender`, esta rota vira SSR e o
-// getStaticPaths é ignorado — `Astro.props.pessoa` fica undefined e a página
-// responde 500. Os dados são estáticos, então geramos uma página por pessoa.
-export const prerender = true;
+// SSR: a ficha precisa refletir também as pessoas criadas/editadas na nuvem
+// (uma página pré-renderizada por pessoa do seed deixaria as novas em 404).
+export const prerender = false;
 
-export function getStaticPaths() {
-  return pessoas.map((pessoa) => ({ params: { id: pessoa.id }, props: { pessoa } }));
+const id = Astro.params.id || '';
+
+function normalizar(r: any): Pessoa {
+  return {
+    id: r.id,
+    nome: r.nome,
+    apelido: r.apelido || '',
+    nascimento: r.nascimento || '',
+    falecimento: r.falecimento || '',
+    geracao: r.geracao ?? 0,
+    pais: r.pais || [],
+    conjuges: r.conjuges || [],
+    foto: r.foto || '',
+    bio: r.bio || '',
+    local: r.local || '',
+    profissao: r.profissao || '',
+    observacao: r.observacao || '',
+    agregado: !!r.agregado,
+  };
 }
 
-const { pessoa } = Astro.props;
-const filhos = filhosDe(pessoa.id);
-const pais = pessoa.pais.map((id) => ({ id, nome: nomeDe(id) }));
-const conjuges = pessoa.conjuges.map((id) => ({ id, nome: nomeDe(id) }));
-const conjugeFamilia = esposoDaFamilia(pessoa);
+/** Lista completa: Supabase quando configurado, senão o seed do projeto. */
+let lista: Pessoa[] = seedPessoas;
+const sb = getSupabase();
+if (sb) {
+  try {
+    const { data } = await sb.from('pessoas').select('*').order('nome');
+    if (data && data.length) lista = data.map(normalizar);
+  } catch (e) {
+    console.warn('[pessoa] falha ao ler a nuvem, usando seed:', e);
+  }
+}
+
+const pessoa = lista.find((p) => p.id === id);
+if (!pessoa) {
+  return new Response('Pessoa não encontrada.', {
+    status: 404,
+    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
+  });
+}
+
+const mapa = new Map(lista.map((p) => [p.id, p]));
+const filhos = lista.filter((p) => (p.pais || []).includes(pessoa.id));
+const pais = (pessoa.pais || []).map((pid) => ({ id: pid, nome: mapa.get(pid)?.nome ?? pid }));
+const conjuges = (pessoa.conjuges || []).map((cid) => ({ id: cid, nome: mapa.get(cid)?.nome ?? cid }));
+// Cônjuge que é da família (não agregado) — vínculo "casou-se com".
+const conjugeFamilia = pessoa.agregado
+  ? (pessoa.conjuges || []).map((cid) => mapa.get(cid)).find((x) => x && !x.agregado)
+  : undefined;
 const iniciais = pessoa.nome
   .split(' ')
   .map((n) => n[0])

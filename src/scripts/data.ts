@@ -1,8 +1,23 @@
 // src/scripts/data.ts
 // Camada de dados: usa Supabase quando configurado, senão localStorage + seed.
-import { getSupabase, isCloudEnabled } from './supabase';
+import { getSupabase } from './supabase';
 
 const CHAVE = 'kato-arvore-v1';
+
+/** Espelha uma pessoa no localStorage (usado como cópia local/offline). */
+function salvarLocal(p: any): void {
+  try {
+    const g = localStorage.getItem(CHAVE);
+    const arr = g ? JSON.parse(g) : [];
+    if (!Array.isArray(arr)) return;
+    const i = arr.findIndex((x: any) => x && x.id === p.id);
+    if (i >= 0) arr[i] = { ...arr[i], ...p };
+    else arr.push(p);
+    localStorage.setItem(CHAVE, JSON.stringify(arr));
+  } catch {
+    /* localStorage indisponível */
+  }
+}
 
 export async function fetchPessoas(seed: any[]): Promise<any[]> {
   const sb = getSupabase();
@@ -60,16 +75,13 @@ export async function savePessoa(p: any): Promise<{ ok: boolean; error?: string 
       if (error) throw error;
       return { ok: true };
     } catch (e: any) {
+      // Mantém a alteração no dispositivo e informa que a nuvem não recebeu.
+      salvarLocal(p);
       return { ok: false, error: e?.message || String(e) };
     }
   }
-  // fallback local
-  try {
-    const g = localStorage.getItem(CHAVE);
-    const arr = g ? JSON.parse(g) : null;
-    // if no local array yet, seed it
-    return { ok: true };
-  } catch {}
+  // fallback local (sem Supabase configurado)
+  salvarLocal(p);
   return { ok: true };
 }
 
@@ -84,6 +96,13 @@ export async function deletePessoa(id: string): Promise<{ ok: boolean; error?: s
       return { ok: false, error: e?.message || String(e) };
     }
   }
+  try {
+    const g = localStorage.getItem(CHAVE);
+    const arr = g ? JSON.parse(g) : [];
+    if (Array.isArray(arr)) {
+      localStorage.setItem(CHAVE, JSON.stringify(arr.filter((p: any) => p && p.id !== id)));
+    }
+  } catch {}
   return { ok: true };
 }
 

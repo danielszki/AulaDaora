@@ -12,7 +12,8 @@
  */
 export function clerkEnabled(): boolean {
   const publica = import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY;
-  const secreta = typeof process !== 'undefined' && process.env ? process.env.CLERK_SECRET_KEY : undefined;
+  const proc = (globalThis as any).process;
+  const secreta = proc?.env?.CLERK_SECRET_KEY;
   return Boolean(publica && secreta);
 }
 

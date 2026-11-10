@@ -8,10 +8,11 @@ Rascunho do site em Astro (estático), com a documentação do projeto na mesma 
 
 ```bash
 npm install
-npm run dev      # ambiente local
-npm run build    # gera dist/
-npm run preview  # serve dist/
-npm run check    # checagem de tipos dos arquivos .astro
+cp .env.example .env   # preencha Supabase/Clerk (opcional: sem chaves roda local)
+npm run dev            # ambiente local
+npm run build          # gera dist/ + .vercel/output
+npm run preview        # serve dist/
+npm run check          # checagem de tipos dos arquivos .astro
 ```
 
 ## Estrutura
@@ -47,7 +48,10 @@ public/fotos/      55 fotos da família (IMG-*.jpg)
 
 - **Cadastrar pessoa:** `/admin` → "Cadastrar pessoa nova". Escolha (opcional) "Filho(a) de" para já criar o vínculo; a pessoa aparece na árvore em seguida.
 - **Backup:** `/admin` → **Exportar** baixa um JSON; **Importar** restaura esse backup. Faça export **antes** de trocar de dispositivo ou limpar o navegador.
-- **Onde as alterações ficam:** no `localStorage` do navegador do dispositivo atual (chave `kato-arvore-v1`). É um armazenamento **por dispositivo**. Para compartilhar as alterações entre a família com sincronia e controle de acesso, o próximo passo é conectar um banco persistente (ex.: Vercel + Supabase/KV) com login e permissões — sem serviço/credencial definidos ainda pela família.
+- **Onde as alterações ficam:** no `localStorage` do navegador do dispositivo atual (chave `kato-arvore-v1`) **e** no Supabase quando a nuvem está configurada. A árvore carrega os dados da nuvem ao abrir; se a nuvem falhar, continua com o que está no dispositivo/seed.
+- **Nuvem (Supabase):** execute `supabase/schema.sql` no SQL Editor do projeto, crie o bucket público `fotos` e preencha `PUBLIC_SUPABASE_URL` (URL **base**, sem `/rest/v1/`) e `PUBLIC_SUPABASE_ANON_KEY`.
+- **Popular a nuvem:** abra `/admin` → **Exportar arquivo (JSON)**, salve como `.seed.json` e rode `SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/seed-supabase.mjs`.
+- **Login:** `/login` usa e-mail/senha (Supabase) e `/sign-in` usa login social (Clerk, quando as chaves existem). Os botões sociais do Supabase em `/login` só funcionam depois de habilitar cada provedor em *Authentication → Providers* (hoje nenhum está habilitado no projeto). Para o Clerk também gravar no Supabase, configure o Clerk como *Third-Party Auth* no painel do Supabase (passo a passo em `.env.example`).
 - **Restaurar o original:** apaga alterações locais, sempre com confirmação. Export antes!
 
 ## Próximos passos
@@ -58,6 +62,15 @@ public/fotos/      55 fotos da família (IMG-*.jpg)
 
 ## Deploy
 
-- O site é estático (Astro). Build: `npm run build` → `dist/`.
-- Vercel já conectado ao GitHub: **todo push no `main` faz deploy automático** (projeto `familiakato`). Config fixada em `vercel.json` (framework Astro, saída `dist/`).
-- Não há segredos nem variáveis de ambiente em produção hoje. Quando entrarmos a etapa de banco/login, serão usadas variáveis documentadas aqui (ex.: `DATABASE_URL`, `ADMIN_TOKEN`) — nomes apenas, sem valores.
+- Astro com **SSR** (`output: 'server'`) e adapter da Vercel. Build: `npm run build`.
+- Vercel já conectado ao GitHub: **todo push no `main` faz deploy automático** (projeto `familiakato`).
+- Variáveis de ambiente na Vercel (**Production** e **Preview**):
+  - `PUBLIC_SUPABASE_URL` (URL base, sem `/rest/v1/`)
+  - `PUBLIC_SUPABASE_ANON_KEY`
+  - `PUBLIC_ADMIN_EMAIL`
+  - `PUBLIC_CLERK_PUBLISHABLE_KEY`
+  - `CLERK_SECRET_KEY`
+- Sem as variáveis do Clerk o site funciona normalmente; o login social fica desativado e aparece um aviso no log. Sem as do Supabase, o site opera em modo local (localStorage).
+- Nos painéis dos provedores, cadastre as URLs de produção: Supabase → Auth → URL Configuration (Site URL/Redirect URLs com o domínio da Vercel) e Clerk → Domains/Redirect URLs (`/sign-in`, `/sign-up`).
+- **Quem pode editar:** as políticas de RLS liberam escrita para qualquer usuário autenticado. Para manter o acesso restrito à família, desative o cadastro público (Supabase → Authentication → Providers → Email → *Allow new users to sign up*; Clerk → *Restrictions* / allowlist) e crie as contas manualmente.
+- `PUBLIC_*` são embutidas no build: ao trocar esses valores, refaça o deploy (não basta reiniciar a função).

@@ -170,8 +170,20 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
 
 <script>
   import { fetchPessoas, isCloudEnabled, savePessoa, uploadPhoto } from '../scripts/data';
-  import { getSession, signIn, signUp, signOut, isAdmin } from '../scripts/supabase';
-  window.__katoCloud = { fetchPessoas, isCloudEnabled, savePessoa, uploadPhoto, getSession, signIn, signUp, signOut, isAdmin };
+  import { getSession, signIn, signUp, signOut, isAdmin, getClerkToken } from '../scripts/supabase';
+  window.__katoCloud = {
+    fetchPessoas,
+    isCloudEnabled,
+    savePessoa,
+    uploadPhoto,
+    getSession,
+    signIn,
+    signUp,
+    signOut,
+    isAdmin,
+    // Diagnóstico da ponte Clerk → Supabase: o token precisa ter `role`.
+    getClerkToken,
+  };
   window.dispatchEvent(new Event('kato-cloud-ready'));
 </script>
 
@@ -210,6 +222,22 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       toast('Não foi possível salvar — suas alterações continuam na tela.');
       return false;
     }
+  }
+
+  // Envia para a nuvem e avisa quando a escrita é recusada (ex.: sem login,
+  // RLS do Supabase ou projeto sem o Clerk configurado como Third-Party Auth).
+  function salvarNuvem(...lista) {
+    const cloud = window.__katoCloud;
+    if (!cloud || !cloud.isCloudEnabled()) return;
+    lista.filter(Boolean).forEach((p) => {
+      Promise.resolve(cloud.savePessoa(p))
+        .then((r) => {
+          if (r && r.ok === false) {
+            toast('Salvo neste dispositivo, mas a nuvem recusou: ' + (r.error || 'sem permissão'));
+          }
+        })
+        .catch((e) => toast('Falha ao sincronizar com a nuvem: ' + e));
+    });
   }
 
   function restaurar() {
@@ -1050,10 +1078,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
 
     pessoas.push(nova);
     persistir();
-    if (window.__katoCloud && window.__katoCloud.isCloudEnabled()) {
-      window.__katoCloud.savePessoa(nova);
-      window.__katoCloud.savePessoa(alvo);
-    }
+    salvarNuvem(nova, alvo);
     render();
     selecionadoId = nova.id;
     pintarSelecao();
@@ -1226,7 +1251,7 @@ for (let i = 0; i < Math.min(planoPos.length, fotosSite.length); i++) {
       p.bio = overlay.querySelector('#t-edit-bio').value.trim();
       p.foto = fotoAtual;
       persistir();
-      if (window.__katoCloud && window.__katoCloud.isCloudEnabled()) window.__katoCloud.savePessoa(p);
+      salvarNuvem(p);
       render();
       pintarSelecao();
       mostrarPerfil(p);

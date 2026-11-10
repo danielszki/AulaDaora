@@ -29,3 +29,6 @@ screenshots-kizuna/
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# export usado para popular o Supabase (dados pessoais; não versionar)
+.seed.json

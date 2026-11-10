@@ -2,9 +2,13 @@
 // Uso:
 //   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... node scripts/seed-supabase.mjs [arquivo.json]
 //
+// O arquivo JSON é a lista de pessoas no formato exportado pela página /admin
+// (botão "Exportar arquivo (JSON)"). Salve como `.seed.json` na raiz do projeto
+// ou passe o caminho como argumento.
+//
 // A chave service_role é necessária porque as políticas de RLS só permitem
 // escrita para usuários autenticados. Nunca versione essa chave.
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
 
 const url = process.env.SUPABASE_URL
@@ -14,8 +18,29 @@ if (!url || !key) {
   process.exit(1)
 }
 
+// Aceita a URL com ou sem `/rest/v1/` (o SDK concatena o caminho sozinho).
+const baseUrl = (() => {
+  try {
+    return new URL(url).origin
+  } catch {
+    return url.replace(/\/+$/, '').replace(/\/(rest|auth|storage)\/v1$/i, '')
+  }
+})()
+
 const file = process.argv[2] || '.seed.json'
+if (!existsSync(file)) {
+  console.error(
+    `Arquivo não encontrado: ${file}\n` +
+      'Abra /admin, clique em "Exportar arquivo (JSON)" e salve o download como .seed.json,\n' +
+      'ou passe o caminho do backup: node scripts/seed-supabase.mjs caminho/backup.json',
+  )
+  process.exit(1)
+}
 const pessoas = JSON.parse(readFileSync(file, 'utf8'))
+if (!Array.isArray(pessoas) || !pessoas.length) {
+  console.error('O arquivo precisa conter uma lista de pessoas (array).')
+  process.exit(1)
+}
 
 const rows = pessoas.map((p) => ({
   id: p.id,
@@ -36,7 +61,7 @@ const rows = pessoas.map((p) => ({
   sexo: p.sexo ?? null,
 }))
 
-const sb = createClient(url, key, { auth: { persistSession: false } })
+const sb = createClient(baseUrl, key, { auth: { persistSession: false } })
 
 let enviados = 0
 for (let i = 0; i < rows.length; i += 50) {

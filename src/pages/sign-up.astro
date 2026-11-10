@@ -1,5 +1,7 @@
 ---
+import { SignUp } from '@clerk/astro/components';
 import { clerkEnabled } from '../lib/clerk';
+import '../styles/global.css';
 
 const clerkAtivo = clerkEnabled();
 ---
@@ -35,6 +37,9 @@ const clerkAtivo = clerkEnabled();
         )
       }
     </p>
-    <a class="btn" href="/login">Ir para o acesso da família</a>
+    {clerkAtivo ? <SignUp /> : <a class="btn" href="/login">Ir para o acesso da família</a>}
+    <p style="margin-top:1.2rem;font-size:0.85rem;color:#8a7d5c">
+      <a href="/login">Criar conta com e-mail e senha</a>
+    </p>
   </div>
 </div>

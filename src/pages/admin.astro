@@ -141,8 +141,13 @@ const ordenadas = [...pessoas].sort((a, b) => a.geracao - b.geracao || a.nome.lo
 
 <script>
   import { savePessoa, isCloudEnabled } from '../scripts/data';
-  import { getSession } from '../scripts/supabase';
-  window.__katoCloud = Object.assign(window.__katoCloud || {}, { savePessoa, isCloudEnabled, getSession });
+  import { getSession, getClerkToken } from '../scripts/supabase';
+  window.__katoCloud = Object.assign(window.__katoCloud || {}, {
+    savePessoa,
+    isCloudEnabled,
+    getSession,
+    getClerkToken,
+  });
   window.dispatchEvent(new Event('kato-cloud-ready'));
 </script>
 
@@ -193,24 +198,65 @@ const ordenadas = [...pessoas].sort((a, b) => a.geracao - b.geracao || a.nome.lo
     arr.push(nova);
     gravar(arr);
     const _cloud = window.__katoCloud;
-    if (_cloud && _cloud.isCloudEnabled()) _cloud.savePessoa(nova);
+    const msgOk = pai
+      ? 'Cadastrada como filho(a) de ' + pai.nome + '! Abra a árvore para conferir.'
+      : 'Cadastrada sem vínculo por enquanto. O vínculo pode ser criado na árvore (+ Pai/mãe).';
+    if (_cloud && _cloud.isCloudEnabled()) {
+      Promise.resolve(_cloud.savePessoa(nova)).then((r) => {
+        if (r && r.ok === false) {
+          feedback(fb, msgOk + ' Porém a nuvem recusou: ' + (r.error || 'sem permissão'), false);
+        }
+      });
+    }
     fNova.reset();
-    feedback(fb, pai ? 'Cadastrada como filho(a) de ' + pai.nome + '! Abra a árvore para conferir.' : 'Cadastrada sem vínculo por enquanto. O vínculo pode ser criado na árvore (+ Pai/mãe).', true);
+    feedback(fb, msgOk, true);
   });
 
   /* ---- Status da nuvem ---- */
   (function () {
-    const cloud = window.__katoCloud;
     const el = document.getElementById('admin-modo');
     if (!el) return;
-    if (!cloud || !cloud.isCloudEnabled()) {
-      el.textContent = 'Modo local: alterações ficam neste dispositivo.';
-      return;
+    function atualizarModo() {
+      const cloud = window.__katoCloud;
+      if (!cloud || !cloud.isCloudEnabled()) {
+        el.textContent = 'Modo local: alterações ficam neste dispositivo.';
+        return;
+      }
+      cloud.getSession().then((s) => {
+        if (s) el.textContent = 'Conectado à nuvem (' + (s.user?.email || '') + '). Alterações são compartilhadas.';
+        else el.textContent = 'Nuvem configurada, mas você não está logado. Entre em /login (e-mail/senha) ou /sign-in (social) para editar compartilhado.';
+        verificarPonteClerk(cloud);
+      });
     }
-    cloud.getSession().then((s) => {
-      if (s) el.textContent = 'Conectado à nuvem (' + (s.user?.email || '') + '). Alterações são compartilhadas.';
-      else el.textContent = 'Nuvem configurada, mas você não está logado. Entre em /login para editar compartilhado.';
-    });
+
+    /**
+     * Mostra se o login social está realmente autorizado a gravar no Supabase.
+     * O token do Clerk só é aceito quando carrega o claim `role`
+     * (Clerk → Connect with Supabase + Supabase → Third-Party Auth).
+     */
+    async function verificarPonteClerk(cloud) {
+      if (!cloud.getClerkToken) return;
+      let token = null;
+      try {
+        token = await cloud.getClerkToken();
+      } catch {
+        return;
+      }
+      if (!token) return; // ninguém logado pelo Clerk
+      let payload = null;
+      try {
+        payload = JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+      } catch {
+        return;
+      }
+      const ok = Boolean(payload?.role);
+      el.textContent += ok
+        ? ' Login social (Clerk) autorizado no Supabase.'
+        : ' Login social (Clerk) sem permissão de escrita: ative a integração Supabase no Clerk e cadastre o domínio em Supabase → Third-Party Auth.';
+    }
+    // O módulo que define window.__katoCloud carrega depois deste script inline.
+    if (window.__katoCloud) atualizarModo();
+    else window.addEventListener('kato-cloud-ready', atualizarModo, { once: true });
   })();
   const busca = document.getElementById('busca');
   busca.addEventListener('input', () => {

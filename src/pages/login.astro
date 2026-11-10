@@ -1,5 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
+import { clerkEnabled } from '../lib/clerk';
+
+const clerkAtivo = clerkEnabled();
 ---
 
 <Base title="Entrar — Família Kato" description="Acesso da família.">
@@ -13,11 +16,17 @@ import Base from '../layouts/Base.astro';
         <p id="login-msg" style="margin: 0 0 0.8rem;">Verificando configuração…</p>
         <div id="login-social" hidden>
           <p style="margin: 0 0 0.6rem; font-weight:600;">Entrar com:</p>
-          <div class="botoes-sociais">
-            <button type="button" class="btn-social" data-provedor="google">Google</button>
-            <button type="button" class="btn-social" data-provedor="facebook">Facebook</button>
-            <button type="button" class="btn-social" data-provedor="github">GitHub</button>
-          </div>
+          {clerkAtivo ? (
+            <p style="margin: 0 0 0.6rem;">
+              <a class="btn" href="/sign-in">Google, Facebook ou GitHub (Clerk)</a>
+            </p>
+          ) : (
+            <div class="botoes-sociais">
+              <button type="button" class="btn-social" data-provedor="google">Google</button>
+              <button type="button" class="btn-social" data-provedor="facebook">Facebook</button>
+              <button type="button" class="btn-social" data-provedor="github">GitHub</button>
+            </div>
+          )}
           <p style="text-align:center; margin: 0.6rem 0; font-size:0.85rem; color: var(--texto-suave);">— ou —</p>
         </div>
         <form id="login-form" hidden>

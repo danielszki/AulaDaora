@@ -13,6 +13,7 @@ export interface Pessoa {
   profissao?: string;
   observacao?: string;
   agregado?: boolean;
+  sexo?: 'M' | 'F';
 }
 
 export interface Evento {
@@ -41,7 +42,7 @@ export interface Album {
 export const pessoas: Pessoa[] = [
   {
     id: 'yoiti-kato',
-    nome: 'Yoiti Kato',
+    nome: 'Yoiti Kato', sexo: 'M',
     geracao: 0,
     pais: [],
     conjuges: ['koto-kato'],
@@ -49,7 +50,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'koto-kato',
-    nome: 'Koto Kato',
+    nome: 'Koto Kato', sexo: 'F',
     geracao: 0,
     pais: [],
     conjuges: ['yoiti-kato'],
@@ -57,7 +58,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'masuji-fujita',
-    nome: 'Masuji Fujita',
+    nome: 'Masuji Fujita', sexo: 'M',
     geracao: 0,
     pais: [],
     conjuges: ['rika-fujita'],
@@ -65,7 +66,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'rika-fujita',
-    nome: 'Rika Fujita',
+    nome: 'Rika Fujita', sexo: 'F',
     geracao: 0,
     pais: [],
     conjuges: ['masuji-fujita'],
@@ -74,7 +75,7 @@ export const pessoas: Pessoa[] = [
 
   {
     id: 'yotaro-kato',
-    nome: 'Yotaro Kato',
+    nome: 'Yotaro Kato', sexo: 'M',
     nascimento: '24/10/1894',
     falecimento: '08/11/1976',
     geracao: 1,
@@ -85,7 +86,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'toyo-kato',
-    nome: 'Toyo Kato',
+    nome: 'Toyo Kato', sexo: 'F',
     nascimento: '05/08/1897',
     falecimento: '22/06/1985',
     geracao: 1,
@@ -96,7 +97,7 @@ export const pessoas: Pessoa[] = [
 
   {
     id: 'yoshiharu-kato',
-    nome: 'Yoshiharu Kato',
+    nome: 'Yoshiharu Kato', sexo: 'M',
     nascimento: '07/02/1939',
     falecimento: '12/04/1978',
     geracao: 2,
@@ -106,7 +107,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'miyoko-kato',
     agregado: true,
-    nome: 'Miyoko Kato',
+    nome: 'Miyoko Kato', sexo: 'F',
     nascimento: '06/03/1942',
     falecimento: '02/06/2022',
     geracao: 2,
@@ -116,7 +117,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'yoshinobu-kato',
-    nome: 'Yoshinobu Kato',
+    nome: 'Yoshinobu Kato', sexo: 'M',
     geracao: 2,
     pais: ['yotaro-kato', 'toyo-kato'],
     conjuges: ['tomiko-suzuki'],
@@ -125,14 +126,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'tomiko-suzuki',
     agregado: true,
-    nome: 'Tomiko Suzuki',
+    nome: 'Tomiko Suzuki', sexo: 'F',
     geracao: 2,
     pais: [],
     conjuges: ['yoshinobu-kato'],
   },
   {
     id: 'tamae-suzuki',
-    nome: 'Tamae Suzuki',
+    nome: 'Tamae Suzuki', sexo: 'F',
     apelido: 'Tia Gorda',
     geracao: 2,
     pais: ['yotaro-kato', 'toyo-kato'],
@@ -143,7 +144,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'kiyoshi-suzuki',
     agregado: true,
-    nome: 'Kiyoshi Suzuki',
+    nome: 'Kiyoshi Suzuki', sexo: 'M',
     falecimento: 'cerca de 1947',
     geracao: 2,
     pais: [],
@@ -152,7 +153,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'yoshitaka-kato',
-    nome: 'Yoshitaka Kato',
+    nome: 'Yoshitaka Kato', sexo: 'M',
     geracao: 2,
     pais: ['yotaro-kato', 'toyo-kato'],
     conjuges: [],
@@ -161,7 +162,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'ayako-saito',
-    nome: 'Ayako Saito',
+    nome: 'Ayako Saito', sexo: 'F',
     nascimento: '05/04/1949',
     geracao: 2,
     pais: ['yotaro-kato', 'toyo-kato'],
@@ -170,7 +171,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'kioko-suzuki',
-    nome: 'Kioko Suzuki',
+    nome: 'Kioko Suzuki', sexo: 'F',
     apelido: 'Kiyoko',
     geracao: 2,
     pais: ['yotaro-kato', 'toyo-kato'],
@@ -179,14 +180,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'takeshi-suzuki',
     agregado: true,
-    nome: 'Takeshi Suzuki',
+    nome: 'Takeshi Suzuki', sexo: 'M',
     geracao: 2,
     pais: [],
     conjuges: ['kioko-suzuki'],
   },
   {
     id: 'kiyoe-kadita',
-    nome: 'Kiyoe Kadita',
+    nome: 'Kiyoe Kadita', sexo: 'F',
     apelido: 'Kyoei Kadita',
     nascimento: '27/09/1934',
     geracao: 2,
@@ -199,7 +200,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'isao-kadita',
     agregado: true,
-    nome: 'Isao Kadita',
+    nome: 'Isao Kadita', sexo: 'M',
     falecimento: 'in memoriam',
     geracao: 2,
     pais: [],
@@ -209,7 +210,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'roberto-yoshio-hosomi',
     agregado: true,
-    nome: 'Roberto Yoshio Hosomi',
+    nome: 'Roberto Yoshio Hosomi', sexo: 'M',
     nascimento: '20/06/1961',
     geracao: 3,
     pais: [],
@@ -217,7 +218,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'dirce-eiko-hosomi',
-    nome: 'Dirce Eiko Hosomi',
+    nome: 'Dirce Eiko Hosomi', sexo: 'F',
     nascimento: '15/01/1962',
     geracao: 3,
     pais: ['yoshiharu-kato', 'miyoko-kato'],
@@ -228,14 +229,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'marcello-chaparro',
     agregado: true,
-    nome: 'Marcello Chaparro',
+    nome: 'Marcello Chaparro', sexo: 'M',
     geracao: 4,
     pais: [],
     conjuges: ['mariana-miyuki-hosomi'],
   },
   {
     id: 'mariana-miyuki-hosomi',
-    nome: 'Mariana Miyuki Hosomi',
+    nome: 'Mariana Miyuki Hosomi', sexo: 'F',
     nascimento: '03/06/1997',
     geracao: 4,
     pais: ['roberto-yoshio-hosomi', 'dirce-eiko-hosomi'],
@@ -246,7 +247,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'louise-remi-hosomi-chaparro',
-    nome: 'Louise Remi Hosomi Chaparro',
+    nome: 'Louise Remi Hosomi Chaparro', sexo: 'F',
     geracao: 5,
     pais: ['marcello-chaparro', 'mariana-miyuki-hosomi'],
     conjuges: [],
@@ -255,7 +256,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'adrielle-martins-de-souza',
     agregado: true,
-    nome: 'Adrielle Martins de Souza',
+    nome: 'Adrielle Martins de Souza', sexo: 'F',
     geracao: 4,
     pais: [],
     conjuges: ['lucas-yukio-hosomi'],
@@ -263,7 +264,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'lucas-yukio-hosomi',
-    nome: 'Lucas Yukio Hosomi',
+    nome: 'Lucas Yukio Hosomi', sexo: 'M',
     nascimento: '24/08/1998',
     geracao: 4,
     pais: ['roberto-yoshio-hosomi', 'dirce-eiko-hosomi'],
@@ -273,7 +274,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'juliana-emi-hosomi',
-    nome: 'Juliana Emi Hosomi',
+    nome: 'Juliana Emi Hosomi', sexo: 'F',
     nascimento: '20/10/2000',
     geracao: 4,
     pais: ['roberto-yoshio-hosomi', 'dirce-eiko-hosomi'],
@@ -283,7 +284,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'suzanna-yumi-hosomi',
-    nome: 'Suzanna Yumi Hosomi',
+    nome: 'Suzanna Yumi Hosomi', sexo: 'F',
     nascimento: '22/05/1992',
     falecimento: '23/05/1993',
     geracao: 4,
@@ -294,7 +295,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'valter-tomio-yamamoto',
     agregado: true,
-    nome: 'Valter Tomio Yamamoto',
+    nome: 'Valter Tomio Yamamoto', sexo: 'M',
     nascimento: '21/04/1963',
     geracao: 3,
     pais: [],
@@ -302,7 +303,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'nancy-etsuko-kato',
-    nome: 'Nancy Etsuko Kato Yamamoto',
+    nome: 'Nancy Etsuko Kato Yamamoto', sexo: 'F',
     apelido: 'Etsuko',
     nascimento: '30/05/1964',
     geracao: 3,
@@ -312,7 +313,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'marcos-vinicius-yamamoto',
-    nome: 'Marcos Vinícius Yamamoto',
+    nome: 'Marcos Vinícius Yamamoto', sexo: 'M',
     nascimento: '03/05/1985',
     geracao: 4,
     pais: ['valter-tomio-yamamoto', 'nancy-etsuko-kato'],
@@ -324,14 +325,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'lais-ivano',
     agregado: true,
-    nome: 'Lais Ivano',
+    nome: 'Lais Ivano', sexo: 'F',
     geracao: 4,
     pais: [],
     conjuges: ['marcos-vinicius-yamamoto'],
   },
   {
     id: 'pedro-henrique-yamamoto',
-    nome: 'Pedro Henrique Yamamoto',
+    nome: 'Pedro Henrique Yamamoto', sexo: 'M',
     nascimento: '13/08/2023',
     geracao: 5,
     pais: ['marcos-vinicius-yamamoto', 'lais-ivano'],
@@ -340,7 +341,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'guilherme-henrique-yamamoto',
-    nome: 'Guilherme Henrique Yamamoto',
+    nome: 'Guilherme Henrique Yamamoto', sexo: 'M',
     nascimento: '27/11/1988',
     geracao: 4,
     pais: ['valter-tomio-yamamoto', 'nancy-etsuko-kato'],
@@ -351,7 +352,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'jane-katayama',
     agregado: true,
-    nome: 'Jane Katayama',
+    nome: 'Jane Katayama', sexo: 'F',
     geracao: 4,
     pais: [],
     conjuges: ['guilherme-henrique-yamamoto'],
@@ -359,7 +360,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'carlos-akira-kato',
-    nome: 'Carlos Akira Kato',
+    nome: 'Carlos Akira Kato', sexo: 'M',
     apelido: 'Akira',
     nascimento: '21/04/1966',
     geracao: 3,
@@ -370,7 +371,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'suely-nakayama-kato',
     agregado: true,
-    nome: 'Suely Nakayama Kato',
+    nome: 'Suely Nakayama Kato', sexo: 'F',
     nascimento: '02/09/1966',
     geracao: 3,
     pais: [],
@@ -378,7 +379,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'anelise-natsumi-kato',
-    nome: 'Anelise Natsumi Kato',
+    nome: 'Anelise Natsumi Kato', sexo: 'F',
     nascimento: '22/05/2004',
     geracao: 4,
     pais: ['carlos-akira-kato', 'suely-nakayama-kato'],
@@ -386,7 +387,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'beatriz-mei-kato',
-    nome: 'Beatriz Mei Kato',
+    nome: 'Beatriz Mei Kato', sexo: 'F',
     nascimento: '02/12/2007',
     geracao: 4,
     pais: ['carlos-akira-kato', 'suely-nakayama-kato'],
@@ -395,21 +396,21 @@ export const pessoas: Pessoa[] = [
 
   {
     id: 'milton-hiroshi-kato',
-    nome: 'Milton Hiroshi Kato',
+    nome: 'Milton Hiroshi Kato', sexo: 'M',
     geracao: 3,
     pais: ['yoshinobu-kato', 'tomiko-suzuki'],
     conjuges: [],
   },
   {
     id: 'anderson-kato',
-    nome: 'Anderson Kato',
+    nome: 'Anderson Kato', sexo: 'M',
     geracao: 4,
     pais: ['milton-hiroshi-kato'],
     conjuges: [],
   },
   {
     id: 'jacson-kato',
-    nome: 'Jacson Kato',
+    nome: 'Jacson Kato', sexo: 'M',
     nascimento: '07/10/1975',
     geracao: 4,
     pais: ['milton-hiroshi-kato'],
@@ -417,7 +418,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'olavo-tadayoshi-kato',
-    nome: 'Olavo Tadayoshi Kato',
+    nome: 'Olavo Tadayoshi Kato', sexo: 'M',
     nascimento: '22/02/1951',
     falecimento: '28/07/2016',
     geracao: 3,
@@ -427,7 +428,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'william-ernesto-bieberbach',
     agregado: true,
-    nome: 'William Ernesto Bieberbach',
+    nome: 'William Ernesto Bieberbach', sexo: 'M',
     nascimento: '09/10/1948',
     falecimento: '27/01/2024',
     geracao: 3,
@@ -436,7 +437,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'eliza-mitsuko-kato-bieberbach',
-    nome: 'Eliza Mitsuko Kato Bieberbach',
+    nome: 'Eliza Mitsuko Kato Bieberbach', sexo: 'F',
     apelido: 'Eliza',
     nascimento: '22/10/1952',
     geracao: 3,
@@ -446,14 +447,14 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'luiz-guilherme-kato-bieberbach',
-    nome: 'Luiz Guilherme Kato Bieberbach',
+    nome: 'Luiz Guilherme Kato Bieberbach', sexo: 'M',
     geracao: 4,
     pais: ['william-ernesto-bieberbach', 'eliza-mitsuko-kato-bieberbach'],
     conjuges: [],
   },
   {
     id: 'evelize-bieberbach',
-    nome: 'Evelize Bieberbach',
+    nome: 'Evelize Bieberbach', sexo: 'F',
     geracao: 4,
     pais: ['william-ernesto-bieberbach', 'eliza-mitsuko-kato-bieberbach'],
     conjuges: [],
@@ -461,7 +462,7 @@ export const pessoas: Pessoa[] = [
 
   {
     id: 'yoshitaka-suzuki',
-    nome: 'Yoshitaka Suzuki',
+    nome: 'Yoshitaka Suzuki', sexo: 'M',
     nascimento: '10/09/1942',
     falecimento: '01/04/2024',
     geracao: 3,
@@ -472,21 +473,21 @@ export const pessoas: Pessoa[] = [
   {
     id: 'marcia-suzuki',
     agregado: true,
-    nome: 'Marcia Suzuki',
+    nome: 'Marcia Suzuki', sexo: 'F',
     geracao: 3,
     pais: [],
     conjuges: ['yoshitaka-suzuki'],
   },
   {
     id: 'rodrigo-suzuki',
-    nome: 'Rodrigo Suzuki',
+    nome: 'Rodrigo Suzuki', sexo: 'M',
     geracao: 4,
     pais: ['yoshitaka-suzuki', 'marcia-suzuki'],
     conjuges: [],
   },
   {
     id: 'patricia-suzuki',
-    nome: 'Patrícia Suzuki',
+    nome: 'Patrícia Suzuki', sexo: 'F',
     geracao: 4,
     pais: ['yoshitaka-suzuki', 'marcia-suzuki'],
     conjuges: ['ricardo-suzuki-familia'],
@@ -496,14 +497,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'ricardo-suzuki-familia',
     agregado: true,
-    nome: 'Ricardo',
+    nome: 'Ricardo', sexo: 'M',
     geracao: 4,
     pais: [],
     conjuges: ['patricia-suzuki'],
   },
   {
     id: 'heloisa-suzuki',
-    nome: 'Heloisa',
+    nome: 'Heloisa', sexo: 'F',
     geracao: 5,
     pais: ['ricardo-suzuki-familia', 'patricia-suzuki'],
     conjuges: [],
@@ -511,7 +512,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'isadora-suzuki',
-    nome: 'Isadora',
+    nome: 'Isadora', sexo: 'F',
     geracao: 5,
     pais: ['ricardo-suzuki-familia', 'patricia-suzuki'],
     conjuges: [],
@@ -520,14 +521,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'moacir',
     agregado: true,
-    nome: 'Moacir',
+    nome: 'Moacir', sexo: 'M',
     geracao: 3,
     pais: [],
     conjuges: ['matsuko-suzuki'],
   },
   {
     id: 'matsuko-suzuki',
-    nome: 'Matsuko Suzuki',
+    nome: 'Matsuko Suzuki', sexo: 'F',
     nascimento: '04/11/1944',
     falecimento: 'maio de 2026',
     geracao: 3,
@@ -537,7 +538,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'daniel-suzuki',
-    nome: 'Daniel Suzuki',
+    nome: 'Daniel Suzuki', sexo: 'M',
     geracao: 4,
     pais: ['moacir', 'matsuko-suzuki'],
     conjuges: [],
@@ -547,14 +548,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'takanobu-morishita',
     agregado: true,
-    nome: 'Takanobu Morishita',
+    nome: 'Takanobu Morishita', sexo: 'M',
     geracao: 3,
     pais: [],
     conjuges: ['julia-morishita'],
   },
   {
     id: 'julia-morishita',
-    nome: 'Júlia Morishita',
+    nome: 'Júlia Morishita', sexo: 'F',
     nascimento: '05/04/1949',
     geracao: 3,
     pais: ['yoshitaka-kato'],
@@ -562,7 +563,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'emerson-morishita',
-    nome: 'Emerson Morishita',
+    nome: 'Emerson Morishita', sexo: 'M',
     nascimento: '01/11/1975',
     geracao: 4,
     pais: ['takanobu-morishita', 'julia-morishita'],
@@ -570,7 +571,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'carlos-morishita',
-    nome: 'Carlos Morishita',
+    nome: 'Carlos Morishita', sexo: 'M',
     nascimento: '07/05/1977',
     geracao: 4,
     pais: ['takanobu-morishita', 'julia-morishita'],
@@ -578,14 +579,14 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'eliza-morishita',
-    nome: 'Eliza Morishita',
+    nome: 'Eliza Morishita', sexo: 'F',
     geracao: 4,
     pais: ['takanobu-morishita', 'julia-morishita'],
     conjuges: [],
   },
   {
     id: 'lincoln-massaharu-kato',
-    nome: 'Lincoln Massaharu Kato',
+    nome: 'Lincoln Massaharu Kato', sexo: 'M',
     nascimento: '15/03/1951',
     geracao: 3,
     pais: ['yoshitaka-kato'],
@@ -593,21 +594,21 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'sandro-yukiyoshi-kato',
-    nome: 'Sandro Yukiyoshi Kato',
+    nome: 'Sandro Yukiyoshi Kato', sexo: 'M',
     geracao: 4,
     pais: ['lincoln-massaharu-kato'],
     conjuges: [],
   },
   {
     id: 'manoel-yoshidiro-kato',
-    nome: 'Manoel Yoshidiro Kato',
+    nome: 'Manoel Yoshidiro Kato', sexo: 'M',
     geracao: 3,
     pais: ['yoshitaka-kato'],
     conjuges: [],
   },
   {
     id: 'roberto-mitio-kato',
-    nome: 'Roberto Mitio Kato',
+    nome: 'Roberto Mitio Kato', sexo: 'M',
     nascimento: '14/02/1955',
     geracao: 3,
     pais: ['yoshitaka-kato'],
@@ -615,21 +616,21 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'guilherme-kato',
-    nome: 'Guilherme Kato',
+    nome: 'Guilherme Kato', sexo: 'M',
     geracao: 4,
     pais: ['roberto-mitio-kato'],
     conjuges: [],
   },
   {
     id: 'jean-carlos-kato',
-    nome: 'Jean Carlos Kato',
+    nome: 'Jean Carlos Kato', sexo: 'M',
     geracao: 4,
     pais: ['roberto-mitio-kato'],
     conjuges: [],
   },
   {
     id: 'nina-tie-kato',
-    nome: 'Nina Tie Kato',
+    nome: 'Nina Tie Kato', sexo: 'F',
     nascimento: '18/06/1958',
     geracao: 3,
     pais: ['yoshitaka-kato'],
@@ -639,14 +640,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'kazuyuki-takano',
     agregado: true,
-    nome: 'Kazuyuki Takano',
+    nome: 'Kazuyuki Takano', sexo: 'M',
     geracao: 3,
     pais: [],
     conjuges: ['tereza-takano'],
   },
   {
     id: 'tereza-takano',
-    nome: 'Tereza Takano',
+    nome: 'Tereza Takano', sexo: 'F',
     geracao: 3,
     pais: ['ayako-saito'],
     conjuges: ['kazuyuki-takano'],
@@ -655,14 +656,14 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'mary-takano',
-    nome: 'Mary Takano',
+    nome: 'Mary Takano', sexo: 'F',
     geracao: 4,
     pais: ['kazuyuki-takano', 'tereza-takano'],
     conjuges: [],
   },
   {
     id: 'eduardo-eichi-takano',
-    nome: 'Eduardo Eichi Takano',
+    nome: 'Eduardo Eichi Takano', sexo: 'M',
     apelido: 'Dudu',
     geracao: 4,
     pais: ['kazuyuki-takano', 'tereza-takano'],
@@ -673,7 +674,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'duane',
     agregado: true,
-    nome: 'Duane',
+    nome: 'Duane', sexo: 'M',
     geracao: 4,
     pais: [],
     conjuges: ['eduardo-eichi-takano'],
@@ -681,7 +682,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'helena-yumi-takano',
-    nome: 'Helena Yumi Takano',
+    nome: 'Helena Yumi Takano', sexo: 'F',
     geracao: 5,
     pais: ['eduardo-eichi-takano', 'duane'],
     conjuges: [],
@@ -689,7 +690,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'ricardo-yuji-takano',
-    nome: 'Ricardo Yuji Takano',
+    nome: 'Ricardo Yuji Takano', sexo: 'M',
     geracao: 4,
     pais: ['kazuyuki-takano', 'tereza-takano'],
     conjuges: ['erica'],
@@ -698,7 +699,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'erica',
     agregado: true,
-    nome: 'Érica',
+    nome: 'Érica', sexo: 'F',
     geracao: 4,
     pais: [],
     conjuges: ['ricardo-yuji-takano'],
@@ -706,7 +707,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'aurora-akemi-takano',
-    nome: 'Aurora Akemi Takano',
+    nome: 'Aurora Akemi Takano', sexo: 'F',
     geracao: 5,
     pais: ['ricardo-yuji-takano', 'erica'],
     conjuges: [],
@@ -714,7 +715,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'raphael-takano',
-    nome: 'Raphael Takano',
+    nome: 'Raphael Takano', sexo: 'M',
     geracao: 4,
     pais: ['kazuyuki-takano', 'tereza-takano'],
     conjuges: [],
@@ -722,7 +723,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'mario-mitsuyoshi-saito',
-    nome: 'Mario Mitsuyoshi Saito',
+    nome: 'Mario Mitsuyoshi Saito', sexo: 'M',
     geracao: 3,
     pais: ['ayako-saito'],
     conjuges: ['solange'],
@@ -730,56 +731,56 @@ export const pessoas: Pessoa[] = [
   {
     id: 'solange',
     agregado: true,
-    nome: 'Solange',
+    nome: 'Solange', sexo: 'F',
     geracao: 3,
     pais: [],
     conjuges: ['mario-mitsuyoshi-saito'],
   },
   {
     id: 'william-yoshio-costa-saito',
-    nome: 'William Yoshio Costa Saito',
+    nome: 'William Yoshio Costa Saito', sexo: 'M',
     geracao: 4,
     pais: ['mario-mitsuyoshi-saito', 'solange'],
     conjuges: [],
   },
   {
     id: 'wagner-yukio-costa-saito',
-    nome: 'Wagner Yukio Costa Saito',
+    nome: 'Wagner Yukio Costa Saito', sexo: 'M',
     geracao: 4,
     pais: ['mario-mitsuyoshi-saito', 'solange'],
     conjuges: [],
   },
   {
     id: 'victor-akio-costa-saito',
-    nome: 'Victor Akio Costa Saito',
+    nome: 'Victor Akio Costa Saito', sexo: 'M',
     geracao: 4,
     pais: ['mario-mitsuyoshi-saito', 'solange'],
     conjuges: [],
   },
   {
     id: 'cassio-kenji-costa-saito',
-    nome: 'Cassio Kenji Costa Saito',
+    nome: 'Cassio Kenji Costa Saito', sexo: 'M',
     geracao: 4,
     pais: ['mario-mitsuyoshi-saito', 'solange'],
     conjuges: [],
   },
   {
     id: 'mariza-saito',
-    nome: 'Mariza Saito',
+    nome: 'Mariza Saito', sexo: 'F',
     geracao: 3,
     pais: ['ayako-saito'],
     conjuges: [],
   },
   {
     id: 'elena-saito',
-    nome: 'Elena Saito',
+    nome: 'Elena Saito', sexo: 'F',
     geracao: 3,
     pais: ['ayako-saito'],
     conjuges: [],
   },
   {
     id: 'nilton-saito',
-    nome: 'Nilton Saito',
+    nome: 'Nilton Saito', sexo: 'M',
     geracao: 3,
     pais: ['ayako-saito'],
     conjuges: [],
@@ -788,14 +789,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'luiz-oyama',
     agregado: true,
-    nome: 'Luiz Oyama',
+    nome: 'Luiz Oyama', sexo: 'M',
     geracao: 3,
     pais: [],
     conjuges: ['noriko-oyama'],
   },
   {
     id: 'noriko-oyama',
-    nome: 'Noriko Oyama',
+    nome: 'Noriko Oyama', sexo: 'F',
     nascimento: '10/07/1952',
     geracao: 3,
     pais: ['takeshi-suzuki', 'kioko-suzuki'],
@@ -806,14 +807,14 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'alexandre-oyama',
-    nome: 'Alexandre Oyama',
+    nome: 'Alexandre Oyama', sexo: 'M',
     geracao: 4,
     pais: ['luiz-oyama', 'noriko-oyama'],
     conjuges: [],
   },
   {
     id: 'eric-oyama',
-    nome: 'Éric Oyama',
+    nome: 'Éric Oyama', sexo: 'M',
     geracao: 5,
     pais: ['alexandre-oyama'],
     conjuges: [],
@@ -822,14 +823,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'willian-ozawa',
     agregado: true,
-    nome: 'Willian Ozawa',
+    nome: 'Willian Ozawa', sexo: 'M',
     geracao: 3,
     pais: [],
     conjuges: ['cintya-carol-ozawa'],
   },
   {
     id: 'cintya-carol-ozawa',
-    nome: 'Cintya Carol Ozawa',
+    nome: 'Cintya Carol Ozawa', sexo: 'F',
     geracao: 3,
     pais: ['takeshi-suzuki', 'kioko-suzuki'],
     conjuges: ['willian-ozawa'],
@@ -838,7 +839,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'pierre-ozawa',
-    nome: 'Pierre Ozawa',
+    nome: 'Pierre Ozawa', sexo: 'M',
     geracao: 5,
     pais: ['willian-ozawa', 'cintya-carol-ozawa'],
     conjuges: [],
@@ -846,7 +847,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'charlie-ozawa',
-    nome: 'Charlie Ozawa',
+    nome: 'Charlie Ozawa', sexo: 'M',
     geracao: 5,
     pais: ['willian-ozawa', 'cintya-carol-ozawa'],
     conjuges: [],
@@ -855,21 +856,21 @@ export const pessoas: Pessoa[] = [
   {
     id: 'jussara-takako-suzuki',
     agregado: true,
-    nome: 'Jussara Takako Suzuki',
+    nome: 'Jussara Takako Suzuki', sexo: 'F',
     geracao: 3,
     pais: [],
     conjuges: ['eduardo-hisaiti-suzuki'],
   },
   {
     id: 'eduardo-hisaiti-suzuki',
-    nome: 'Eduardo Hisaiti Suzuki',
+    nome: 'Eduardo Hisaiti Suzuki', sexo: 'M',
     geracao: 3,
     pais: ['takeshi-suzuki', 'kioko-suzuki'],
     conjuges: ['jussara-takako-suzuki'],
   },
   {
     id: 'alberto-hissakazu-suzuki',
-    nome: 'Alberto Hissakazu Suzuki',
+    nome: 'Alberto Hissakazu Suzuki', sexo: 'M',
     apelido: 'Beto',
     geracao: 4,
     pais: ['eduardo-hisaiti-suzuki', 'jussara-takako-suzuki'],
@@ -879,14 +880,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'franciny',
     agregado: true,
-    nome: 'Franciny',
+    nome: 'Franciny', sexo: 'F',
     geracao: 4,
     pais: [],
     conjuges: ['henrique-nobuaki-suzuki'],
   },
   {
     id: 'henrique-nobuaki-suzuki',
-    nome: 'Henrique Nobuaki Suzuki',
+    nome: 'Henrique Nobuaki Suzuki', sexo: 'M',
     geracao: 4,
     pais: ['eduardo-hisaiti-suzuki', 'jussara-takako-suzuki'],
     conjuges: ['franciny'],
@@ -895,14 +896,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'leandro-enrik',
     agregado: true,
-    nome: 'Leandro Enrik',
+    nome: 'Leandro Enrik', sexo: 'M',
     geracao: 4,
     pais: [],
     conjuges: ['cintya-leika-suzuki'],
   },
   {
     id: 'cintya-leika-suzuki',
-    nome: 'Cintya Leika Suzuki',
+    nome: 'Cintya Leika Suzuki', sexo: 'F',
     geracao: 4,
     pais: ['eduardo-hisaiti-suzuki', 'jussara-takako-suzuki'],
     conjuges: ['leandro-enrik'],
@@ -911,7 +912,7 @@ export const pessoas: Pessoa[] = [
   {
     id: 'francisco-kenji-doi',
     agregado: true,
-    nome: 'Francisco Kenji Doi',
+    nome: 'Francisco Kenji Doi', sexo: 'M',
     nascimento: '15/06/1952',
     geracao: 3,
     pais: [],
@@ -919,7 +920,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'emilia-tomoko-suzuki-doi',
-    nome: 'Emília Tomoko Suzuki Doi',
+    nome: 'Emília Tomoko Suzuki Doi', sexo: 'F',
     nascimento: '12/02/1957',
     geracao: 3,
     pais: ['takeshi-suzuki', 'kioko-suzuki'],
@@ -929,7 +930,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'luana-tiharu-doi',
-    nome: 'Luana Tiharu Doi',
+    nome: 'Luana Tiharu Doi', sexo: 'F',
     nascimento: '15/10/1999',
     geracao: 4,
     pais: ['francisco-kenji-doi', 'emilia-tomoko-suzuki-doi'],
@@ -937,7 +938,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'rebeca-kenna-doi',
-    nome: 'Rebeca Kenna Doi',
+    nome: 'Rebeca Kenna Doi', sexo: 'F',
     nascimento: '09/07/2002',
     geracao: 4,
     pais: ['francisco-kenji-doi', 'emilia-tomoko-suzuki-doi'],
@@ -946,7 +947,7 @@ export const pessoas: Pessoa[] = [
 
   {
     id: 'amelia-kadita',
-    nome: 'Amélia Kadita',
+    nome: 'Amélia Kadita', sexo: 'F',
     geracao: 3,
     pais: ['isao-kadita', 'kiyoe-kadita'],
     conjuges: [],
@@ -956,7 +957,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'vania',
-    nome: 'Vania',
+    nome: 'Vania', sexo: 'F',
     geracao: 4,
     pais: ['amelia-kadita'],
     conjuges: ['bruno'],
@@ -965,14 +966,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'bruno',
     agregado: true,
-    nome: 'Bruno',
+    nome: 'Bruno', sexo: 'M',
     geracao: 4,
     pais: [],
     conjuges: ['vania'],
   },
   {
     id: 'laura',
-    nome: 'Laura',
+    nome: 'Laura', sexo: 'F',
     geracao: 5,
     pais: ['bruno', 'vania'],
     conjuges: [],
@@ -980,7 +981,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'livia',
-    nome: 'Livia',
+    nome: 'Livia', sexo: 'F',
     geracao: 5,
     pais: ['bruno', 'vania'],
     conjuges: [],
@@ -988,7 +989,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'fernando',
-    nome: 'Fernando',
+    nome: 'Fernando', sexo: 'M',
     geracao: 4,
     pais: ['amelia-kadita'],
     conjuges: ['baby-lyn'],
@@ -997,14 +998,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'baby-lyn',
     agregado: true,
-    nome: 'Baby Lyn',
+    nome: 'Baby Lyn', sexo: 'F',
     geracao: 4,
     pais: [],
     conjuges: ['fernando'],
   },
   {
     id: 'lorenzo',
-    nome: 'Lorenzo',
+    nome: 'Lorenzo', sexo: 'M',
     geracao: 5,
     pais: ['fernando', 'baby-lyn'],
     conjuges: [],
@@ -1012,7 +1013,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'emiko-kadita',
-    nome: 'Emiko Kadita',
+    nome: 'Emiko Kadita', sexo: 'F',
     apelido: 'Marlene',
     geracao: 3,
     pais: ['isao-kadita', 'kiyoe-kadita'],
@@ -1022,7 +1023,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'nelson-kadita',
-    nome: 'Nelson Kadita',
+    nome: 'Nelson Kadita', sexo: 'M',
     apelido: 'Hiro',
     geracao: 3,
     pais: ['isao-kadita', 'kiyoe-kadita'],
@@ -1032,14 +1033,14 @@ export const pessoas: Pessoa[] = [
   {
     id: 'marcia-tanaka',
     agregado: true,
-    nome: 'Marcia Tanaka',
+    nome: 'Marcia Tanaka', sexo: 'F',
     geracao: 3,
     pais: [],
     conjuges: ['nelson-kadita'],
   },
   {
     id: 'regina-hiroko-kadita',
-    nome: 'Regina Hiroko Kadita',
+    nome: 'Regina Hiroko Kadita', sexo: 'F',
     falecimento: 'in memoriam',
     geracao: 3,
     pais: ['isao-kadita', 'kiyoe-kadita'],
@@ -1047,7 +1048,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'douglas-kazuyoshi-kadita',
-    nome: 'Douglas Kazuyoshi Kadita',
+    nome: 'Douglas Kazuyoshi Kadita', sexo: 'M',
     geracao: 3,
     pais: ['isao-kadita', 'kiyoe-kadita'],
     conjuges: [],
@@ -1056,7 +1057,7 @@ export const pessoas: Pessoa[] = [
 
   {
     id: 'sandro',
-    nome: 'Sandro',
+    nome: 'Sandro', sexo: 'M',
     geracao: 4,
     pais: [],
     conjuges: [],
@@ -1065,7 +1066,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'guilherme-primogenito',
-    nome: 'Guilherme',
+    nome: 'Guilherme', sexo: 'M',
     geracao: 4,
     pais: [],
     conjuges: [],
@@ -1073,7 +1074,7 @@ export const pessoas: Pessoa[] = [
   },
   {
     id: 'giancarlo-kyomen-kato',
-    nome: 'Giancarlo Kyomen Kato',
+    nome: 'Giancarlo Kyomen Kato', sexo: 'M',
     geracao: 4,
     pais: [],
     conjuges: [],

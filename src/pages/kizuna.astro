@@ -5,6 +5,7 @@ import { pessoas, historias, eventos } from '../data/familia';
 const dados = pessoas.map((p) => ({
   id: p.id,
   nome: p.nome,
+  sexo: p.sexo || '',
   nascimento: p.nascimento || '',
   falecimento: p.falecimento || '',
   geracao: p.geracao,
@@ -208,6 +209,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   const dataEl = document.getElementById('kz-dados');
   const evEl = document.getElementById('kz-eventos');
   const PESSOAS = dataEl ? JSON.parse(dataEl.textContent || '[]') : [];
+  const seedSexoById = new Map(PESSOAS.map((p) => [p.id, p.sexo || '']));
   const EVENTOS = evEl ? JSON.parse(evEl.textContent || '[]') : [];
   const byId = new Map(PESSOAS.map((p) => [p.id, p]));
 
@@ -349,20 +351,9 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     return 'Parente';
   }
 
-  function tokenDe(lab) {
-    switch (lab) {
-      case 'Pai/Mãe': return 'pais';
-      case 'Filho(a)': return 'filhos';
-      case 'Cônjuge': return 'conjuge';
-      case 'Ex-cônjuge': return 'ex';
-      case 'Irmão(a)': return 'irmaos';
-      default: return 'parente';
-    }
-  }
-
   function satHTML(f, t, excesso) {
     const lab = rotuloDe(f, t);
-    return `<button type="button" class="kz-sat kz-sat--${tokenDe(lab)}" data-id="${esc(t.id)}" aria-label="Selecionar ${esc(t.nome)}, ${esc(lab)}">
+    return `<button type="button" class="kz-sat${t.sexo ? ' kz-g--' + String(t.sexo).toLowerCase() : ''}" data-id="${esc(t.id)}" aria-label="Selecionar ${esc(t.nome)}, ${esc(lab)}">
       <span class="kz-sat__rot">${esc(lab)}</span>
       <span class="kz-sat__foto">${fotoHTML(t)}</span>
       <strong class="kz-sat__nome">${esc(t.nome)}</strong>
@@ -427,7 +418,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     if (!p) return;
 
     const bioCurta = p.bio ? (p.bio.length > 150 ? p.bio.slice(0, 148).trim() + '…' : p.bio) : '';
-    centroEl.innerHTML = `<article class="kz-foco" data-tem-foto="${p.foto ? 1 : 0}">
+    centroEl.innerHTML = `<article class="kz-foco${p.sexo ? ' kz-g--' + String(p.sexo).toLowerCase() : ''}" data-tem-foto="${p.foto ? 1 : 0}">
       <span class="kz-foco__selo">Pessoa em foco</span>
       <div class="kz-foco__foto">${fotoHTML(p, 'kz-avt--foco')}</div>
       <h2 class="kz-foco__nome">${esc(p.nome)}</h2>
@@ -546,7 +537,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     const totalVinculos = ps.length + cs.length + xs.length + is.length + fs.length;
 
     painelCont.innerHTML = `
-      <header class="kz-painel__hero">
+      <header class="kz-painel__hero${p.sexo ? ' kz-g--' + String(p.sexo).toLowerCase() : ''}">
         <span class="kz-painel__crest" aria-hidden="true">加</span>
         <span class="kz-painel__onda" aria-hidden="true"></span>
         <span class="kz-painel__foto">${fotoHTML(p, 'kz-avt--painel')}</span>
@@ -756,6 +747,12 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     try {
       const remoto = await fetchPessoas(PESSOAS.slice());
       if (remoto && remoto.length) {
+        for (const p of remoto) {
+          if (!p.sexo) {
+            const s = seedSexoById.get(p.id);
+            if (s) p.sexo = s;
+          }
+        }
         PESSOAS.length = 0;
         PESSOAS.push(...remoto);
         byId.clear();
@@ -1796,17 +1793,6 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   .kz-sat__nome { font-weight: 700; color: #533f45; }
   .kz-sat__anos { color: #a5716d; }
   .kz-sat__foto { box-shadow: 0 0 0 2px #f4d7cd; }
-  .kz-sat--pais { border-color: #f2d19b; }
-  .kz-sat--pais .kz-sat__rot { background: #fbe8c0; color: #7c5f16; }
-  .kz-sat--filhos { border-color: #a9dcc0; }
-  .kz-sat--filhos .kz-sat__rot { background: #ddf4e7; color: #2f6b47; }
-  .kz-sat--conjuge { border-color: #f2b3c0; }
-  .kz-sat--conjuge .kz-sat__rot { background: #fbdee6; color: #a03a54; }
-  .kz-sat--ex { border-color: #d3cbdf; }
-  .kz-sat--ex .kz-sat__rot { background: #ece7f5; color: #5d5470; }
-  .kz-sat--irmaos { border-color: #aecbf2; }
-  .kz-sat--irmaos .kz-sat__rot { background: #e0eafd; color: #33486e; }
-  .kz-sat--parente .kz-sat__rot { background: #fbe6d8; color: #8a5230; }
   .kz-sat--mais {
     background: linear-gradient(160deg, #efe2f7 0%, #f7dcea 100%);
     border: 2px solid #d3bfe2;
@@ -1856,6 +1842,48 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   @media (prefers-reduced-motion: reduce) {
     .kz-floaty { animation: none !important; }
   }
+
+  /* ---------- cores por sexo: homens azul / mulheres rosa ---------- */
+  .kz-sat.kz-g--m { border-color: #a9c6f2; box-shadow: 0 7px 17px rgba(63, 111, 176, 0.2); }
+  .kz-sat.kz-g--m .kz-sat__rot { background: #e0ebfd; color: #2f4a7c; }
+  .kz-sat.kz-g--m .kz-sat__foto { box-shadow: 0 0 0 2px #a9c6f2; }
+  .kz-sat.kz-g--m .kz-retrato--placeholder { background: #e9eef9; color: #3a5a8c; }
+  .kz-sat.kz-g--m:hover, .kz-sat.kz-g--m:focus-visible { border-color: #7fa8e0; box-shadow: 0 13px 28px rgba(63, 111, 176, 0.32); }
+  .kz-sat.kz-g--f { border-color: #f2b3c0; box-shadow: 0 7px 17px rgba(214, 121, 143, 0.22); }
+  .kz-sat.kz-g--f .kz-sat__rot { background: #fbdee6; color: #a03a54; }
+  .kz-sat.kz-g--f .kz-sat__foto { box-shadow: 0 0 0 2px #f2b3c0; }
+  .kz-sat.kz-g--f .kz-retrato--placeholder { background: #fdeef1; color: #a03a54; }
+  .kz-sat.kz-g--f:hover, .kz-sat.kz-g--f:focus-visible { border-color: #e5a0ac; box-shadow: 0 13px 28px rgba(214, 121, 143, 0.32); }
+
+  .kz-foco.kz-g--m {
+    background: radial-gradient(circle at 50% 30%, #fbfdff 0%, #dce9fa 46%, #b3cdee 84%, #8fb3e0 100%);
+    box-shadow: 0 22px 48px rgba(63, 111, 176, 0.36), 0 0 0 5px #c7dbf5, 0 0 0 9px rgba(255, 253, 250, 0.78), inset 0 -8px 18px rgba(63, 100, 156, 0.24), inset 0 5px 12px #ffffff;
+  }
+  .kz-foco.kz-g--m::after { border-color: rgba(79, 116, 184, 0.55); }
+  .kz-foco.kz-g--m .kz-foco__selo { background: linear-gradient(180deg, #6f9bde 0%, #4f74b8 100%); box-shadow: 0 4px 12px rgba(79, 116, 184, 0.45); }
+  .kz-foco.kz-g--m .kz-foco__nome { color: #26344d; }
+  .kz-foco.kz-g--m .kz-foco__anos { color: #5b6d8c; }
+  .kz-foco.kz-g--m .kz-foco__ger { color: #3a5a8c; }
+  .kz-foco.kz-g--m .kz-foco__foto { background: #dce9fa; box-shadow: 0 10px 24px rgba(63, 111, 176, 0.35), 0 0 0 2px #8fb3e0; }
+  .kz-foco.kz-g--m .kz-avt--foco { color: #3a5a8c; }
+  .kz-foco.kz-g--m .kz-foco__foto::before, .kz-foco.kz-g--m .kz-foco__foto::after { background: rgba(120, 160, 225, 0.55); }
+  .kz-foco.kz-g--m .kz-foco__det { background: linear-gradient(180deg, #6f9bde 0%, #4f74b8 100%); box-shadow: 0 6px 16px rgba(79, 116, 184, 0.45); }
+  .kz-foco.kz-g--m .kz-foco__det:hover { background: linear-gradient(180deg, #7fa8e6 0%, #5b82c4 100%); }
+
+  .kz-painel__hero.kz-g--m {
+    background: radial-gradient(130% 130% at 50% -10%, #dce9fa 0%, #bcd2ee 55%, #93b4dd 100%);
+    border-color: #a9c6f2;
+    box-shadow: inset 0 1px 0 #ffffff, 0 12px 30px rgba(63, 111, 176, 0.3);
+  }
+  .kz-painel__hero.kz-g--m .kz-painel__crest { color: rgba(63, 111, 176, 0.22); }
+  .kz-painel__hero.kz-g--m .kz-painel__onda {
+    background-image: radial-gradient(circle at 50% 0, transparent 33%, rgba(63, 111, 176, 0.18) 34%, rgba(63, 111, 176, 0.18) 36%, transparent 37%, transparent 50%, rgba(63, 111, 176, 0.13) 51%, rgba(63, 111, 176, 0.13) 53%, transparent 54%);
+  }
+  .kz-painel__hero.kz-g--m .kz-painel__foto { border-color: #8fb3e0; box-shadow: 0 8px 22px rgba(63, 111, 176, 0.4), inset 0 0 0 3px rgba(143, 179, 224, 0.4); }
+  .kz-painel__hero.kz-g--m h3 { color: #23324d; }
+  .kz-painel__hero.kz-g--m .kz-painel__anos { color: #45597e; }
+  .kz-painel__hero.kz-g--m .kz-painel__ger { color: #3a5a8c; }
+  .kz-painel__hero.kz-g--m .kz-painel__chip { border-color: rgba(58, 90, 140, 0.5); color: #2f4a7c; }
 
   /* ===================== RESPONSIVO ===================== */
   /* notebook */

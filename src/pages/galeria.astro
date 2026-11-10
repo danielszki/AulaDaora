@@ -1,7 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
-import { albuns } from '../data/familia';
+import { albuns, pessoas } from '../data/familia';
 import { uploadPhoto, isCloudEnabled } from '../scripts/data';
+
+function esc(s: string): string {
+  return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+}
+
+function anos(p: { nascimento?: string; falecimento?: string }): string {
+  const partes: string[] = [];
+  if (p.nascimento) partes.push(`n. ${p.nascimento}`);
+  if (p.falecimento) partes.push(`f. ${p.falecimento}`);
+  return partes.join(' · ') || '';
+}
 ---
 <Base title="Galeria de Fotos" description="Álbuns de fotos da Família Kato por época.">
   <section class="section">
@@ -34,10 +45,10 @@ import { uploadPhoto, isCloudEnabled } from '../scripts/data';
                 <select id="f-familia" required>
                   <option value="">Selecione uma pessoa ou família…</option>
                   <optgroup label="Pessoas cadastradas">
-                    {pessoasOpts()}
+                    {pessoas.map(p => `<option value="pessoa:${p.id}">${esc(p.nome)} (${anos(p)})</option>`).join('')}
                   </optgroup>
                   <optgroup label="Álbuns existentes">
-                    {albunsOpts()}
+                    {albuns.map(a => `<option value="album:${a.id}">${esc(a.titulo)} · ${a.periodo}</option>`).join('')}
                   </optgroup>
                   <option value="__novo__">+ Adicionar nova pessoa/família</option>
                 </select>
@@ -133,31 +144,16 @@ import { uploadPhoto, isCloudEnabled } from '../scripts/data';
     <button class="lightbox__seta lightbox__seta--dir" type="button" aria-label="Próxima foto">›</button>
   </div>
 
+  <script type="application/json" id="galeria-opcoes">
+    {
+      "pessoas": ${JSON.stringify(pessoas.map(p => ({ id: p.id, nome: p.nome, nascimento: p.nascimento, falecimento: p.falecimento })))},
+      "albuns": ${JSON.stringify(albuns.map(a => ({ id: a.id, titulo: a.titulo, periodo: a.periodo })))}
+    }
+  </script>
+
   <script>
-    import { pessoas } from '../data/familia';
-
-    function pessoasOpts() {
-      return pessoas
-        .map((p) => `<option value="pessoa:${p.id}">${esc(p.nome)} (${anos(p)})</option>`)
-        .join('');
-    }
-
-    function albunsOpts() {
-      return albuns
-        .map((a) => `<option value="album:${a.id}">${esc(a.titulo)} · ${a.periodo}</option>`)
-        .join('');
-    }
-
-    function esc(s) {
-      return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    }
-
-    function anos(p) {
-      const partes = [];
-      if (p.nascimento) partes.push(`n. ${p.nascimento}`);
-      if (p.falecimento) partes.push(`f. ${p.falecimento}`);
-      return partes.join(' · ') || '';
-    }
+    const data = document.getElementById('galeria-opcoes');
+    const opcoes = data ? JSON.parse(data.textContent || '{}') : { pessoas: [], albuns: [] };
 
     const form = document.getElementById('f-envio-foto');
     const selFamilia = document.getElementById('f-familia');

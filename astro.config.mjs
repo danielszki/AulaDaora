@@ -65,6 +65,17 @@ export default defineConfig({
           signInUrl: '/sign-in',
           signUpUrl: '/sign-up',
           afterSignOutUrl: '/',
+          // A interface do Clerk vem em inglês por padrão; o site é em pt-BR.
+          localization: { locale: 'pt-BR' },
+          appearance: {
+            variables: {
+              colorPrimary: '#496b54',
+              colorText: '#29322d',
+              colorBackground: '#fffefb',
+              borderRadius: '10px',
+              fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
+            },
+          },
         }),
       ]
     : [],

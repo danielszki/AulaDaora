@@ -1,37 +1,46 @@
 :root {
-  /* Paleta Família Kato — herança nikkei: papel washi, tinta sumi, verde-bambu, dourado, terracota */
-  --creme: #f7f5ef;          /* fundo principal */
-  --papel: #fffefb;          /* superfícies e cartões */
-  --carvao: #29322d;         /* texto principal */
-  --verde: #496b54;          /* verde natural — ação primária */
-  --verde-suave: #e8efe7;    /* fundos secundários */
-  --dourado: #b99a61;        /* destaque discreto */
-  --terracota: #ad6652;      /* acento pontual */
-  --terracota-escuro: #8a4a3a; /* texto/ação com contraste AA sobre creme */
+  /* Paleta Família Kato — kawaii compacto azul-rosa: rosa, menta, pessego, dourado */
+  --creme: #fdf6ef;            /* fundo principal */
+  --papel: #fffefb;             /* superfícies e cartões */
+  --carvao: #29322d;           /* texto principal */
   --borda: #e6e2d7;          /* borda leve */
   --texto-suave: #5d6660;    /* texto secundário (AA sobre creme) */
+  --dourado: #e4b95b;        /* destaque discreto / foco visível */
 
-  /* Aliases legados (componentes antigos continuam funcionando com a nova paleta) */
-  --vinho: var(--terracota-escuro);
-  --vinho-escuro: #6f3a2c;
-  --rosa: #f0e4d6;
-  --oliva: var(--verde-suave);
-  --oliva-escuro: #3d5a45;
-  --verde: var(--verde);
-  --montanha-claro: #efede4;
-  --montanha: #e2dfd3;
-  --nuvem: #d8ddde;
-  --fundo: var(--creme);
-  --texto: var(--carvao);
-
+  /* Tokens kawaii (azul homens / rosa mulheres) */
+  --blush: #ffe4ea;           /* tom de rosa pálido — assento azul-toalete,
+                                 .section--alt, visualizações mulheres */
+  --blue-luz: #dce9fa;        /* tons pastel de azul — børton homens, acessórios */
+  --blue-interm: #b3cdee;    /* azul profundo — selo foco homens, satélites homens, hero painel homens */
+  --blue-serie: #4f74b8;     /* azul escuro — texto central masculino, meta de contraste */
+  --pink-luz: #fde4f0;       /* tons rosados translúcidos — card feminino, herói rosa */
+  --pink-interm: #ffcfd9;    /* tom para rótulo feminino */
+  --pink-serie: #a03a54;     /* rosa escuro — nome feminino, chips de rosa */
+  --pink-solid: #f0b6c1;     /* bordas/fundos rosa pastel */
+  --roxo: #9fdcb8;            /* verde-menta, pendulo complementar — kotu discretamente */
+  --mel: #e4b95b;             /* dourado suave, todos pequenos */
   --radius: 14px;
   --radius-peq: 10px;
   --shadow: 0 6px 24px rgba(41, 50, 45, 0.07);
 
-  /* Tipografia: sem serifa legível para body; serifada editorial para títulos */
+  /* Tipografia: corpo limpo, títulos com a fonte redonda kawaii */
   --fonte-corpo: -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
-  --fonte-titulo: "Iowan Old Style", Georgia, "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif", serif;
-  --fonte-jp: "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif;
+  --fonte-titulo: "Zen Maru Gothic", "Iowan Old Style", Georgia, "Hiragino Mincho ProN", "Yu Mincho", "Noto Serif", sans-serif;
+  --fonte-jp: "Zen Maru Gothic", "Hiragino Mincho ProN", "Yu Mincho", "MS PMincho", serif;
+
+  /* Aliases legados (componentes antigos continuam funcionando com a nova paleta) */
+  --vinho: #a03a54;
+  --vinho-escuro: #7a2b3f;
+  --rosa: #ffe4ea;
+  --oliva: #fde4f0;
+  --oliva-escuro: #a03a54;
+  --verde: #f2b3c0;
+  --verde-suave: #fff0f4;
+  --montanha-claro: #fde4ec;
+  --montanha: #f5d7e0;
+  --nuvem: #e8dde2;
+  --fundo: var(--creme);
+  --texto: var(--carvao);
 }
 
 * {
@@ -53,7 +62,10 @@ html {
 
 body {
   margin: 0;
-  background: var(--fundo);
+  background:
+    radial-gradient(circle at 92% 8%, rgba(243, 169, 184, 0.22), transparent 46%),
+    radial-gradient(circle at 4% 96%, rgba(212, 230, 210, 0.3), transparent 42%),
+    var(--fundo);
   color: var(--texto);
   font-family: var(--fonte-corpo);
   font-size: 17px;
@@ -88,7 +100,7 @@ select:focus-visible,
   position: absolute;
   left: -9999px;
   top: 0;
-  background: var(--verde);
+  background: var(--pink-serie);
   color: #fff;
   padding: 0.7rem 1.1rem;
   border-radius: 0 0 10px 0;
@@ -140,12 +152,12 @@ img {
 }
 
 .section--alt {
-  background: var(--montanha-claro);
+  background: #fdeef0;
 }
 
 /* Faixa decorativa de ondas (seigaiha) — muito discreta, remete ao Japão */
 .seigaiha {
-  background-image: radial-gradient(circle at 50% 100%, transparent 12px, rgba(73, 107, 84, 0.055) 12px, rgba(73, 107, 84, 0.055) 15px, transparent 15px, transparent 22px, rgba(73, 107, 84, 0.045) 22px, rgba(73, 107, 84, 0.045) 25px, transparent 25px);
+  background-image: radial-gradient(circle at 50% 100%, transparent 12px, rgba(163, 64, 84, 0.055) 12px, rgba(163, 64, 84, 0.055) 15px, transparent 15px, transparent 22px, rgba(163, 64, 84, 0.045) 22px, rgba(163, 64, 84, 0.045) 25px, transparent 25px);
   background-size: 44px 22px;
 }
 
@@ -154,8 +166,9 @@ img {
   font-size: 0.72rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--verde);
-  background: var(--verde-suave);
+  color: var(--pink-serie);
+  background: #fff0f4;
+  border: 1px solid #f3c3cf;
   padding: 0.3rem 0.75rem;
   border-radius: 999px;
   margin-bottom: 1rem;
@@ -176,9 +189,9 @@ img {
   display: inline-block;
   padding: 0.85rem 1.6rem;
   border-radius: 999px;
-  background: var(--verde);
-  color: #fff;
-  border: 1.5px solid var(--verde);
+  background: linear-gradient(180deg, #e98ba0 0%, #d36a86 100%);
+  color: #4f1d2a;
+  border: 1.5px solid #b85c77;
   font-size: 0.95rem;
   font-family: inherit;
   cursor: pointer;
@@ -186,19 +199,21 @@ img {
 }
 
 .btn:hover {
-  background: var(--oliva-escuro);
-  border-color: var(--oliva-escuro);
-  color: #fff;
+  background: linear-gradient(180deg, #f09db0 0%, #dc7f9b 100%);
+  border-color: #a3405f;
+  color: #401523;
   text-decoration: none;
 }
 
 .btn--ghost {
   background: transparent;
-  color: var(--verde);
+  color: var(--pink-serie);
+  border-color: #d98ca2;
 }
 
 .btn--ghost:hover {
-  background: var(--verde);
+  background: var(--pink-serie);
+  border-color: var(--pink-serie);
   color: #fff;
 }
 
@@ -242,12 +257,12 @@ img {
 .menu__logo .jp {
   margin-left: 0.45rem;
   font-size: 0.95em;
-  color: var(--verde);
+  color: var(--pink-serie);
   font-weight: 400;
 }
 
 .menu__logo:hover {
-  color: var(--verde);
+  color: var(--pink-serie);
   text-decoration: none;
 }
 
@@ -269,17 +284,17 @@ img {
 
 .menu__links a:hover,
 .menu__links a[aria-current="page"] {
-  color: var(--verde);
+  color: var(--pink-serie);
   text-decoration: none;
 }
 
 .menu__links a[aria-current="page"] {
-  box-shadow: inset 0 -2px 0 var(--verde);
+  box-shadow: inset 0 -2px 0 var(--pink-serie);
 }
 
 .header {
   border-bottom: 1px solid var(--borda);
-  background: rgba(247, 245, 239, 0.92);
+  background: rgba(253, 246, 239, 0.92);
   backdrop-filter: blur(6px);
   position: sticky;
   top: 0;
@@ -350,16 +365,16 @@ img {
 }
 
 .pill--familia {
-  background: var(--verde-suave);
-  color: var(--oliva-escuro);
-  border-color: #d3e0d1;
+  background: #fff0f4;
+  color: #a03a54;
+  border-color: #f3c3cf;
   font-weight: 600;
 }
 
 .pill--agregado {
-  background: #f2e6df;
-  color: var(--vinho-escuro);
-  border-color: #e6d2c8;
+  background: #fdf1e7;
+  color: #7a2b3f;
+  border-color: #ecd9c9;
 }
 
 .empty {

@@ -138,10 +138,10 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 <style>
   .menu__auth { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; }
-  .menu__auth-btn { font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.9rem; border: 1.5px solid var(--montanha, #6b7d6f); border-radius: 999px; background: transparent; color: inherit; cursor: pointer; text-decoration: none; }
-  .menu__auth-btn:hover { border-color: var(--vinho, #8a3b3b); }
-  .menu__auth-btn--destaque { background: var(--vinho, #8a3b3b); border-color: var(--vinho, #8a3b3b); color: #fff; }
-  .menu__auth-btn--destaque:hover { filter: brightness(1.1); }
+  .menu__auth-btn { font-family: inherit; font-size: 0.9rem; padding: 0.4rem 0.9rem; border: 1.5px solid #d98ca2; border-radius: 999px; background: transparent; color: #a03a54; cursor: pointer; text-decoration: none; transition: border-color .2s, color .2s, background .2s; }
+  .menu__auth-btn:hover { border-color: #a03a54; color: #7a2b3f; background: #fff0f4; }
+  .menu__auth-btn--destaque { background: linear-gradient(180deg, #e98ba0 0%, #d36a86 100%); border-color: #b85c77; color: #4f1d2a; }
+  .menu__auth-btn--destaque:hover { background: linear-gradient(180deg, #f09db0 0%, #dc7f9b 100%); color: #401523; }
   .menu__auth-info {
     display: inline-flex;
     align-items: center;
@@ -155,23 +155,26 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
     max-width: 12rem;
   }
   .menu__auth-info::before {
-    content: '👤';
-    font-size: 1rem;
+    content: '✿';
+    font-size: 0.95rem;
+    color: #d36a86;
   }
   .menu__auth-btn--sair {
     font-size: 0.85rem;
     padding: 0.35rem 0.75rem;
-    border: 1.5px solid var(--vinho, #8a3b3b);
+    border: 1.5px solid #d98ca2;
     border-radius: 999px;
     background: transparent;
-    color: var(--vinho, #8a3b3b);
+    color: #a03a54;
     font-family: inherit;
     cursor: pointer;
     text-decoration: none;
     line-height: 1;
+    transition: background .2s, color .2s;
   }
   .menu__auth-btn--sair:hover {
-    background: var(--vinho, #8a3b3b);
+    background: #a03a54;
+    border-color: #a03a54;
     color: #fff;
   }
 </style>

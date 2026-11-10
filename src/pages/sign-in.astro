@@ -43,3 +43,9 @@ const clerkAtivo = clerkEnabled();
     </p>
   </div>
 </div>
+
+<script>
+  import { aplicarPortuguesClerk } from '../scripts/clerk-i18n';
+
+  if (document.querySelector('[data-clerk-id]')) aplicarPortuguesClerk();
+</script>

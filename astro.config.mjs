@@ -65,8 +65,8 @@ export default defineConfig({
           signInUrl: '/sign-in',
           signUpUrl: '/sign-up',
           afterSignOutUrl: '/',
-          // A interface do Clerk vem em inglês por padrão; o site é em pt-BR.
-          localization: { locale: 'pt-BR' },
+          // As traduções pt-BR são aplicadas só nas páginas de login/cadastro
+          // (ver src/pages/sign-in.astro), para não pesar todas as páginas.
           appearance: {
             variables: {
               colorPrimary: '#496b54',

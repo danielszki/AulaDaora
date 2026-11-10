@@ -571,6 +571,19 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   }
 
   /* ---------- seleção e navegação ---------- */
+  let trocaT1, trocaT2;
+  function renderComTransicao(id) {
+    clearTimeout(trocaT1);
+    clearTimeout(trocaT2);
+    palco.classList.add('kz-troca--out');
+    trocaT1 = setTimeout(() => {
+      render(id);
+      palco.classList.remove('kz-troca--out');
+      palco.classList.add('kz-troca--in');
+      trocaT2 = setTimeout(() => palco.classList.remove('kz-troca--in'), 700);
+    }, 230);
+  }
+
   function selecionar(id, silencioso) {
     if (!byId.has(id)) return;
     if (!silencioso) {
@@ -579,7 +592,8 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     }
     selecionado = id;
     btnVoltar.disabled = historico.length === 0;
-    render(id);
+    if (silencioso) render(id);
+    else renderComTransicao(id);
   }
 
   function voltar() {
@@ -587,7 +601,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     if (!anterior) return;
     selecionado = anterior;
     btnVoltar.disabled = historico.length === 0;
-    render(anterior);
+    renderComTransicao(anterior);
   }
 
   function atualizarURL(id) {
@@ -1884,6 +1898,41 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   .kz-painel__hero.kz-g--m .kz-painel__anos { color: #45597e; }
   .kz-painel__hero.kz-g--m .kz-painel__ger { color: #3a5a8c; }
   .kz-painel__hero.kz-g--m .kz-painel__chip { border-color: rgba(58, 90, 140, 0.5); color: #2f4a7c; }
+
+  /* ---------- troca suave e elegante de pessoa ---------- */
+  .kz-centro, .kz-sat, .kz-linhas, .kz-painel__corpo {
+    transition: opacity 0.22s ease, transform 0.26s cubic-bezier(0.2, 1.5, 0.4, 1), filter 0.22s ease, box-shadow 0.22s ease, border-color 0.2s ease;
+  }
+  .kz-palco.kz-troca--out .kz-centro { opacity: 0; transform: translate(-50%, -50%) scale(0.78) translateY(14px); filter: blur(4px); }
+  .kz-palco.kz-troca--out .kz-sat { opacity: 0; transform: translate(-50%, -50%) scale(0.4); filter: blur(2px); }
+  .kz-palco.kz-troca--out .kz-linhas { opacity: 0; }
+  .kz-palco.kz-troca--out .kz-painel__corpo { opacity: 0.12; filter: blur(2px); }
+  .kz-palco.kz-troca--in .kz-centro { animation: kzFocoTroca 0.55s 0.05s cubic-bezier(0.22, 1.45, 0.36, 1) both; }
+  @keyframes kzFocoTroca {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.7) translateY(16px); filter: blur(5px); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: none; }
+  }
+  .kz-palco.kz-troca--in .kz-sat { animation: kzSatTroca 0.5s cubic-bezier(0.2, 1.7, 0.4, 1) both; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(1) { animation-delay: 0.02s; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(2) { animation-delay: 0.08s; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(3) { animation-delay: 0.14s; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(4) { animation-delay: 0.2s; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(5) { animation-delay: 0.26s; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(6) { animation-delay: 0.32s; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(7) { animation-delay: 0.38s; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(8) { animation-delay: 0.44s; }
+  .kz-palco.kz-troca--in .kz-sat:nth-child(9) { animation-delay: 0.5s; }
+  @keyframes kzSatTroca {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.25); filter: blur(2px); }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1); filter: none; }
+  }
+  .kz-palco.kz-troca--in .kz-linhas { animation: kzLinhaTroca 0.6s 0.15s ease both; }
+  @keyframes kzLinhaTroca { from { opacity: 0; } to { opacity: 1; } }
+  .kz-palco.kz-troca--in .kz-painel__corpo { animation: kzPainelTroca 0.4s 0.12s ease both; }
+  @keyframes kzPainelTroca { from { opacity: 0; filter: blur(2px); } to { opacity: 1; filter: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .kz-troca--in .kz-centro, .kz-troca--in .kz-sat, .kz-troca--in .kz-linhas, .kz-troca--in .kz-painel__corpo { animation: none !important; }
+  }
 
   /* ===================== RESPONSIVO ===================== */
   /* notebook */

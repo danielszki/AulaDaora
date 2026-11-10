@@ -27,27 +27,36 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     <svg class="kz-hero__paisagem" viewBox="0 0 1440 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
       <defs>
         <linearGradient id="kzCeu" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#202d26" />
-          <stop offset="0.55" stop-color="#33443a" />
-          <stop offset="1" stop-color="#4c5a48" />
+          <stop offset="0" stop-color="#2a2130" />
+          <stop offset="0.55" stop-color="#453146" />
+          <stop offset="1" stop-color="#6b4a5a" />
         </linearGradient>
         <linearGradient id="kzAquecer" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stop-color="#000000" stop-opacity="0" />
-          <stop offset="1" stop-color="#7a6a45" stop-opacity="0.22" />
+          <stop offset="0" stop-color="#f7c6cf" stop-opacity="0.14" />
+          <stop offset="1" stop-color="#7a4a56" stop-opacity="0.3" />
         </linearGradient>
       </defs>
       <rect width="1440" height="300" fill="url(#kzCeu)" />
       <rect width="1440" height="300" fill="url(#kzAquecer)" />
+      <!-- lua crescente e estrelinhas -->
+      <circle cx="170" cy="52" r="34" fill="#f6e7c8" opacity="0.96" />
+      <circle cx="157" cy="46" r="30" fill="#2a2130" opacity="0.9" />
+      <text x="370" y="48" fill="#f6e2c0" font-size="15">✦</text>
+      <text x="560" y="26" fill="#f6e2c0" font-size="12" opacity="0.9">✦</text>
+      <text x="760" y="64" fill="#f6e2c0" font-size="13" opacity="0.85">✦</text>
+      <text x="980" y="34" fill="#f6e2c0" font-size="15">✦</text>
+      <text x="240" y="96" fill="#f6e2c0" font-size="11" opacity="0.8">✦</text>
+      <text x="1150" y="72" fill="#f6e2c0" font-size="12" opacity="0.85">✦</text>
       <!-- montanhas distantes -->
-      <path d="M0 218 L160 150 L300 205 L430 140 L470 250 L850 250 L900 165 L1050 215 L1200 150 L1330 210 L1440 165 L1440 300 L0 300 Z" fill="#2c3a31" opacity="0.9" />
+      <path d="M0 218 L160 150 L300 205 L430 140 L470 250 L850 250 L900 165 L1050 215 L1200 150 L1330 210 L1440 165 L1440 300 L0 300 Z" fill="#33283a" opacity="0.9" />
       <!-- Monte Fuji -->
-      <path d="M430 252 L640 78 L852 252 Z" fill="#37453c" />
-      <path d="M584 126 L640 78 L696 126 L674 117 L640 130 L612 115 Z" fill="#dfe6dc" opacity="0.85" />
+      <path d="M430 252 L640 78 L852 252 Z" fill="#3f3043" />
+      <path d="M584 126 L640 78 L696 126 L674 117 L640 130 L612 115 Z" fill="#f3e2ec" opacity="0.92" />
       <!-- névoa -->
-      <ellipse cx="640" cy="258" rx="520" ry="26" fill="#cdd8cc" opacity="0.14" />
-      <ellipse cx="240" cy="270" rx="360" ry="22" fill="#cdd8cc" opacity="0.1" />
+      <ellipse cx="640" cy="258" rx="520" ry="26" fill="#e3c9d4" opacity="0.18" />
+      <ellipse cx="240" cy="270" rx="360" ry="22" fill="#e3c9d4" opacity="0.13" />
       <!-- pagode -->
-      <g fill="#151d18">
+      <g fill="#1d1620">
         <rect x="1146" y="120" width="8" height="132" />
         <path d="M1110 138 L1190 138 L1176 152 L1124 152 Z" />
         <rect x="1122" y="152" width="56" height="22" />
@@ -58,7 +67,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
         <rect x="1148" y="98" width="4" height="24" />
       </g>
       <!-- cerejeira -->
-      <g stroke="#1a231c" stroke-width="7" fill="none" stroke-linecap="round">
+      <g stroke="#241a26" stroke-width="7" fill="none" stroke-linecap="round">
         <path d="M1440 16 C1330 34 1262 66 1212 118" />
         <path d="M1330 48 C1300 74 1284 102 1280 132" />
         <path d="M1262 78 C1236 88 1218 104 1206 124" />
@@ -86,6 +95,11 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
 
   <!-- ===================== ÁREA PRINCIPAL ===================== -->
   <section class="kz-main">
+    <span class="kz-floaty kz-floaty--1" aria-hidden="true">✿</span>
+    <span class="kz-floaty kz-floaty--2" aria-hidden="true">♡</span>
+    <span class="kz-floaty kz-floaty--3" aria-hidden="true">☆</span>
+    <span class="kz-floaty kz-floaty--4" aria-hidden="true">❀</span>
+    <span class="kz-floaty kz-floaty--5" aria-hidden="true">✦</span>
     <div class="container kz-main__grid">
 
       <!-- barra lateral de comandos -->
@@ -128,7 +142,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
           <div class="kz-overlay" id="kz-overlay" hidden></div>
 
           <div class="kz-rod__topo">
-            <span class="kz-rod__tit">Roda da família</span>
+            <span class="kz-rod__tit">✿ Roda da família</span>
             <div class="kz-rod__nav">
               <button type="button" id="kz-rod-voltar" class="kz-rod__navbtn">Voltar</button>
               <button type="button" id="kz-rod-prox" class="kz-rod__navbtn">Próximo →</button>
@@ -335,9 +349,20 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
     return 'Parente';
   }
 
+  function tokenDe(lab) {
+    switch (lab) {
+      case 'Pai/Mãe': return 'pais';
+      case 'Filho(a)': return 'filhos';
+      case 'Cônjuge': return 'conjuge';
+      case 'Ex-cônjuge': return 'ex';
+      case 'Irmão(a)': return 'irmaos';
+      default: return 'parente';
+    }
+  }
+
   function satHTML(f, t, excesso) {
     const lab = rotuloDe(f, t);
-    return `<button type="button" class="kz-sat" data-id="${esc(t.id)}" aria-label="Selecionar ${esc(t.nome)}, ${esc(lab)}">
+    return `<button type="button" class="kz-sat kz-sat--${tokenDe(lab)}" data-id="${esc(t.id)}" aria-label="Selecionar ${esc(t.nome)}, ${esc(lab)}">
       <span class="kz-sat__rot">${esc(lab)}</span>
       <span class="kz-sat__foto">${fotoHTML(t)}</span>
       <strong class="kz-sat__nome">${esc(t.nome)}</strong>
@@ -410,7 +435,7 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
       <p class="kz-foco__ger">${esc(geracaoLabel(p.geracao))}</p>
       ${bioCurta ? `<p class="kz-foco__bio">${esc(bioCurta)}</p>` : ''}
       <span class="kz-foco__orn" aria-hidden="true">✿</span>
-      <button type="button" class="kz-foco__det" data-abrir-painel>Ver detalhes</button>
+      <button type="button" class="kz-foco__det" data-abrir-painel>Ver detalhes ♡</button>
     </article>`;
 
     const { ids, excesso, cat } = montarOrbita(p);
@@ -1535,6 +1560,302 @@ const eventosJSON = eventos.map((e) => ({ ano: e.ano, titulo: e.titulo, pessoa: 
   .kz-linha__pt { fill: #9a8c64; }
   .kz-foco__det { background: #496b54; }
   .kz-foco__det:hover { background: #38553f; }
+
+  /* ===================== KAWAII — fofinho ❀ ===================== */
+  .kz-main {
+    position: relative;
+    font-family: 'Zen Maru Gothic', var(--fonte-corpo, 'Segoe UI', sans-serif);
+    background:
+      radial-gradient(circle at 92% 8%, rgba(243, 169, 184, 0.28), transparent 44%),
+      radial-gradient(circle at 4% 96%, rgba(191, 227, 205, 0.4), transparent 46%),
+      radial-gradient(circle at 96% 88%, rgba(246, 211, 139, 0.28), transparent 38%),
+      #fdf6ef;
+  }
+  .kz-floaty {
+    position: absolute;
+    pointer-events: none;
+    user-select: none;
+    z-index: 0;
+    animation: kzFloaty 6.5s ease-in-out infinite alternate;
+    opacity: 0.75;
+  }
+  .kz-floaty--1 { top: 4%; left: 2%; font-size: 28px; color: #e9a3b2; }
+  .kz-floaty--2 { top: 12%; right: 4%; font-size: 22px; color: #d4788e; animation-delay: -1.4s; }
+  .kz-floaty--3 { top: 44%; right: 2%; font-size: 24px; color: #e4b95b; animation-delay: -2.8s; }
+  .kz-floaty--4 { bottom: 12%; left: 3%; font-size: 26px; color: #9fdcb8; animation-delay: -4s; }
+  .kz-floaty--5 { bottom: 26%; right: 30%; font-size: 20px; color: #c3aede; animation-delay: -5.2s; }
+  @keyframes kzFloaty { from { transform: translateY(0) rotate(-7deg); } to { transform: translateY(-16px) rotate(9deg); } }
+
+  /* hero rosê-sakura */
+  .kz-hero { background: #241a26; }
+  .kz-kanji {
+    font-family: 'Zen Maru Gothic', var(--fonte-jp), serif;
+    color: #f7c6cf;
+    border: 2px solid rgba(247, 198, 207, 0.75);
+    outline: 1px solid rgba(247, 198, 207, 0.35);
+    background: rgba(60, 38, 50, 0.45);
+    border-radius: 22px;
+    transform: rotate(-2.5deg);
+    text-shadow: 0 0 26px rgba(247, 198, 207, 0.55), 0 2px 10px rgba(0, 0, 0, 0.4);
+  }
+  .kz-hero__textos h1 {
+    font-family: 'Zen Maru Gothic', var(--fonte-titulo), serif;
+    font-weight: 900;
+    background: linear-gradient(175deg, #ffffff 10%, #fbd9de 48%, #eda0b0 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 0.035em;
+    text-shadow: none;
+    filter: drop-shadow(0 3px 14px rgba(237, 160, 176, 0.35));
+  }
+  .kz-hero__sub {
+    font-family: 'Zen Maru Gothic', var(--fonte-titulo), serif;
+    font-style: normal;
+    font-weight: 500;
+    color: #f3bfba;
+    letter-spacing: 0.06em;
+  }
+  .kz-hero__desc { color: rgba(250, 235, 238, 0.92); }
+
+  /* rail fofinho */
+  .kz-rail {
+    background: #fffdf6;
+    border: 1.5px solid #f2dcd0;
+    border-radius: 22px;
+    box-shadow: 0 8px 24px rgba(214, 121, 143, 0.14);
+  }
+  .kz-rail__btn {
+    font-family: 'Zen Maru Gothic', var(--fonte-corpo), sans-serif;
+    font-weight: 700;
+    border-radius: 16px;
+    transition: background 0.22s cubic-bezier(0.2, 1.5, 0.4, 1), color 0.2s, transform 0.22s cubic-bezier(0.2, 1.5, 0.4, 1);
+  }
+  .kz-rail__btn:hover:not(:disabled) { background: #ffe4ea; color: #a3405f; transform: translateY(-2px) rotate(-1.2deg); }
+  .kz-rail__btn:focus-visible { outline: 2px solid #d4788e; outline-offset: 2px; }
+
+  /* busca de doces */
+  .kz-busca {
+    border: 2px solid #f2cdd2;
+    box-shadow: 0 6px 18px rgba(217, 127, 148, 0.16);
+    background: #fffdfa;
+  }
+  .kz-busca:focus-within {
+    border-color: #e8a4b0;
+    box-shadow: 0 0 0 4px rgba(232, 164, 176, 0.28), 0 10px 26px rgba(217, 127, 148, 0.22);
+  }
+  .kz-busca svg { stroke: #d98d9c; }
+  .kz-busca input::placeholder { color: #cf9d99; font-style: italic; }
+  .kz-sugestoes { border-radius: 18px; border: 1.5px solid #f2cdd2; box-shadow: 0 16px 40px rgba(214, 121, 143, 0.22); }
+  .kz-sugestoes li button:hover, .kz-sugestoes li button:focus-visible { background: #ffeef1; }
+
+  /* chips de filtro */
+  .kz-filtro {
+    font-family: 'Zen Maru Gothic', var(--fonte-corpo), sans-serif;
+    background: #fffdf6;
+    border: 1.5px solid #ecdfd0;
+    box-shadow: 0 2px 6px rgba(217, 127, 148, 0.08);
+  }
+  .kz-filtro:hover { background: #ffeef1; border-color: #eec3c9; color: #a3405f; transform: translateY(-1px); }
+  .kz-filtro[aria-selected="true"] {
+    background: linear-gradient(180deg, #e98ba0 0%, #d36a86 100%);
+    border-color: #d36a86;
+    color: #fffdfa;
+    box-shadow: 0 4px 14px rgba(211, 106, 134, 0.45);
+  }
+  .kz-filtro[role="tab"]:focus-visible { outline: 2px solid #d4788e; outline-offset: 1px; }
+
+  /* palco pêssego com bolinhas */
+  .kz-palco {
+    background:
+      radial-gradient(circle, rgba(217, 127, 148, 0.12) 1.3px, transparent 1.6px) 0 0 / 22px 22px,
+      radial-gradient(circle at 86% 12%, rgba(243, 169, 184, 0.3), transparent 46%),
+      radial-gradient(circle at 8% 88%, rgba(191, 227, 205, 0.4), transparent 46%),
+      linear-gradient(180deg, #fff9f3 0%, #fdeee4 100%);
+    border: 2px solid #f3ddd0;
+    border-radius: 26px;
+    box-shadow: 0 14px 44px rgba(214, 121, 143, 0.2), inset 0 1px 0 #fffdfa;
+  }
+  .kz-palco::before {
+    background-image: radial-gradient(circle at 50% 100%, transparent 22%, rgba(217, 127, 148, 0.09) 23%, rgba(217, 127, 148, 0.09) 25%, transparent 26%, transparent 33%, rgba(217, 127, 148, 0.075) 34%, rgba(217, 127, 148, 0.075) 36%, transparent 37%);
+  }
+  .kz-rod__tit {
+    font-family: 'Zen Maru Gothic', var(--fonte-titulo), serif;
+    font-weight: 800;
+    color: #a3405f;
+    letter-spacing: 0.04em;
+  }
+  .kz-rod__navbtn {
+    font-family: 'Zen Maru Gothic', var(--fonte-corpo), sans-serif;
+    color: #a3405f;
+    background: #fffdfa;
+    border: 1.5px solid #eec3c9;
+    box-shadow: 0 2px 6px rgba(217, 127, 148, 0.14);
+  }
+  .kz-rod__navbtn:hover { background: linear-gradient(180deg, #e98ba0, #d36a86); color: #fffdfa; border-color: #d36a86; }
+  .kz-rod__rodape { color: #8a6258; font-family: 'Zen Maru Gothic', var(--fonte-corpo), sans-serif; }
+  .kz-rod__rodape strong { color: #7c3b4c; }
+
+  /* anel orbital rosê */
+  .kz-rod__orbit {
+    border: 2px solid #f0c3ca;
+    background: radial-gradient(circle, rgba(248, 213, 220, 0.45) 62%, rgba(255, 255, 255, 0) 100%);
+    box-shadow: inset 0 0 70px rgba(243, 169, 184, 0.4);
+  }
+  .kz-rod__orbit::before { border: 1.5px dashed rgba(232, 164, 176, 0.6); }
+  .kz-rod__orbit::after { border: 1.5px dotted rgba(159, 220, 184, 0.55); }
+  .kz-linha { stroke: #dfa0ac; stroke-width: 1.8; stroke-linecap: round; }
+  .kz-linha__pt { fill: #fff5f3; stroke: #dfa0ac; stroke-width: 1.6; }
+
+  /* disco central — pêssego corado */
+  .kz-foco {
+    background: radial-gradient(circle at 50% 30%, #fffaf0 0%, #fce0d4 46%, #f5c0ae 84%, #ecab99 100%);
+    border: 3px solid #fffdfa;
+    box-shadow: 0 22px 48px rgba(214, 121, 143, 0.36), 0 0 0 5px #f7d0c7, 0 0 0 9px rgba(255, 253, 250, 0.78), inset 0 -8px 18px rgba(188, 108, 96, 0.2), inset 0 5px 12px #fffdfa;
+  }
+  .kz-foco::after { border: 2px dashed rgba(217, 127, 148, 0.55); inset: 9px; }
+  .kz-foco[data-tem-foto="1"] {
+    border-color: #fffdfa;
+    box-shadow: 0 22px 52px rgba(214, 121, 143, 0.42), 0 0 0 5px #f2a9b8, 0 0 0 9px rgba(255, 253, 250, 0.78), inset 0 -8px 18px rgba(188, 108, 96, 0.22), inset 0 5px 12px #fffdfa;
+  }
+  .kz-foco[data-tem-foto="1"]::after { border-color: rgba(211, 106, 134, 0.6); }
+  .kz-foco__selo {
+    font-family: 'Zen Maru Gothic', var(--fonte-corpo), sans-serif;
+    background: linear-gradient(180deg, #e98ba0, #d36a86);
+    color: #fffdfa;
+    border-radius: 999px;
+    padding: 0.34rem 1.05rem;
+    box-shadow: 0 4px 12px rgba(211, 106, 134, 0.45);
+    transform: rotate(-2deg);
+  }
+  .kz-foco__nome {
+    font-family: 'Zen Maru Gothic', var(--fonte-titulo), serif;
+    font-weight: 900;
+    color: #4f333e;
+  }
+  .kz-foco__anos { color: #a5716d; font-weight: 500; }
+  .kz-foco__ger { color: #d15f7f; font-weight: 700; }
+  .kz-foco__foto {
+    position: relative;
+    border: 4px solid #fffdfa;
+    box-shadow: 0 10px 24px rgba(214, 121, 143, 0.35), 0 0 0 2px #f2a9b8;
+    background: #fde3d7;
+  }
+  .kz-foco[data-tem-foto="1"] .kz-foco__foto { box-shadow: 0 12px 26px rgba(211, 106, 134, 0.4), 0 0 0 2px #d36a86; }
+  .kz-avt--foco { color: #d15f7f; }
+  /* bochechas coradas no placeholder */
+  .kz-foco__foto::before, .kz-foco__foto::after {
+    content: '';
+    position: absolute;
+    bottom: 22%;
+    width: 16%;
+    height: 10%;
+    border-radius: 50%;
+    background: rgba(244, 130, 152, 0.55);
+    filter: blur(2px);
+    pointer-events: none;
+  }
+  .kz-foco__foto::before { left: 20%; }
+  .kz-foco__foto::after { right: 20%; }
+  .kz-foco__det {
+    font-family: 'Zen Maru Gothic', var(--fonte-corpo), sans-serif;
+    background: linear-gradient(180deg, #e98ba0 0%, #d36a86 100%);
+    border: 0;
+    color: #fffdfa;
+    padding: 0.48rem 1.25rem;
+    border-radius: 999px;
+    box-shadow: 0 6px 16px rgba(211, 106, 134, 0.45);
+    transition: transform 0.2s cubic-bezier(0.2, 1.6, 0.4, 1), box-shadow 0.2s, filter 0.2s;
+  }
+  .kz-foco__det:hover { background: linear-gradient(180deg, #ee9cae, #da7592); transform: translateY(-2px) scale(1.04); box-shadow: 0 10px 22px rgba(211, 106, 134, 0.5); filter: brightness(1.04); }
+  .kz-foco__det:focus-visible { outline: 2px solid #a3405f; outline-offset: 2px; }
+
+  /* satélites doces, coloridos por parentesco */
+  .kz-sat {
+    font-family: 'Zen Maru Gothic', var(--fonte-corpo), sans-serif;
+    background: #fffdfa;
+    border: 2px solid #efd9cd;
+    border-radius: 20px;
+    box-shadow: 0 7px 17px rgba(214, 121, 143, 0.16);
+    transition: transform 0.22s cubic-bezier(0.2, 1.6, 0.4, 1), box-shadow 0.22s, border-color 0.2s;
+  }
+  .kz-sat:hover, .kz-sat:focus-visible {
+    transform: translate(-50%, -50%) scale(1.09) rotate(-1.4deg);
+    box-shadow: 0 13px 28px rgba(214, 121, 143, 0.3);
+    border-color: #e7b3ac;
+    outline: none;
+  }
+  .kz-sat__rot {
+    border-radius: 999px;
+    padding: 0.14rem 0.52rem;
+    font-size: 0.5rem;
+    background: #fbe6d8;
+    color: #8a5230;
+    letter-spacing: 0.1em;
+  }
+  .kz-sat__nome { font-weight: 700; color: #533f45; }
+  .kz-sat__anos { color: #a5716d; }
+  .kz-sat__foto { box-shadow: 0 0 0 2px #f4d7cd; }
+  .kz-sat--pais { border-color: #f2d19b; }
+  .kz-sat--pais .kz-sat__rot { background: #fbe8c0; color: #7c5f16; }
+  .kz-sat--filhos { border-color: #a9dcc0; }
+  .kz-sat--filhos .kz-sat__rot { background: #ddf4e7; color: #2f6b47; }
+  .kz-sat--conjuge { border-color: #f2b3c0; }
+  .kz-sat--conjuge .kz-sat__rot { background: #fbdee6; color: #a03a54; }
+  .kz-sat--ex { border-color: #d3cbdf; }
+  .kz-sat--ex .kz-sat__rot { background: #ece7f5; color: #5d5470; }
+  .kz-sat--irmaos { border-color: #aecbf2; }
+  .kz-sat--irmaos .kz-sat__rot { background: #e0eafd; color: #33486e; }
+  .kz-sat--parente .kz-sat__rot { background: #fbe6d8; color: #8a5230; }
+  .kz-sat--mais {
+    background: linear-gradient(160deg, #efe2f7 0%, #f7dcea 100%);
+    border: 2px solid #d3bfe2;
+    color: #6d4a5f;
+  }
+  .kz-sat--mais:hover { border-color: #b39ccf; }
+  .kz-sat--mais .kz-sat__rot { background: #e4d3f0; color: #5b3d72; }
+
+  /* painel de detalhes — dossiê sakura pastel */
+  .kz-painel { box-shadow: 0 16px 44px rgba(214, 121, 143, 0.28), 0 0 0 1.5px #f3d3d3, inset 0 1px 0 #fff; border-radius: 22px; }
+  .kz-painel__hero {
+    background: radial-gradient(130% 130% at 50% -10%, #ffe4ea 0%, #f8cdd5 55%, #eec0cb 100%);
+    border: 1.5px solid #f0b6c1;
+    color: #572f3c;
+    box-shadow: inset 0 1px 0 #fff, 0 12px 30px rgba(214, 121, 143, 0.28);
+  }
+  .kz-painel__crest { color: rgba(211, 106, 134, 0.28); }
+  .kz-painel__onda {
+    background-image: radial-gradient(circle at 50% 0, transparent 33%, rgba(211, 106, 134, 0.18) 34%, rgba(211, 106, 134, 0.18) 36%, transparent 37%, transparent 50%, rgba(211, 106, 134, 0.13) 51%, rgba(211, 106, 134, 0.13) 53%, transparent 54%);
+  }
+  .kz-painel__foto { border-color: #e58ea1; box-shadow: 0 8px 22px rgba(211, 106, 134, 0.4), inset 0 0 0 3px rgba(229, 142, 161, 0.35); }
+  .kz-painel__hero h3 { color: #4f2e38; font-family: 'Zen Maru Gothic', var(--fonte-titulo), serif; font-weight: 800; }
+  .kz-painel__anos { color: #7c5259; }
+  .kz-painel__ger { color: #c2557a; }
+  .kz-painel__chip {
+    border-color: rgba(194, 85, 122, 0.5);
+    background: rgba(255, 253, 250, 0.55);
+    color: #a3405f;
+  }
+  .kz-painel__divisor { color: #d4788e; }
+  .kz-painel__divisor::before, .kz-painel__divisor::after { background: linear-gradient(90deg, transparent, #eec3cb, transparent); }
+  .kz-painel__sec h4 { color: #8a4b58; border-left-color: #e89aae; font-family: 'Zen Maru Gothic', var(--fonte-corpo), sans-serif; }
+  .kz-painel__sec h4 span[aria-hidden] { color: #d4788e; }
+  .kz-painel__citacao { border-left-color: #e9bcc4; color: #6b4a50; }
+  .kz-painel__vida { background: #fff5ef; border-color: #f3d9cf; border-radius: 14px; }
+  .kz-painel__vida-ic { background: #fad9e0; color: #c2557a; }
+  .kz-painel__vida em { color: #c2557a; }
+  .kz-painel__vida p { color: #4a343c; }
+  .kz-mini { background: #fffaf6; border-color: #f3ddd1; border-radius: 14px; }
+  .kz-mini:hover, .kz-mini:focus-visible { background: #fdeef0; border-color: #e5b6bf; transform: translateY(-2px); box-shadow: 0 7px 17px rgba(214, 121, 143, 0.2); }
+  .kz-mini__foto { border-color: #f3d3c8; }
+  .kz-painel__evs::before { background: linear-gradient(#e9bcc4, #f3d9df); }
+  .kz-painel__evs li::before { background: #e58ea1; border-color: #fffdfa; box-shadow: 0 0 0 1.5px #eec3cb; }
+  .kz-painel__evs strong { color: #a3405f; }
+  .kz-painel__n { color: #d4788e; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .kz-floaty { animation: none !important; }
+  }
 
   /* ===================== RESPONSIVO ===================== */
   /* notebook */

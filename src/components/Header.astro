@@ -34,34 +34,37 @@ const current = Astro.url.pathname.replace(/\/$/, '') || '/';
           ))
         }
       </ul>
-      <div class="menu__auth" id="menu-auth">
-        {
-          clerkAtivo ? (
-            <>
-              <a class="menu__auth-btn" href="/sign-in">
+      <div id="menu-auth-wrap">
+        <div class="menu__auth">
+          {
+            clerkAtivo ? (
+              <>
+                <a class="menu__auth-btn" href="/sign-in">
+                  Entrar
+                </a>
+                <a class="menu__auth-btn menu__auth-btn--destaque" href="/sign-up">
+                  Criar conta
+                </a>
+              </>
+            ) : (
+              <a class="menu__auth-btn" href="/login">
                 Entrar
               </a>
-              <a class="menu__auth-btn menu__auth-btn--destaque" href="/sign-up">
-                Criar conta
-              </a>
-            </>
-          ) : (
-            <a class="menu__auth-btn" href="/login">
-              Entrar
-            </a>
-          )
-        }
+            )
+          }
+        </div>
       </div>
 
       <script>
         (function () {
-          const container = document.getElementById('menu-auth');
-          if (!container) return;
+          const wrap = document.getElementById('menu-auth-wrap');
+          if (!wrap) return;
+          const container = wrap.querySelector('.menu__auth');
 
           function atualizar() {
             const c = window.Clerk;
             const temSessao = c?.session;
-            if (!temSessao) return; // mantém Entrar/Criar conta visíveis
+            if (!temSessao) return;
 
             const email =
               c.user?.primaryEmailAddress?.emailAddress ||

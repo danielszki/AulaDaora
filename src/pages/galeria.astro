@@ -308,5 +308,73 @@ ${albuns.map((a) => {
     .albuns {
       margin-top: 1rem;
     }
+
+    /* Álbuns de fotos */
+    .album__grade {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 0.7rem;
+    }
+
+    .album__item {
+      display: block;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--montanha);
+      background: var(--montanha-claro);
+    }
+
+    .album__item img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: var(--montanha-claro);
+      transition: transform 0.25s;
+    }
+
+    .album__item:hover img {
+      transform: scale(1.04);
+    }
+
+    .album__topo {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .album__topo h2 {
+      font-size: 1.15rem;
+      margin: 0;
+      color: var(--vinho);
+    }
+
+    .album__legenda {
+      max-width: 640px;
+      font-size: 0.9rem;
+      color: var(--texto-suave);
+      margin: 0.6rem 0 0;
+    }
+
+    .album__legenda a {
+      color: var(--vinho);
+      font-weight: 600;
+    }
+
+    .album__video {
+      max-width: 640px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--montanha);
+      background: #000;
+      box-shadow: var(--shadow);
+    }
+
+    .album__video video {
+      width: 100%;
+      display: block;
+    }
   </style>
 </Base>
